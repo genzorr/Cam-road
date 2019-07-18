@@ -21,8 +21,6 @@ class QQWidget(QWidget):
     def set_layout(self, layout):
         layout.addWidget(self)
 
-    # def show(self):
-
 
 class QWorkWidget(QQWidget):
     accel_signal = pyqtSignal(int)
@@ -37,6 +35,11 @@ class QWorkWidget(QQWidget):
         self.velocity = 0
         self.coordinate = 0
 
+        #   В каких единицах передается значение??
+        self.accel_signal.connect(self.ui.Acceleration.setValue)
+        self.antiaccel_signal.connect(self.ui.Antiaccel.setValue)
+        self.velocity_signal.connect(self.ui.Velocity.setValue)
+        self.coordinate_signal.connect(self.ui.Coordinate.setValue)
 
 
 class QSettingsWidget(QQWidget):
