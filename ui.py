@@ -6,7 +6,8 @@ from workwidget import Ui_Form
 from settingswidget import Ui_SForm
 from telemetrywidget import Ui_TForm
 
-
+#----------------------------------------------------------------------------------------------#
+#   Base class
 class QQWidget(QWidget):
     def __init__(self, parent=None, my_ui=None, title=None, layout=None):
         QWidget.__init__(self, parent)
@@ -21,36 +22,66 @@ class QQWidget(QWidget):
     def set_layout(self, layout):
         layout.addWidget(self)
 
+#----------------------------------------------------------------------------------------------#
 
 class QWorkWidget(QQWidget):
-    accel_signal = pyqtSignal(int)
-    antiaccel_signal = pyqtSignal(int)
-    velocity_signal = pyqtSignal(int)
-    coordinate_signal = pyqtSignal(int)
-
     def __init__(self, parent=None, my_ui=Ui_Form(), title=None, layout=None):
         QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
-        self.accel = 0
-        self.antiaccel = 0
-        self.velocity = 0
-        self.coordinate = 0
+        self._acceleration = 0.0
+        self._braking = 0.0
+        self._velocity = 0.0
+        self._coordinate = 0.0
 
-        #   В каких единицах передается значение??
-        self.accel_signal.connect(self.ui.Acceleration.setValue)
-        self.antiaccel_signal.connect(self.ui.Antiaccel.setValue)
-        self.velocity_signal.connect(self.ui.Velocity.setValue)
-        self.coordinate_signal.connect(self.ui.Coordinate.setValue)
+        # self.acceleration_signal.connect(self.ui.Acceleration.setValue)
+        # self.braking_signal.connect(self.ui.Braking.setValue)
+        # self.velocity_signal.connect(self.ui.Velocity.setValue)
+        # self.coordinate_signal.connect(self.ui.Coordinate.setValue)
 
+    @property       # Acceleration value property
+    def acceleration(self):
+        return self._acceleration
+
+    @acceleration.setter
+    def acceleration(self, value):
+        self._acceleration = value
+
+    @property       # Braking value property
+    def braking(self):
+        return self._braking
+
+    @braking.setter
+    def braking(self, value):
+        self._braking = value
+
+    @property       # Velocity value property
+    def velocity(self):
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value):
+        self._velocity = value
+
+    @property       # Coordinate value property
+    def coordinate(self):
+        return self._coordinate
+
+    @coordinate.setter
+    def coordinate(self, value):
+        self._coordinate = value
+
+#----------------------------------------------------------------------------------------------#
 
 class QSettingsWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_SForm(), title=None, layout=None):
         QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
 
+#----------------------------------------------------------------------------------------------#
 
 class QTelemetryWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_TForm(), title=None, layout=None):
         QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
 
+#----------------------------------------------------------------------------------------------#
 
 class MainWindow(QMainWindow):
     def __init__(self):

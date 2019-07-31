@@ -136,7 +136,7 @@
      </widget>
     </item>
     <item alignment="Qt::AlignHCenter">
-     <widget class="QProgressBar" name="Antiaccel">
+     <widget class="QProgressBar" name="Braking">
       <property name="minimumSize">
        <size>
         <width>120</width>
