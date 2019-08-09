@@ -6,15 +6,18 @@ from PyQt5.QtWidgets import QApplication
 from ui import MainWindow
 from watcher import *
 
+#   TODO: ADD FLAGS CLASS FOR HANDLING BUTTONS
+#   TODO: think about adventages of properties (I should add there smth else)
+#   TODO: all proceccing should be on the road
+#   TODO: change velocity QSlider to QProgressBar
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     window = MainWindow()
     window.show()
 
-    baudrate = 9600
-    port = '/dev/ttyUSB0'
-    thread = WatcherThread(baudrate, port, window)
-    thread.start()
+    thread = WatcherThread(window=window)
+    # thread.start()
 
     sys.exit(app.exec_())
