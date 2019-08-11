@@ -40,17 +40,19 @@ class WatcherThread(QThread):
             self.roadData.coordinate_signal.connect(window.workWidget.ui.Coordinate.setValue)
 
         if window.settingsWidget:
-            window.settingsWidget.ui.EndPointsEnable.toggled.connect(self.outerData.enable_end_points)
-            # self.ui.EndPointsBehavior.toggled.connect(self.button_toggled)
-            # self.ui.SoundStop.toggled.connect(self.button_toggled)
-            # self.ui.SwapDirection.toggled.connect(self.button_toggled)
-            # self.ui.StopAccelerometer.toggled.connect(self.button_toggled)
-            #
-            window.settingsWidget.ui.EndPointsEnable.toggled.emit(False)
-            # self.ui.EndPointsBehavior.toggled.emit(False)
-            # self.ui.SoundStop.toggled.emit(False)
-            # self.ui.SwapDirection.toggled.emit(False)
-            # self.ui.StopAccelerometer.toggled.emit(False)
+            window.settingsWidget.ui.EnableEndPoints.toggled.connect(self.outerData.enable_end_points_)
+            window.settingsWidget.ui.EndPointsBehavior.toggled.connect(self.outerData.end_points_behavior_)
+            window.settingsWidget.ui.SoundStop.toggled.connect(self.outerData.sound_stop_)
+            window.settingsWidget.ui.SwapDirection.toggled.connect(self.outerData.swap_direction_)
+            window.settingsWidget.ui.StopAccelerometer.toggled.connect(self.outerData.stop_accelerometer_)
+            window.settingsWidget.ui.LockButtons.toggled.connect(self.outerData.lock_buttons_)
+
+            window.settingsWidget.ui.EnableEndPoints.toggled.emit(False)
+            window.settingsWidget.ui.EndPointsBehavior.toggled.emit(False)
+            window.settingsWidget.ui.SoundStop.toggled.emit(False)
+            window.settingsWidget.ui.SwapDirection.toggled.emit(False)
+            window.settingsWidget.ui.StopAccelerometer.toggled.emit(False)
+            window.settingsWidget.ui.LockButtons.toggled.emit(False)
 
     def run(self):
         while True and self.device:

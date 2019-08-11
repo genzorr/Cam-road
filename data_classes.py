@@ -157,9 +157,10 @@ class HBData(QObject):
         self.end_points = 0
         self.end_points_behavior = 0
         self.sound_stop = 0
-        self.swap_direction = 1
+        self.swap_direction = 0
         self.accelerometer_stop = 0
-        self.hard_stop = 0
+        self.HARD_STOP = 0
+        self.lock_buttons = 0
 
         self.color_red = QColor(255, 0, 0).name()
         self.color_green = QColor(0, 255, 0).name()
@@ -169,10 +170,60 @@ class HBData(QObject):
         button.setStyleSheet('QToolButton { background-color: %s}' % color)
 
     @pyqtSlot(bool)
-    def enable_end_points(self, value):
+    def lock_buttons_(self, value):
         sender = self.sender()
         if value:
-            color, self.end_points = self.color_green, 1
+            color, self.lock_buttons = self.color_green, 1
         else:
-            color, self.end_points = self.color_red, 0
+            color, self.lock_buttons = self.color_red, 0
         self.set_color(sender, color)
+
+    @pyqtSlot(bool)
+    def enable_end_points_(self, value):
+        if not self.lock_buttons:
+            sender = self.sender()
+            if value:
+                color, self.end_points = self.color_green, 1
+            else:
+                color, self.end_points = self.color_red, 0
+            self.set_color(sender, color)
+
+    @pyqtSlot(bool)
+    def end_points_behavior_(self, value):
+        if not self.lock_buttons:
+            sender = self.sender()
+            if value:
+                color, self.end_points_behavior = self.color_green, 1
+            else:
+                color, self.end_points_behavior = self.color_red, 0
+            self.set_color(sender, color)
+
+    @pyqtSlot(bool)
+    def sound_stop_(self, value):
+        if not self.lock_buttons:
+            sender = self.sender()
+            if value:
+                color, self.sound_stop = self.color_green, 1
+            else:
+                color, self.sound_stop = self.color_red, 0
+            self.set_color(sender, color)
+
+    @pyqtSlot(bool)
+    def swap_direction_(self, value):
+        if not self.lock_buttons:
+            sender = self.sender()
+            if value:
+                color, self.swap_direction = self.color_green, 1
+            else:
+                color, self.swap_direction = self.color_red, 0
+            self.set_color(sender, color)
+
+    @pyqtSlot(bool)
+    def stop_accelerometer_(self, value):
+        if not self.lock_buttons:
+            sender = self.sender()
+            if value:
+                color, self.accelerometer_stop = self.color_green, 1
+            else:
+                color, self.accelerometer_stop = self.color_red, 0
+            self.set_color(sender, color)

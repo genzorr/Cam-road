@@ -37,7 +37,7 @@
         <height>50</height>
        </size>
       </property>
-      <widget class="QToolButton" name="EndPointsEnable">
+      <widget class="QToolButton" name="EnableEndPoints">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -244,6 +244,51 @@
        </property>
        <property name="text">
         <string>СТОП ПО УДАРУ</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="widget_8" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <widget class="QToolButton" name="LockButtons">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>30</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>15</y>
+         <width>400</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ЗАБЛОКИРОВАТЬ КНОПКИ</string>
        </property>
       </widget>
      </widget>
