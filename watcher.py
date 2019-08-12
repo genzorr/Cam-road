@@ -1,4 +1,4 @@
-import serial
+import time, serial
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from data_classes import *
 
@@ -39,6 +39,9 @@ class WatcherThread(QThread):
             self.hostData.velocity_signal.connect(window.workWidget.ui.Velocity.setValue)
             self.roadData.coordinate_signal.connect(window.workWidget.ui.Coordinate.setValue)
 
+            # FIXME: REMOVE
+            window.workWidget.ui.Velocity.valueChanged.connect(self.veloChange)
+
         if window.settingsWidget:
             window.settingsWidget.ui.EnableEndPoints.toggled.connect(self.outerData.enable_end_points_)
             window.settingsWidget.ui.EndPointsBehavior.toggled.connect(self.outerData.end_points_behavior_)
@@ -54,15 +57,23 @@ class WatcherThread(QThread):
             window.settingsWidget.ui.StopAccelerometer.toggled.emit(False)
             window.settingsWidget.ui.LockButtons.toggled.emit(False)
 
+    # FIXME: REMOVE
+    def veloChange(self, value):
+        self.hostData.velocity = value
+
+
     def run(self):
+        VELO_MAX = 15
         while True and self.device:
-            data = serial_recv(self.device)
+            # data = serial_recv(self.device)
+            accel = 1
+            serial_send(self.device, str(0xFF)+str(self.hostData.velocity * VELO_MAX / 100)+' '+str(accel)+str(0xFE))
+            # print(self.hostData.velocity)
+            # time.sleep(0.5)
 
             # if data:
             #     data = int(data)
             # TODO: getting data from packages (bytes or smth else)
-        while True:
-            i = 0
 
 #----------------------------------------------------------------------------------------------#
 

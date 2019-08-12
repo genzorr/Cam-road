@@ -82,7 +82,7 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(self.Velocity.sizePolicy().hasHeightForWidth())
         self.Velocity.setSizePolicy(sizePolicy)
         self.Velocity.setMinimumSize(QtCore.QSize(400, 70))
-        self.Velocity.setProperty("value", 69)
+        self.Velocity.setProperty("value", 50)
         self.Velocity.setObjectName("Velocity")
         self.verticalLayout_3.addWidget(self.Velocity, 0, QtCore.Qt.AlignHCenter)
         self.verticalLayoutWidget_4 = QtWidgets.QWidget(Form)
@@ -107,7 +107,7 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(self.Coordinate.sizePolicy().hasHeightForWidth())
         self.Coordinate.setSizePolicy(sizePolicy)
         self.Coordinate.setMinimumSize(QtCore.QSize(400, 70))
-        self.Coordinate.setProperty("value", 69)
+        self.Coordinate.setProperty("value", 50)
         self.Coordinate.setObjectName("Coordinate")
         self.verticalLayout_4.addWidget(self.Coordinate, 0, QtCore.Qt.AlignHCenter)
 

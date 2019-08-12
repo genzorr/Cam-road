@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QColor
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt, QEvent
 
 from window import Ui_Watcher
 from workwidget import Ui_Form
@@ -11,7 +10,7 @@ from telemetrywidget import Ui_TForm
 #   Base class
 class QQWidget(QWidget):
     def __init__(self, parent=None, my_ui=None, title=None, layout=None):
-        QWidget.__init__(self, parent)
+        super(QQWidget, self).__init__(parent)
         self.ui = my_ui
         self.ui.setupUi(self)
         self.set_window_title(title)
@@ -27,7 +26,7 @@ class QQWidget(QWidget):
 
 class QWorkWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_Form(), title=None, layout=None):
-        QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
+        super(QWorkWidget, self).__init__(parent=parent, my_ui=my_ui, title=title, layout=layout)
 
 #----------------------------------------------------------------------------------------------#
 
@@ -44,11 +43,15 @@ class QTelemetryWidget(QQWidget):
 #----------------------------------------------------------------------------------------------#
 
 class MainWindow(QMainWindow):
+    keyPressed = pyqtSignal(QEvent)
+
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_Watcher()
         self.ui.setupUi(self)
         self.setWindowTitle('Watcher')
+
+        self.keyPressed.connect(self.on_key)
 
         self.workWidget = QWorkWidget(layout=self.ui.layoutidontwant)
         self.settingsWidget = QSettingsWidget(layout=self.ui.layoutidontwant)
@@ -81,3 +84,13 @@ class MainWindow(QMainWindow):
             self.workWidget.hide()
             self.settingsWidget.hide()
             self.telemetryWidget.show()
+
+    def keyPressEvent(self, event):
+        super(MainWindow, self).keyPressEvent(event)
+        self.keyPressed.emit(event)
+
+    def on_key(self, event):
+        if event.key() == Qt.Key_A:
+            self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 10)
+        if event.key() == Qt.Key_D:
+            self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 10)

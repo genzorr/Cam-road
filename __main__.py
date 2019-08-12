@@ -3,12 +3,11 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 
-from ui import MainWindow
+from ui import MainWindow, QWorkWidget
 from watcher import *
 
-#   TODO: ADD FLAGS CLASS FOR HANDLING BUTTONS
-#   TODO: think about adventages of properties (I should add there smth else)
-#   TODO: all proceccing should be on the road
+#   TODO: think about advantages of properties (I should add there smth else)
+#   TODO: all processing should be on the road
 #   TODO: change velocity QSlider to QProgressBar
 
 if __name__ == "__main__":
@@ -18,6 +17,6 @@ if __name__ == "__main__":
     window.show()
 
     thread = WatcherThread(window=window)
-    # thread.start()
+    thread.start()
 
     sys.exit(app.exec_())
