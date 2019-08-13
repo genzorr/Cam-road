@@ -1,3 +1,4 @@
+import sys
 from PyQt5.QtWidgets import QMainWindow, QWidget
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt, QEvent
 
@@ -94,3 +95,5 @@ class MainWindow(QMainWindow):
             self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 10)
         if event.key() == Qt.Key_D:
             self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 10)
+        if event.key() == Qt.Key_Q:
+            sys.exit()

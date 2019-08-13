@@ -60,6 +60,8 @@ class WatcherThread(QThread):
     # FIXME: REMOVE
     def veloChange(self, value):
         self.hostData.velocity = value
+        # self.hostData.acceleration = 1
+        # self.hostData.braking = 1
 
 
     def run(self):
@@ -67,7 +69,9 @@ class WatcherThread(QThread):
         while True and self.device:
             # data = serial_recv(self.device)
             accel = 1
-            serial_send(self.device, str(0xFF)+str(self.hostData.velocity * VELO_MAX / 100)+' '+str(accel)+str(0xFE))
+            braking = 1
+            data = str(0xFF)+str(self.hostData.velocity * VELO_MAX / 100)+' '+str(accel)+' '+str(braking)+str(0xFE)
+            serial_send(self.device, data)
             # print(self.hostData.velocity)
             # time.sleep(0.5)
 
