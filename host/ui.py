@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QMainWindow, QWidget
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt, QEvent
+from PyQt5.QtGui import QColor
 
 from window import Ui_Watcher
 from workwidget import Ui_Form
@@ -34,6 +35,16 @@ class QWorkWidget(QQWidget):
 class QSettingsWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_SForm(), title=None, layout=None):
         QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
+        self.color_red = QColor(255, 0, 0).name()
+        self.color_green = QColor(0, 255, 0).name()
+
+    def setChecked(self):
+        sender = self.sender()
+
+        if sender == self.ui.EndPointsStop:
+            self.ui.EndPointsReverse.setChecked(False)
+        elif sender == self.ui.EndPointsReverse:
+            self.ui.EndPointsStop.setChecked(False)
 
 #----------------------------------------------------------------------------------------------#
 

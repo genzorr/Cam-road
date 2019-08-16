@@ -44,14 +44,20 @@ class WatcherThread(QThread):
 
         if window.settingsWidget:
             window.settingsWidget.ui.EnableEndPoints.toggled.connect(self.outerData.enable_end_points_)
-            window.settingsWidget.ui.EndPointsBehavior.toggled.connect(self.outerData.end_points_behavior_)
+            window.settingsWidget.ui.EndPointsStop.toggled.connect(self.outerData.end_points_stop_)
+            window.settingsWidget.ui.EndPointsReverse.toggled.connect(self.outerData.end_points_reverse_)
             window.settingsWidget.ui.SoundStop.toggled.connect(self.outerData.sound_stop_)
             window.settingsWidget.ui.SwapDirection.toggled.connect(self.outerData.swap_direction_)
             window.settingsWidget.ui.StopAccelerometer.toggled.connect(self.outerData.stop_accelerometer_)
             window.settingsWidget.ui.LockButtons.toggled.connect(self.outerData.lock_buttons_)
 
+            '''Stop-reverse end points behavior'''
+            window.settingsWidget.ui.EndPointsStop.pressed.connect(window.settingsWidget.setChecked)
+            window.settingsWidget.ui.EndPointsReverse.pressed.connect(window.settingsWidget.setChecked)
+
             window.settingsWidget.ui.EnableEndPoints.toggled.emit(False)
-            window.settingsWidget.ui.EndPointsBehavior.toggled.emit(False)
+            window.settingsWidget.ui.EndPointsStop.toggled.emit(False)
+            window.settingsWidget.ui.EndPointsReverse.toggled.emit(False)
             window.settingsWidget.ui.SoundStop.toggled.emit(False)
             window.settingsWidget.ui.SwapDirection.toggled.emit(False)
             window.settingsWidget.ui.StopAccelerometer.toggled.emit(False)

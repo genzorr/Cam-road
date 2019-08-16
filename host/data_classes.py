@@ -155,7 +155,8 @@ class HBData(QObject):
         self.right = 0
         self.soft_stop = 0
         self.end_points = 0
-        self.end_points_behavior = 0
+        self.end_points_stop = 0
+        self.end_points_reverse = 0
         self.sound_stop = 0
         self.swap_direction = 0
         self.accelerometer_stop = 0
@@ -189,14 +190,26 @@ class HBData(QObject):
             self.set_color(sender, color)
 
     @pyqtSlot(bool)
-    def end_points_behavior_(self, value):
+    def end_points_stop_(self, value):
         if not self.lock_buttons:
             sender = self.sender()
             if value:
-                color, self.end_points_behavior = self.color_green, 1
+                color, self.end_points_stop = self.color_green, 1
             else:
-                color, self.end_points_behavior = self.color_red, 0
+                color, self.end_points_stop = self.color_red, 0
             self.set_color(sender, color)
+            print("stop: ", self.end_points_stop)
+
+    @pyqtSlot(bool)
+    def end_points_reverse_(self, value):
+        if not self.lock_buttons:
+            sender = self.sender()
+            if value:
+                color, self.end_points_reverse = self.color_green, 1
+            else:
+                color, self.end_points_reverse = self.color_red, 0
+            self.set_color(sender, color)
+            print("reverse: ", self.end_points_reverse)
 
     @pyqtSlot(bool)
     def sound_stop_(self, value):

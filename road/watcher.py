@@ -64,7 +64,52 @@ class Motor_control(threading.Thread):
         self._braking = 0.0
         self.AB_choose = 0
         self._est_speed = 0.0
-        self.HARD_STOP = 0
+        self._HARD_STOP = 0
+
+    @property
+    def HARD_STOP(self):
+        return self._HARD_STOP
+
+    @HARD_STOP.setter
+    def HARD_STOP(self, value):
+        self._HARD_STOP = value
+        if value == 1:
+            self._speed = 0
+            self._est_speed = 0
+
+    @property
+    def accel(self):
+        return self._accel
+
+    @accel.setter
+    def accel(self, value):
+        if value is not None:
+            self._accel = value
+
+    @property
+    def braking(self):
+        return self._braking
+
+    @braking.setter
+    def braking(self, value):
+        if value is not None:
+            self._braking = value
+
+    @property
+    def est_speed(self):
+        return self._est_speed
+
+    @est_speed.setter
+    def est_speed(self, value):
+        if value is not None:
+            self._est_speed = min(value, SPEED_MAX)
+
+            if value < self.speed:
+                self.AB_choose = -1
+            elif value > self.speed:
+                self.AB_choose = 1
+            else:
+                self.AB_choose = 0
 
     @property
     def speed(self):
@@ -72,20 +117,17 @@ class Motor_control(threading.Thread):
 
     @speed.setter
     def speed(self, value):
-        if (self.HARD_STOP == 1):
-            self._speed = value
-        elif (value != None):
-            if (self.AB_choose > 0):
-                if (value < self.est_speed):
+        if value is not None:
+            if self.AB_choose > 0:
+                if value < self.est_speed:
                     self._speed = value
                 else:
                     self._speed = self.est_speed
                     self.AB_choose = 0
-                    print('here')
                 # self._speed = min(value, self.est_speed)
 
-            elif (self.AB_choose < 0):
-                if (value > self.est_speed):
+            elif self.AB_choose < 0:
+                if value > self.est_speed:
                     self._speed = value
                 else:
                     self._speed = self.est_speed
@@ -95,56 +137,23 @@ class Motor_control(threading.Thread):
             else:
                 pass
 
-
-    @property
-    def est_speed(self):
-        return self._est_speed
-
-    @est_speed.setter
-    def est_speed(self, value):
-        if (value != None):
-            if (value > self._est_speed):
-                self.AB_choose = 1
-                print('set')
-            else:
-                self.AB_choose = -1
-            self._est_speed = min(value, SPEED_MAX)
-
-    @property
-    def accel(self):
-        return self._accel
-
-    @accel.setter
-    def accel(self, value):
-        if (value != None):
-            self._accel = value
-
-    @property
-    def braking(self):
-        return self._braking
-
-    @braking.setter
-    def braking(self, value):
-        if (value != None):
-            self._braking = value
-
     @property
     def data(self):
         return self._data
 
     @data.setter
     def data(self, value):
-        if (value != None):
+        if value is not None:
             self._data = value
 
 
     def packageResolver(self):
         try:
-            if (self.data != ''):
+            if self.data != '':
                 start = self.data.find('255')
                 end = self.data.find('254', start+3, len(self.data))
 
-                if ((end != -1) and (start != -1)):
+                if (end != -1) and (start != -1):
                     self.data = self.data[start+3:end]
                 else:
                     return
@@ -166,29 +175,28 @@ class Motor_control(threading.Thread):
         est_speed = self.est_speed
         choose = self.AB_choose
 
-        if (self.HARD_STOP == 0):
-            if choose == 0:
-                return dt * speed
+        if self.HARD_STOP == 1:
+            return 0
+        elif choose == 0:
+            return dt * speed
+        else:
+            if choose > 0:
+                accel = self.accel
+                speed_new = min(speed + self.accel * dt, est_speed)
             else:
-                if (choose > 0):
-                    accel = self.accel
-                    speed_new = min(speed + self.accel * dt, est_speed)
-                else:
-                    accel = - self.braking
-                    speed_new = max(speed - self.braking * dt, est_speed)
+                accel = - self.braking
+                speed_new = max(speed - self.braking * dt, est_speed)
 
-                l = (speed + speed_new) / 2 * dt
-                self.speed = speed_new
-                return l
+            l = (speed + speed_new) / 2 * dt
+            self.speed = speed_new
+            return l
 
-                # accel = self.accel if (choose > 0) else -self.braking
-                # if (choose > 0):
-                #     print(accel)
-                # speed_new = speed + accel * dt
-                # speed_new = min(speed_new, est_speed) if (choose > 0) else max(speed_new, est_speed)
-                # return l
-
-        return 0
+            # accel = self.accel if (choose > 0) else -self.braking
+            # if (choose > 0):
+            #     print(accel)
+            # speed_new = speed + accel * dt
+            # speed_new = min(speed_new, est_speed) if (choose > 0) else max(speed_new, est_speed)
+            # return l
 
 
     def run(self):
@@ -213,7 +221,7 @@ class Watcher(threading.Thread):
         self.accel = accel
 
     def run(self):
-        stringData = 't:\t{:.2f}\tangle:\t{:.2f}\tspeed:\t{:.2f}\taccel:\t{:.2f}\tbraking:\t{:.2f}\tch:\t{}\n'
+        stringData = 't:\t{:.2f}\tspeed:\t{:.2f}\taccel:\t{:.2f}\tbraking:\t{:.2f}\tch:\t{}\n'
 
         th = threading.currentThread()
         while getattr(th, "do_run", True):
@@ -225,15 +233,14 @@ class Watcher(threading.Thread):
 
             thr = 2
             if (x > thr) or (z > thr):
-                self.motor_control.speed = 0
-                self.motor_control.est_speed = 0
                 self.motor_control.HARD_STOP = 1
                 print('got')
                 print(x," ", y," ", z)
 
             #   FIXME:
             # Print message
-            data = (self.motor_control.t, self.motor_control.motor.readAngle(),
+            '''self.motor_control.motor.readAngle()'''
+            data = (self.motor_control.t,
                     self.motor_control.speed, self.motor_control.accel, self.motor_control.braking,
                     self.motor_control.AB_choose)
             self.writer.out = stringData.format(*data)

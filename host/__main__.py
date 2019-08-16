@@ -3,8 +3,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 
-from ui import MainWindow, QWorkWidget
 from watcher import *
+from ui import MainWindow
 
 #   TODO: think about advantages of properties (I should add there smth else)
 #   TODO: all processing should be on the road
