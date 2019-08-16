@@ -198,7 +198,6 @@ class HBData(QObject):
             else:
                 color, self.end_points_stop = self.color_red, 0
             self.set_color(sender, color)
-            print("stop: ", self.end_points_stop)
 
     @pyqtSlot(bool)
     def end_points_reverse_(self, value):
@@ -209,7 +208,6 @@ class HBData(QObject):
             else:
                 color, self.end_points_reverse = self.color_red, 0
             self.set_color(sender, color)
-            print("reverse: ", self.end_points_reverse)
 
     @pyqtSlot(bool)
     def sound_stop_(self, value):

@@ -3,6 +3,11 @@ from lib.lsm6ds3 import *
 
 SPEED_MAX = 20
 
+STOP = 0
+COURSING = 1
+BUTTONS = 2
+
+
 #-------------------------------------------------------------------------------------#
 #   Host-to-road data
 class HTRData():
@@ -46,7 +51,7 @@ class Writer(threading.Thread):
         while getattr(t, "do_run", True):
             sys.stdout.write(self._out)
             sys.stdout.flush()
-            time.sleep(0.5)
+            time.sleep(0.2)
 
 #-------------------------------------------------------------------------------------#
 
@@ -65,6 +70,18 @@ class Motor_control(threading.Thread):
         self.AB_choose = 0
         self._est_speed = 0.0
         self._HARD_STOP = 0
+        self.coordinate = 0
+
+        self.mode = 0
+        self.left = 0
+        self.right = 0
+
+        self._base1 = 0.0
+        self._base2 = 0.0
+        self.set_base = 1
+        self.base1_set = 0
+        self.base2_set = 0
+        self.swap = 1
 
     @property
     def HARD_STOP(self):
@@ -108,8 +125,8 @@ class Motor_control(threading.Thread):
                 self.AB_choose = -1
             elif value > self.speed:
                 self.AB_choose = 1
-            else:
-                self.AB_choose = 0
+            # else:
+            #     self.AB_choose = 0
 
     @property
     def speed(self):
@@ -138,6 +155,36 @@ class Motor_control(threading.Thread):
                 pass
 
     @property
+    def base1(self):
+        return self._base1
+
+    @base1.setter
+    def base1(self, value):
+        if (value > self._base2) and (self.base2 != 0):
+            self._base1 = self._base2
+            self._base2 = value
+            self.base2_set = 1
+            self.base1_set = 1
+        else:
+            self._base1 = value
+            self.base1_set = 1
+
+    @property
+    def base2(self):
+        return self._base2
+
+    @base2.setter
+    def base2(self, value):
+        if (value < self.base1) and (self.base1 != 0):
+            self._base2 = self._base1
+            self._base1 = value
+            self.base1_set = 1
+            self.base2_set = 1
+        else:
+            self._base2 = value
+            self.base2_set = 1
+
+    @property
     def data(self):
         return self._data
 
@@ -159,7 +206,20 @@ class Motor_control(threading.Thread):
                     return
 
                 temp = self.data.split(' ')
-                self.est_speed, self.accel, self.braking = float(temp[0]), float(temp[1]), float(temp[2])
+                self.est_speed, self.accel, self.braking, self.mode, left, right, self.set_base = \
+                float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5]), int(temp[6])
+                self.accel = 3
+                self.braking = 3
+
+                if (self.mode == BUTTONS):
+                    self.right = right
+                    self.left = left
+
+                if self.set_base == 1 and not self.base1_set:
+                    self.base1 = self.coordinate
+                elif self.set_base == 2 and not self.base2_set:
+                    self.base2 = self.coordinate
+
                 self.data = ''
 
         except ValueError:
@@ -174,29 +234,101 @@ class Motor_control(threading.Thread):
         speed = self.speed
         est_speed = self.est_speed
         choose = self.AB_choose
+        coord = self.coordinate
+        accel = self.accel
+        braking = self.braking
 
+        l = 0
+        ''' No moving if hard stop is enabled '''
         if self.HARD_STOP == 1:
             return 0
-        elif choose == 0:
-            return dt * speed
         else:
-            if choose > 0:
-                accel = self.accel
-                speed_new = min(speed + self.accel * dt, est_speed)
+            if (self.left == 1):
+                dist_to_base = coord - self.base1
             else:
-                accel = - self.braking
-                speed_new = max(speed - self.braking * dt, est_speed)
+                dist_to_base = self.base2 - coord
 
-            l = (speed + speed_new) / 2 * dt
-            self.speed = speed_new
+            braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
+            speed_new = 0
+
+            if self.mode == STOP:
+                #   Braking if S was pressed
+                speed_new = speed - braking * dt
+                if (speed_new < 0):
+                    speed_new = 0
+
+                l = (speed + speed_new) / 2 * dt
+                self.speed = speed_new
+
+                #   To consider direction of moving
+                l = l if self.right == 1 else -l
+
+
+            elif self.mode == COURSING:
+                ''' If mode 1 is set, road will be coursing between two bases '''
+                if choose == 0:
+                    speed_new = speed
+                elif choose > 0:
+                    speed_new = min(speed + accel * dt, est_speed)
+                elif choose < 0:
+                    speed_new = max(speed - braking * dt, est_speed)
+                else:
+                    pass
+
+                #   Consider braking into bases points
+                if (self.base1_set == 1) and (self.base2_set == 1):
+                    if (braking_dist >= dist_to_base):
+                        speed_new = speed - braking * dt
+                        if (speed_new < 0):
+                            speed_new = 0
+
+                l = (speed + speed_new) / 2 * dt
+                self.speed = speed_new
+
+                #   To consider direction of moving
+                l = l if self.right == 1 else -l
+
+                if (self.base1_set == 1) and (self.base2_set == 1):
+                    if l < 0:                       # Moving left
+                        if (dist_to_base < abs(l)):
+                            l = -dist_to_base
+                            self.swap = 1
+                    elif l > 0:                     # Moving right
+                        if (dist_to_base < l):
+                            l = dist_to_base
+                            self.swap = 1
+
+                    #   TODO: maybe if needed
+                    tmp1 = self.base1 + braking_dist
+                    tmp2 = self.base2 - braking_dist
+                    if (coord + l < tmp1):
+                        l = tmp1 - coord
+                        self.coordinate = tmp1
+                    elif (coord + l > tmp2):
+                        l = tmp2 - coord
+                        self.coordinate = tmp2
+
+                    return l
+
+            elif self.mode == BUTTONS:
+                if choose == 0:
+                    speed_new = speed
+                elif choose > 0:
+                    speed_new = min(speed + accel * dt, est_speed)
+                elif choose < 0:
+                    speed_new = max(speed - braking * dt, est_speed)
+                else:
+                    pass
+
+                l = (speed + speed_new) / 2 * dt
+                self.speed = speed_new
+
+                #   To consider direction of moving
+                l = l if self.right == 1 else -l
+
+
+            self.coordinate += l
             return l
-
-            # accel = self.accel if (choose > 0) else -self.braking
-            # if (choose > 0):
-            #     print(accel)
-            # speed_new = speed + accel * dt
-            # speed_new = min(speed_new, est_speed) if (choose > 0) else max(speed_new, est_speed)
-            # return l
 
 
     def run(self):
@@ -205,6 +337,13 @@ class Motor_control(threading.Thread):
 
             self.packageResolver()
             self.motor.dstep = self.controller()
+
+            if (self.swap == 1):
+                if self.left == 1:
+                    self.left, self.right = 0, 1
+                else:
+                    self.left, self.right = 1, 0
+                self.swap = 0
 
             # Update time
             self.t_prev = self.t
@@ -221,30 +360,34 @@ class Watcher(threading.Thread):
         self.accel = accel
 
     def run(self):
-        stringData = 't:\t{:.2f}\tspeed:\t{:.2f}\taccel:\t{:.2f}\tbraking:\t{:.2f}\tch:\t{}\n'
+        stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
 
         th = threading.currentThread()
         while getattr(th, "do_run", True):
 
-            data = serial_recv(self.dev, 40)
+            data = serial_recv(self.dev, 60)
             self.motor_control.data = data
 
             [x, y, z] = self.accel.getdata()
 
-            thr = 2
+            thr = 5
             if (x > thr) or (z > thr):
                 self.motor_control.HARD_STOP = 1
                 print('got')
                 print(x," ", y," ", z)
 
-            #   FIXME:
             # Print message
-            '''self.motor_control.motor.readAngle()'''
+            if self.motor_control.mode == 0:
+                tmp = " "
+            elif self.motor_control.left == 1:
+                tmp = "-"
+            else:
+                tmp = "+"
+
             data = (self.motor_control.t,
-                    self.motor_control.speed, self.motor_control.accel, self.motor_control.braking,
-                    self.motor_control.AB_choose)
+                    self.motor_control.speed, self.motor_control.base1, self.motor_control.base2,
+                    self.motor_control.mode, self.motor_control.coordinate, tmp)
             self.writer.out = stringData.format(*data)
-            # self.writer.out = '{}\n'.format(data)
 
 
 #-------------------------------------------------------------------------------------#

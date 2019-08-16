@@ -57,11 +57,12 @@ class QTelemetryWidget(QQWidget):
 class MainWindow(QMainWindow):
     keyPressed = pyqtSignal(QEvent)
 
-    def __init__(self):
+    def __init__(self, control=None):
         super(MainWindow, self).__init__()
         self.ui = Ui_Watcher()
         self.ui.setupUi(self)
         self.setWindowTitle('Watcher')
+        self.control = control
 
         self.keyPressed.connect(self.on_key)
 
@@ -102,9 +103,40 @@ class MainWindow(QMainWindow):
         self.keyPressed.emit(event)
 
     def on_key(self, event):
-        if event.key() == Qt.Key_A:
-            self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 10)
-        if event.key() == Qt.Key_D:
-            self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 10)
+        if event.key() == Qt.Key_BracketLeft:
+            self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 5)
+            self.control.mode = 1
+
+        if event.key() == Qt.Key_BracketRight:
+            self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 5)
+            self.control.mode = 1
+
         if event.key() == Qt.Key_Q:
             sys.exit()
+
+        if event.key() == Qt.Key_A:
+            self.control.mode = 2
+            self.control.left = 1
+            self.control.right = 0
+
+        if event.key() == Qt.Key_D:
+            self.control.mode = 2
+            self.control.right = 1
+            self.control.left = 0
+
+        if event.key() == Qt.Key_S:
+            self.control.mode = 0
+            self.control.right = 0
+            self.control.left = 0
+
+        if event.key() == Qt.Key_W:
+            if self.control.set_base == 1:
+                self.control.set_base = 2
+            else:
+                self.control.set_base = 1
+
+        if event.key() == Qt.Key_R:
+            self.control.mode = 0
+            self.control.right = 0
+            self.control.left = 0
+            self.control.set_base = 1
