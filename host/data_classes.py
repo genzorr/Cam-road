@@ -15,6 +15,11 @@ class HTRData(QObject):
         self._braking = 0.0
         self._velocity = 0.0
 
+        # FIXME: needed?
+        self.mode = 0
+        self.direction = 0
+        self.set_base = 0
+
     @property  # Acceleration value property
     def acceleration(self):
         return self._acceleration
@@ -65,13 +70,15 @@ class RTHData(QObject):
 
     def __init__(self):
         super().__init__()
-
-        self._velocity = 0.0
+        self.mode = 0
         self._coordinate = 0.0
         self._RSSI = 0.0
         self._voltage = 0.0
         self._current = 0.0
         self._temperature = 0.0
+        self.base1 = 0.0
+        self.base2 = 0.0
+
 
     @property  # Velocity value property
     def velocity(self):
@@ -149,8 +156,6 @@ class RTHData(QObject):
 class HBData(QObject):
     def __init__(self):
         super().__init__()
-        self.base1 = 0.0
-        self.base2 = 0.0
         self.left = 0
         self.right = 0
         self.soft_stop = 0

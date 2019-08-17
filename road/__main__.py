@@ -6,6 +6,7 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient #initialize 
 from x4motor import X4Motor
 from lib.indicator import *
 from watcher import *
+from data_classes import *
 from lib.lsm6ds3 import *
 import time
 
@@ -67,13 +68,20 @@ if __name__ == '__main__':
     try:
         client, M, portex, serial_device, accel = initAll()
 
+        hostData = HTRData()
+        roadData = RTHData()
+        specialData = HBData()
+        classes = [hostData, roadData, specialData]
+
+
         writer = Writer()
         writer.start()
 
-        motor_control = Motor_control(motor=M)
-        motor_control.start()
+        controller = Controller(motor=M, classes=classes)
+        motor_thread = Motor_thread(controller=controller)
+        motor_thread.start()
 
-        watcher = Watcher(motor_control=motor_control, writer=writer, serial_device=serial_device, accel=accel)
+        watcher = Watcher(motor_thread=motor_thread, writer=writer, serial_device=serial_device, accel=accel, classes=classes)
         watcher.start()
 
         # FIXME: MOTOR

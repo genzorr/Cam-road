@@ -36,7 +36,6 @@ class WatcherThread(QThread):
         if window.workWidget:
             self.hostData.acceleration_signal.connect(window.workWidget.ui.Acceleration.setValue)
             self.hostData.braking_signal.connect(window.workWidget.ui.Braking.setValue)
-            # TODO: ACKNOWLEDGE
             self.hostData.velocity_signal.connect(window.workWidget.ui.Velocity.setValue)
             self.roadData.coordinate_signal.connect(window.workWidget.ui.Coordinate.setValue)
 
@@ -72,7 +71,6 @@ class WatcherThread(QThread):
     def run(self):
         VELO_MAX = 30
         while True and self.device:
-            # data = serial_recv(self.device)
             accel = 3
             braking = 3
             data = str(0xFF)+\
