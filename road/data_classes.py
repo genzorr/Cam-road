@@ -192,8 +192,7 @@ class Controller:
             tmp = "-"
         else:
             tmp = " "
-        return [self.t, self.speed, self.base1, self.base2,
-                self.mode, self.coordinate, tmp]
+        return (self.t, self.speed, self.base1, self.base2, self.mode, self.coordinate, tmp)
 
 #    """
     def packageResolver(self):

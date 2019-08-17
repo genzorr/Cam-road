@@ -1,6 +1,8 @@
 import time, serial
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from data_classes import *
+from mbee import serialstar
+
 
 ACCUM_LEN = 1
 
@@ -19,13 +21,36 @@ class MsgAccumulator:
             self.signal.emit(self.accumulator)
             self.accumulator = []
 
+#----------------------------------------------------------------------------------------------#
+
+class MbeeThread(QThread):
+    def __init__(self, port='/dev/ttyUSB0', speed=9600):
+        QThread.__init__(self)
+        self.mbee = serialstar.SerialStar(port, speed)
+
+    def run(self):
+        while True and self.mbee:
+            self.mbee.send_tx_request(0x01, "0234", data="123456")
+            # self.mbee.run()
+
+    #   Callback functions for SerialStar
+    def frame_81_received(packet):
+        print("Received 81-frame.")
+        print(packet)
 
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting / throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
-    def __init__(self, speed=9600, port='/dev/ttyUSB0', window=None, control=None):
+    def __init__(self, speed=9600, port='/dev/ttyUSB0', window=None, control=None, mbee_thread=None):
         QThread.__init__(self)
-        self.device = serial_init(speed, port)
+        # self.device = serial_init(speed, port)
+        # self.mbee_thread = mbee_thread
+        try:
+            self.mbee = serialstar.SerialStar(port, speed)
+        except serial.serialutil.SerialException:
+            self.mbee = None
+            print('Could not open port')
+
         self.control = control
 
         self.hostData = HTRData()
@@ -69,22 +94,20 @@ class WatcherThread(QThread):
 
 
     def run(self):
-        VELO_MAX = 30
-        while True and self.device:
-            accel = 3
-            braking = 3
-            data = str(0xFF)+\
-                   str(self.hostData.velocity * VELO_MAX / 100)+\
-                   ' '+str(accel)+' '+str(braking)+' '+\
-                   str(self.control.mode)+' '+\
-                   str(self.control.direction)+' '+\
-                   str(self.control.set_base)+\
-                   str(0xFE)
-            serial_send(self.device, data)
-
-            # if data:
-            #     data = int(data)
-            # TODO: getting data from packages (bytes or smth else)
+        # VELO_MAX = 30
+        # while True and self.device:
+        #     accel = 3
+        #     braking = 3
+        #     data = str(0xFF)+\
+        #            str(self.hostData.velocity * VELO_MAX / 100)+\
+        #            ' '+str(accel)+' '+str(braking)+' '+\
+        #            str(self.control.mode)+' '+\
+        #            str(self.control.direction)+' '+\
+        #            str(self.control.set_base)+\
+        #            str(0xFE)
+        #     serial_send(self.device, data)
+        while True and self.mbee:
+            self.mbee.send_tx_request(0x01, "0234", data="123456")
 
 #----------------------------------------------------------------------------------------------#
 

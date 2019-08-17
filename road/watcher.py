@@ -1,4 +1,5 @@
 import sys, time, threading, serial
+from mbee import serialstar
 from data_classes import *
 from lib.lsm6ds3 import *
 
@@ -40,7 +41,7 @@ class Motor_thread(threading.Thread):
             # FIXME: MOTOR
             # self.controller.packageResolver()
             with self.lock:
-                if lock.acquire(False):
+                if self.lock.acquire(False):
                     self.controller.control()
 
 #-------------------------------------------------------------------------------------#
@@ -53,6 +54,9 @@ class Watcher(threading.Thread):
         self.writer = writer
         self.dev = serial_device
         self.accel = accel
+        self.mbee = serialstar.SerialStar('/dev/ttyS2', 9600)
+
+        self.mbee.callback_registring("81", self.frame_81_received)
 
         self.hostData = classes[0]
         self.roadData = classes[1]
@@ -69,9 +73,12 @@ class Watcher(threading.Thread):
             # self.motor_thread.controller.data = [self.hostData, self.roadData, self.specialData]
 
             # Getting MBee data
+            with self.lock:
+                if self.lock.acquire(False):
+                    self.mbee.run()
             #
             with self.lock:
-                if lock.acquire(False):
+                if self.lock.acquire(False):
                     self.motor_thread.controller.update_host_to_road()
 
             # Check accelerometer data
@@ -82,12 +89,20 @@ class Watcher(threading.Thread):
                 print('got')
                 print(x," ", y," ", z)
 
+            data = (0,0,0,0,0,0,'')
             with self.lock:
-                if lock.acquire(False):
+                if self.lock.acquire(False):
                     data = self.motor_thread.controller.get_data()
             # data = (self.motor_thread.controller.t, self.motor_thread.controller.speed, self.roadData.base1, self.roadData.base2,
             #         self.roadData.mode, self.roadData.coordinate, tmp)
             self.writer.out = stringData.format(*data)
+
+
+    #   Callback functions for SerialStar
+    def frame_81_received(packet):
+        print("Received 81-frame.")
+        print(packet)
+
 
 
 #-------------------------------------------------------------------------------------#

@@ -15,12 +15,17 @@ class Control:
 
 #   TODO: think about advantages of properties (I should add there smth else)
 
+#   TODO: CONNECT BUTTONS TO DATA CLASSES
+#   TODO: ADD LOCK TO THREADS
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     control = Control()
     window = MainWindow(control=control)
     window.show()
+
+    # mbee_thread = MbeeThread()
 
     thread = WatcherThread(window=window, control=control)
     thread.start()

@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor
 
+
 #----------------------------------------------------------------------------------------------#
 #   Keeps 'host-to-road' data
 class HTRData(QObject):
