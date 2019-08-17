@@ -28,8 +28,9 @@ class Writer(threading.Thread):
 #-------------------------------------------------------------------------------------#
 """ Used to control the motor by Motor_controller class """
 class Motor_thread(threading.Thread):
-    def __init__(self, controller):
+    def __init__(self, lock, controller):
         super().__init__()
+        self.lock = lock
         self.paused = False
         self.controller = controller
 
@@ -37,14 +38,17 @@ class Motor_thread(threading.Thread):
         th = threading.currentThread()
         while getattr(th, "do_run", True):
             # FIXME: MOTOR
-            self.controller.packageResolver()
-            self.controller.control()
+            # self.controller.packageResolver()
+            with self.lock:
+                if lock.acquire(False):
+                    self.controller.control()
 
 #-------------------------------------------------------------------------------------#
 """ Used to control all operations """
 class Watcher(threading.Thread):
-    def __init__(self, motor_thread, writer, serial_device, accel, classes):
+    def __init__(self, lock, motor_thread, writer, serial_device, accel, classes):
         super().__init__()
+        self.lock = lock
         self.motor_thread = motor_thread
         self.writer = writer
         self.dev = serial_device
@@ -60,9 +64,15 @@ class Watcher(threading.Thread):
         th = threading.currentThread()
         while getattr(th, "do_run", True):
 
-            data = serial_recv(self.dev, 60)
-            self.motor_thread.controller.data = data
+            # data = serial_recv(self.dev, 60)
+            # self.motor_thread.controller.data = data
             # self.motor_thread.controller.data = [self.hostData, self.roadData, self.specialData]
+
+            # Getting MBee data
+            #
+            with self.lock:
+                if lock.acquire(False):
+                    self.motor_thread.controller.update_host_to_road()
 
             # Check accelerometer data
             [x, y, z] = self.accel.getdata()
@@ -72,7 +82,9 @@ class Watcher(threading.Thread):
                 print('got')
                 print(x," ", y," ", z)
 
-            data = self.motor_thread.controller.get_data()
+            with self.lock:
+                if lock.acquire(False):
+                    data = self.motor_thread.controller.get_data()
             # data = (self.motor_thread.controller.t, self.motor_thread.controller.speed, self.roadData.base1, self.roadData.base2,
             #         self.roadData.mode, self.roadData.coordinate, tmp)
             self.writer.out = stringData.format(*data)

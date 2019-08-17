@@ -211,6 +211,7 @@ class Controller:
                 est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
                 float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])
 
+# FIXME: MOVE  TO MBEE
                 if not self.is_braking:
                     self.est_speed = est_speed
 
@@ -309,3 +310,23 @@ class Controller:
             # self.motor.dstep = dstep
 
 
+    def update_host_to_road(self):
+        self.accel = self.hostData.acceleration
+        self.braking = self.hostData.braking
+        est_speed = self.hostData.velocity
+        self.mode = self.hostData.mode
+        direction = self.hostData.direction
+        self.set_base = self.hostData.set_base
+
+        if not self.is_braking:
+            self.est_speed = est_speed
+
+        if self.mode == BUTTONS:
+            self.direction = direction
+
+        if self.set_base == 1 and not self.base1_set:
+            self.base1 = self.coordinate
+        elif self.set_base == 2 and not self.base2_set:
+            self.base2 = self.coordinate
+
+        return

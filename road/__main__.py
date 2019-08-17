@@ -77,11 +77,15 @@ if __name__ == '__main__':
         writer = Writer()
         writer.start()
 
+        lock = threading.Lock()
+
         controller = Controller(motor=M, classes=classes)
-        motor_thread = Motor_thread(controller=controller)
+        motor_thread = Motor_thread(lock=lock, controller=controller)
         motor_thread.start()
 
-        watcher = Watcher(motor_thread=motor_thread, writer=writer, serial_device=serial_device, accel=accel, classes=classes)
+        watcher = Watcher(lock=lock, motor_thread=motor_thread, writer=writer,
+                            serial_device=serial_device, accel=accel,
+                            classes=classes)
         watcher.start()
 
         # FIXME: MOTOR
