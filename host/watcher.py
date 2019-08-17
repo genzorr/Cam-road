@@ -105,8 +105,8 @@ def serial_init(speed, port):
 
     return dev
 
-def serial_recv(dev):
-    string = dev.read(255).decode()
+def serial_recv(dev, size):
+    string = dev.read(size).decode()
     return string
 
 def serial_send(dev, string):

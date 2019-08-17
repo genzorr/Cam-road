@@ -74,6 +74,8 @@ class Motor_control(threading.Thread):
 
         self.mode = 0
         self.direction = 1
+        self.change_direction = 0
+        self.is_braking = 0
 
         self._base1 = 0.0
         self._base2 = 0.0
@@ -204,13 +206,19 @@ class Motor_control(threading.Thread):
                     return
 
                 temp = self.data.split(' ')
-                self.est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
+                est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
                 float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])
+
+                if not self.is_braking:
+                    self.est_speed = est_speed
+
+                if self.mode > 2:
+                    self.mode = 0
                 self.accel = 3
                 self.braking = 3
 
+                # direction field: -1 if moving left, +1 if right, 0 if stop
                 if self.mode == BUTTONS:
-                    # direction field: -1 if moving left, +1 if right, 0 if stop
                     self.direction = direction
 
                 if self.set_base == 1 and not self.base1_set:
@@ -268,17 +276,21 @@ class Motor_control(threading.Thread):
                     else:
                         dist_to_base = self.base2 - coord
 
-                    braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
+                    braking_dist = speed * speed / (2 * braking) # if braking != 0 else 0
                     if dist_to_base <= braking_dist:
+                        self.is_braking = 1
+                        self.est_speed = 0
                         dstep = self.update_motor(speed_to=0)
 
                         # FIXME: seems strange, I should change direction when JUST stopped
                         if dist_to_base < abs(dstep):
                             dstep = dist_to_base * self.direction
                             self.direction = -self.direction
+                            self.change_direction = 1 if self.change_direction == 0 else 0
                         else:
                             pass
                     else:
+                        self.is_braking = 0
                         dstep = self.update_motor(speed_to=self.est_speed)
                 else:
                     dstep = self.update_motor(speed_to=self.est_speed)
@@ -333,12 +345,12 @@ class Watcher(threading.Thread):
                 print(x," ", y," ", z)
 
             # Print message
-            if self.motor_control.mode == 0:
-                tmp = " "
-            elif self.motor_control.direction == 1:
+            if self.motor_control.direction == 1:
                 tmp = "+"
-            else:
+            elif self.motor_control.direction == -1:
                 tmp = "-"
+            else:
+                tmp = " "
 
             data = (self.motor_control.t,
                     self.motor_control.speed, self.motor_control.base1, self.motor_control.base2,
