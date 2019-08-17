@@ -9,8 +9,7 @@ from ui import MainWindow
 class Control:
     def __init__(self):
         self._mode = 0
-        self.left = 0
-        self.right = 0
+        self.direction = 0
         self.set_base = 0
 
     @property
@@ -19,15 +18,12 @@ class Control:
 
     @mode.setter
     def mode(self, value):
-        if value == 1:
-            self.left = 0
-            self.right = 0
+        if value == 0:
+            self.direction = 0
         self._mode = value
 
 
 #   TODO: think about advantages of properties (I should add there smth else)
-#   TODO: all processing should be on the road
-#   TODO: change velocity QSlider to QProgressBar
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

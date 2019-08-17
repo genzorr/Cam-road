@@ -79,13 +79,10 @@ class WatcherThread(QThread):
                    str(self.hostData.velocity * VELO_MAX / 100)+\
                    ' '+str(accel)+' '+str(braking)+' '+\
                    str(self.control.mode)+' '+\
-                   str(self.control.left)+' '+str(self.control.right)+' '+\
+                   str(self.control.direction)+' '+\
                    str(self.control.set_base)+\
                    str(0xFE)
             serial_send(self.device, data)
-            # self.control.set_base = 0
-            # print(self.hostData.velocity)
-            # time.sleep(0.5)
 
             # if data:
             #     data = int(data)

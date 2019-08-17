@@ -9,6 +9,8 @@ from watcher import *
 from lib.lsm6ds3 import *
 import time
 
+global NO_MOTOR
+
 #-------------------------------------------------------------------------------------#
 #   Settings
 config = {'id': 1,\
@@ -28,24 +30,26 @@ config = {'id': 1,\
 #-------------------------------------------------------------------------------------#
 
 def initAll():
-    print("Motor connection...")
-    client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
-                         bytesize = 8, parity = 'N', baudrate= 115200,
-                         timeout = 0.8, strict=False )
+    # FIXME: MOTOR
+    # print("Motor connection...")
+    # client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
+    #                      bytesize = 8, parity = 'N', baudrate= 115200,
+    #                      timeout = 0.8, strict=False )
 
-    #   Try to connect to modbus client
-    client_status = client.connect()
+    # #   Try to connect to modbus client
+    # client_status = client.connect()
 
-    #   Motor initialization
-    M = X4Motor(client, settings = config)
-    print("OK") if client_status and M else print("Failed")
+    # #   Motor initialization
+    # M = X4Motor(client, settings = config)
+    # print("OK") if client_status and M else print("Failed")
 
-    #   Print all registers
-    registers = M.readAllRO()
-    print(registers)
+    # #   Print all registers
+    # registers = M.readAllRO()
+    # print(registers)
 
-    #   Indicator initialization
-    portex = indicator_init()
+    # #   Indicator initialization
+    # portex = indicator_init()
+    client, M, portex = None, None, None
 
     #   Serial init
     serial_device = serial_init()
@@ -58,23 +62,6 @@ def initAll():
 
     return client, M, portex, serial_device, accel
 
-
-# def setAngleZero(M):
-#     while True:
-#         a = M.readAngle()
-#         (M.dstep = -0.1) if (a > 0) else (M.dstep = 0.1)
-
-#         if (a > -50) and (a < 50):
-#             break
-
-#         if (round(t))
-#         out = "step:\t{:.2f}\tangle:\t{:.2f}\n".format(M.step, M.readAngle())
-#         sys.stdout.write(out)
-#         sys.stdout.flush()
-
-#-------------------------------------------------------------------------------------#
-
-#   TODO: ACCEL, GYRO, MBEE
 
 if __name__ == '__main__':
     try:
@@ -89,10 +76,11 @@ if __name__ == '__main__':
         watcher = Watcher(motor_control=motor_control, writer=writer, serial_device=serial_device, accel=accel)
         watcher.start()
 
-        while True:
-            V = M.readV()
-            indicate(V, portex)
-            time.sleep(10)
+        # FIXME: MOTOR
+        # while True:
+        #     V = M.readV()
+        #     indicate(V, portex)
+        #     time.sleep(10)
 
 
     except KeyboardInterrupt:
@@ -107,6 +95,7 @@ if __name__ == '__main__':
         writer.do_run = False
         writer.join()
 
-        indicator_off(portex)
-        M.release()             # Release motor
-        client.close()
+        # FIXME: MOTOR
+        # indicator_off(portex)
+        # M.release()             # Release motor
+        # client.close()

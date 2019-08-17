@@ -73,15 +73,13 @@ class Motor_control(threading.Thread):
         self.coordinate = 0
 
         self.mode = 0
-        self.left = 0
-        self.right = 0
+        self.direction = 1
 
         self._base1 = 0.0
         self._base2 = 0.0
         self.set_base = 1
         self.base1_set = 0
         self.base2_set = 0
-        self.swap = 1
 
     @property
     def HARD_STOP(self):
@@ -206,14 +204,14 @@ class Motor_control(threading.Thread):
                     return
 
                 temp = self.data.split(' ')
-                self.est_speed, self.accel, self.braking, self.mode, left, right, self.set_base = \
-                float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5]), int(temp[6])
+                self.est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
+                float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])
                 self.accel = 3
                 self.braking = 3
 
-                if (self.mode == BUTTONS):
-                    self.right = right
-                    self.left = left
+                if self.mode == BUTTONS:
+                    # direction field: -1 if moving left, +1 if right, 0 if stop
+                    self.direction = direction
 
                 if self.set_base == 1 and not self.base1_set:
                     self.base1 = self.coordinate
@@ -229,106 +227,69 @@ class Motor_control(threading.Thread):
         return
 
 
-    def controller(self):
+    """ Updates speed by given acceleration """
+    def update_motor(self, speed_to):
         dt = self.t - self.t_prev
+        if self.AB_choose == 0:
+            speed_new = self.speed
+        elif self.AB_choose > 0:
+            speed_new = min(self.speed + self.accel * dt, speed_to)
+        else:
+            speed_new = max(self.speed - self.braking * dt, speed_to)
+
+        l = (self.speed + speed_new) / 2 * dt * self.direction
+        self.speed = speed_new
+        return l
+
+
+    """ Returns motor dstep value """
+    def controller(self):
         speed = self.speed
-        est_speed = self.est_speed
-        choose = self.AB_choose
         coord = self.coordinate
-        accel = self.accel
         braking = self.braking
 
-        l = 0
-        ''' No moving if hard stop is enabled '''
         if self.HARD_STOP == 1:
+            # No moving if hard stop is enabled
+            return 0
+        elif self.mode == STOP and self.speed == 0:
             return 0
         else:
-            if (self.left == 1):
-                dist_to_base = coord - self.base1
-            else:
-                dist_to_base = self.base2 - coord
-
-            braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
-            speed_new = 0
-
             if self.mode == STOP:
                 #   Braking if S was pressed
-                speed_new = speed - braking * dt
-                if (speed_new < 0):
-                    speed_new = 0
-
-                l = (speed + speed_new) / 2 * dt
-                self.speed = speed_new
-
-                #   To consider direction of moving
-                l = l if self.right == 1 else -l
-
+                dstep = self.update_motor(speed_to=0)
 
             elif self.mode == COURSING:
-                ''' If mode 1 is set, road will be coursing between two bases '''
-                if choose == 0:
-                    speed_new = speed
-                elif choose > 0:
-                    speed_new = min(speed + accel * dt, est_speed)
-                elif choose < 0:
-                    speed_new = max(speed - braking * dt, est_speed)
-                else:
-                    pass
+                #   In this mode road will be coursing between two bases
 
                 #   Consider braking into bases points
                 if (self.base1_set == 1) and (self.base2_set == 1):
-                    if (braking_dist >= dist_to_base):
-                        speed_new = speed - braking * dt
-                        if (speed_new < 0):
-                            speed_new = 0
+                    if self.direction == -1:
+                        dist_to_base = coord - self.base1
+                    else:
+                        dist_to_base = self.base2 - coord
 
-                l = (speed + speed_new) / 2 * dt
-                self.speed = speed_new
+                    braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
+                    if dist_to_base <= braking_dist:
+                        dstep = self.update_motor(speed_to=0)
 
-                #   To consider direction of moving
-                l = l if self.right == 1 else -l
-
-                if (self.base1_set == 1) and (self.base2_set == 1):
-                    if l < 0:                       # Moving left
-                        if (dist_to_base < abs(l)):
-                            l = -dist_to_base
-                            self.swap = 1
-                    elif l > 0:                     # Moving right
-                        if (dist_to_base < l):
-                            l = dist_to_base
-                            self.swap = 1
-
-                    #   TODO: maybe if needed
-                    tmp1 = self.base1 + braking_dist
-                    tmp2 = self.base2 - braking_dist
-                    if (coord + l < tmp1):
-                        l = tmp1 - coord
-                        self.coordinate = tmp1
-                    elif (coord + l > tmp2):
-                        l = tmp2 - coord
-                        self.coordinate = tmp2
-
-                    return l
+                        # FIXME: seems strange, I should change direction when JUST stopped
+                        if dist_to_base < abs(dstep):
+                            dstep = dist_to_base * self.direction
+                            self.direction = -self.direction
+                        else:
+                            pass
+                    else:
+                        dstep = self.update_motor(speed_to=self.est_speed)
+                else:
+                    dstep = self.update_motor(speed_to=self.est_speed)
 
             elif self.mode == BUTTONS:
-                if choose == 0:
-                    speed_new = speed
-                elif choose > 0:
-                    speed_new = min(speed + accel * dt, est_speed)
-                elif choose < 0:
-                    speed_new = max(speed - braking * dt, est_speed)
-                else:
-                    pass
+                dstep = self.update_motor(speed_to=self.est_speed)
+            else:
+                pass
 
-                l = (speed + speed_new) / 2 * dt
-                self.speed = speed_new
-
-                #   To consider direction of moving
-                l = l if self.right == 1 else -l
-
-
-            self.coordinate += l
-            return l
+            self.coordinate += dstep
+            return dstep
 
 
     def run(self):
@@ -336,14 +297,9 @@ class Motor_control(threading.Thread):
         while getattr(th, "do_run", True):
 
             self.packageResolver()
-            self.motor.dstep = self.controller()
-
-            if (self.swap == 1):
-                if self.left == 1:
-                    self.left, self.right = 0, 1
-                else:
-                    self.left, self.right = 1, 0
-                self.swap = 0
+            # FIXME: MOTOR
+            # self.motor.dstep = self.controller()
+            dstep = self.controller()
 
             # Update time
             self.t_prev = self.t
@@ -379,10 +335,10 @@ class Watcher(threading.Thread):
             # Print message
             if self.motor_control.mode == 0:
                 tmp = " "
-            elif self.motor_control.left == 1:
-                tmp = "-"
-            else:
+            elif self.motor_control.direction == 1:
                 tmp = "+"
+            else:
+                tmp = "-"
 
             data = (self.motor_control.t,
                     self.motor_control.speed, self.motor_control.base1, self.motor_control.base2,

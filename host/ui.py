@@ -105,29 +105,29 @@ class MainWindow(QMainWindow):
     def on_key(self, event):
         if event.key() == Qt.Key_BracketLeft:
             self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 5)
-            self.control.mode = 1
 
         if event.key() == Qt.Key_BracketRight:
             self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 5)
-            self.control.mode = 1
 
         if event.key() == Qt.Key_Q:
             sys.exit()
 
-        if event.key() == Qt.Key_A:
+        if event.key() == Qt.Key_1:
+            self.control.mode = 1
+
+        if event.key() == Qt.Key_2:
             self.control.mode = 2
-            self.control.left = 1
-            self.control.right = 0
+
+        if event.key() == Qt.Key_A:
+            self.control.direction = -1
 
         if event.key() == Qt.Key_D:
-            self.control.mode = 2
-            self.control.right = 1
-            self.control.left = 0
+            self.control.direction = 1
 
         if event.key() == Qt.Key_S:
             self.control.mode = 0
-            self.control.right = 0
-            self.control.left = 0
+            # FIXME: CHANGE DIRECTION HERE
+            self.workWidget.ui.Velocity.setValue(0)
 
         if event.key() == Qt.Key_W:
             if self.control.set_base == 1:
@@ -137,6 +137,5 @@ class MainWindow(QMainWindow):
 
         if event.key() == Qt.Key_R:
             self.control.mode = 0
-            self.control.right = 0
-            self.control.left = 0
+            self.control.direction = 0
             self.control.set_base = 1
