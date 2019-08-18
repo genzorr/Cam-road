@@ -54,8 +54,6 @@ def initAll():
 
     #   Serial init
     serial_device = serial_init()
-    if (serial_device == None):
-        print('Could not open port')
 
     #   Accel init
     accel = Accelerometer()
@@ -77,7 +75,8 @@ if __name__ == '__main__':
         writer = Writer()
         writer.start()
 
-        lock = threading.Lock()
+        # lock = threading.Lock()
+        lock = None
 
         controller = Controller(motor=M, classes=classes)
         motor_thread = Motor_thread(lock=lock, controller=controller)

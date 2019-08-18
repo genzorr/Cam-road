@@ -41,6 +41,7 @@ class Motor_thread(threading.Thread):
             # with self.lock:
             #     if self.lock.acquire(False):
             #         self.controller.control()
+            self.controller.get_package()
             self.controller.control()
 
 #-------------------------------------------------------------------------------------#
@@ -54,7 +55,7 @@ class Watcher(threading.Thread):
         self.dev = serial_device
         self.accel = accel
 
-        self.analyzer = PackageAnalyzer(serial_device)
+        # self.analyzer = PackageAnalyzer(serial_device)
 
         # TODO: MBee
         # self.mbee = serialstar.SerialStar('/dev/ttyS2', 9600)
@@ -64,17 +65,19 @@ class Watcher(threading.Thread):
         self.roadData = classes[1]
         self.specialData = classes[2]
 
+
     def run(self):
         stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
 
         th = threading.currentThread()
         while getattr(th, "do_run", True):
 
-            # data = serial_recv(self.dev, 60)
-            # self.motor_thread.controller.data = data # old
-            package = self.analyzer.decrypt_package()
-            if package:
-                self.hostData = package
+            data = serial_recv(self.dev, 60)
+            print(data)
+            self.motor_thread.controller.data = data # old
+            # package = self.analyzer.decrypt_package()
+            # if package:
+            #     self.hostData = package
 
             # TODO: MBee
             # # Getting MBee data
@@ -86,7 +89,7 @@ class Watcher(threading.Thread):
             # with self.lock:
             #     if self.lock.acquire(False):
             #         self.motor_thread.controller.update_host_to_road()
-            self.motor_thread.controller.update_host_to_road()
+            # self.motor_thread.controller.update_host_to_road()
 
             # Check accelerometer data
             [x, y, z] = self.accel.getdata()
@@ -114,7 +117,7 @@ class Watcher(threading.Thread):
 
 #-------------------------------------------------------------------------------------#
 #   Serial communication
-def serial_init(speed=19200, port='/dev/ttyS2'):
+def serial_init(speed=9600, port='/dev/ttyS2'):
     try:
         dev = serial.Serial(
         port=port,
@@ -125,6 +128,7 @@ def serial_init(speed=19200, port='/dev/ttyS2'):
         timeout=0.1
     )
     except serial.serialutil.SerialException:
+        print('Could not open port')
         dev = None
 
     return dev

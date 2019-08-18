@@ -41,7 +41,7 @@ class MbeeThread(QThread):
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting / throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
-    def __init__(self, speed=19200, port='/dev/ttyUSB0', window=None, control=None, mbee_thread=None):
+    def __init__(self, speed=9600, port='/dev/ttyUSB0', window=None, control=None, mbee_thread=None):
         QThread.__init__(self)
         self.device = serial_init(speed, port)
         self.analyzer = PackageAnalyzer(self.device)
@@ -97,24 +97,25 @@ class WatcherThread(QThread):
 
 
     def run(self):
-        # VELO_MAX = 30
-        # while True and self.device:
-        #     accel = 3
-        #     braking = 3
-        #     data = str(0xFF)+\
-        #            str(self.hostData.velocity * VELO_MAX / 100)+\
-        #            ' '+str(accel)+' '+str(braking)+' '+\
-        #            str(self.control.mode)+' '+\
-        #            str(self.control.direction)+' '+\
-        #            str(self.control.set_base)+\
-        #            str(0xFE)
-        #     serial_send(self.device, data)
+        VELO_MAX = 30
         while True and self.device:
-            self.hostData.acceleration = 3
-            self.hostData.braking = 3
-            self.hostData.mode = -3
-            data = self.analyzer.encrypt_package(self.hostData)
-            self.device.write(data)
+            accel = 3
+            braking = 3
+            self.control.mode = 1
+            data = str(0xFF)+\
+                   str(self.hostData.velocity * VELO_MAX / 100)+\
+                   ' '+str(accel)+' '+str(braking)+' '+\
+                   str(self.control.mode)+' '+\
+                   str(self.control.direction)+' '+\
+                   str(self.control.set_base)+\
+                   str(0xFE)
+            serial_send(self.device, data)
+        # while True and self.device:
+        #     self.hostData.acceleration = 3
+        #     self.hostData.braking = 3
+        #     self.hostData.mode = -3
+        #     data = self.analyzer.encrypt_package(self.hostData)
+        #     self.device.write(data)
 
 #----------------------------------------------------------------------------------------------#
 
@@ -126,7 +127,8 @@ def serial_init(speed, port):
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=0.1 )
+        timeout=0.1
+    )
     except serial.serialutil.SerialException:
         print('Could not open port')
         dev = None

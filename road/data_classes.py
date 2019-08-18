@@ -67,6 +67,7 @@ class Controller:
         self.specialData = classes[2]
 
         self.starttime = time.time()
+        self.data = ''
 
         self.t = 0.0
         self.t_prev = 0.0
@@ -299,37 +300,44 @@ class Controller:
         return
 
     def get_package(self):
-        if self.data != '':
-            start = self.data.find('255')
-            end = self.data.find('254', start+3, len(self.data))
+        try:
+            if self.data != '':
+                start = self.data.find('255')
+                end = self.data.find('254', start+3, len(self.data))
 
-            if (end != -1) and (start != -1):
-                self.data = self.data[start+3:end]
-            else:
-                return
+                if (end != -1) and (start != -1):
+                    self.data = self.data[start+3:end]
+                else:
+                    return
 
-            temp = self.data.split(' ')
-            est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
-            float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])
+                temp = self.data.split(' ')
+                est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
+                float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])
 
-            if not self.is_braking:
-                self.est_speed = est_speed
+                if not self.is_braking:
+                    self.est_speed = est_speed
 
-            if self.mode > 2:
-                self.mode = 0
-            self.accel = 3
-            self.braking = 3
+                if self.mode > 2:
+                    self.mode = 0
+                self.accel = 3
+                self.braking = 3
 
-            # direction field: -1 if moving left, +1 if right, 0 if stop
-            if self.mode == BUTTONS:
-                self.direction = direction
+                # direction field: -1 if moving left, +1 if right, 0 if stop
+                if self.mode == BUTTONS:
+                    self.direction = direction
 
-            if self.set_base == 1 and not self.base1_set:
-                self.base1 = self.coordinate
-            elif self.set_base == 2 and not self.base2_set:
-                self.base2 = self.coordinate
+                if self.set_base == 1 and not self.base1_set:
+                    self.base1 = self.coordinate
+                elif self.set_base == 2 and not self.base2_set:
+                    self.base2 = self.coordinate
 
-            self.data = ''
+                self.data = ''
+
+        except ValueError:
+            print('error')
+        except IndexError:
+            print('error')
+        return
 
 
 #----------------------------------------------------------------------------------------------#
