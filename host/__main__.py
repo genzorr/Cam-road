@@ -18,6 +18,8 @@ class Control:
 #   TODO: CONNECT BUTTONS TO DATA CLASSES
 #   TODO: ADD LOCK TO THREADS
 
+#   TODO: USE ISINSTANSE
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
@@ -31,3 +33,4 @@ if __name__ == "__main__":
     thread.start()
 
     sys.exit(app.exec_())
+

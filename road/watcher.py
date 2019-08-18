@@ -32,17 +32,16 @@ class Motor_thread(threading.Thread):
     def __init__(self, lock, controller):
         super().__init__()
         self.lock = lock
-        self.paused = False
         self.controller = controller
 
     def run(self):
         th = threading.currentThread()
         while getattr(th, "do_run", True):
             # FIXME: MOTOR
-            # self.controller.packageResolver()
-            with self.lock:
-                if self.lock.acquire(False):
-                    self.controller.control()
+            # with self.lock:
+            #     if self.lock.acquire(False):
+            #         self.controller.control()
+            self.controller.control()
 
 #-------------------------------------------------------------------------------------#
 """ Used to control all operations """
@@ -54,9 +53,12 @@ class Watcher(threading.Thread):
         self.writer = writer
         self.dev = serial_device
         self.accel = accel
-        self.mbee = serialstar.SerialStar('/dev/ttyS2', 9600)
 
-        self.mbee.callback_registring("81", self.frame_81_received)
+        self.analyzer = PackageAnalyzer(serial_device)
+
+        # TODO: MBee
+        # self.mbee = serialstar.SerialStar('/dev/ttyS2', 9600)
+        # self.mbee.callback_registring("81", self.frame_81_received)
 
         self.hostData = classes[0]
         self.roadData = classes[1]
@@ -69,17 +71,22 @@ class Watcher(threading.Thread):
         while getattr(th, "do_run", True):
 
             # data = serial_recv(self.dev, 60)
-            # self.motor_thread.controller.data = data
-            # self.motor_thread.controller.data = [self.hostData, self.roadData, self.specialData]
+            # self.motor_thread.controller.data = data # old
+            package = self.analyzer.decrypt_package()
+            if package:
+                self.hostData = package
 
-            # Getting MBee data
-            with self.lock:
-                if self.lock.acquire(False):
-                    self.mbee.run()
-            #
-            with self.lock:
-                if self.lock.acquire(False):
-                    self.motor_thread.controller.update_host_to_road()
+            # TODO: MBee
+            # # Getting MBee data
+            # with self.lock:
+            #     if self.lock.acquire(False):
+            #         self.mbee.run()
+
+            # Updating motor controller data
+            # with self.lock:
+            #     if self.lock.acquire(False):
+            #         self.motor_thread.controller.update_host_to_road()
+            self.motor_thread.controller.update_host_to_road()
 
             # Check accelerometer data
             [x, y, z] = self.accel.getdata()
@@ -89,25 +96,25 @@ class Watcher(threading.Thread):
                 print('got')
                 print(x," ", y," ", z)
 
+            # Write data to console
             data = (0,0,0,0,0,0,'')
-            with self.lock:
-                if self.lock.acquire(False):
-                    data = self.motor_thread.controller.get_data()
-            # data = (self.motor_thread.controller.t, self.motor_thread.controller.speed, self.roadData.base1, self.roadData.base2,
-            #         self.roadData.mode, self.roadData.coordinate, tmp)
+            # with self.lock:
+            #     if self.lock.acquire(False):
+            #         data = self.motor_thread.controller.get_data()
+            data = self.motor_thread.controller.get_data()
             self.writer.out = stringData.format(*data)
 
 
-    #   Callback functions for SerialStar
-    def frame_81_received(packet):
-        print("Received 81-frame.")
-        print(packet)
+    # #   Callback functions for SerialStar
+    # def frame_81_received(packet):
+    #     print("Received 81-frame.")
+    #     print(packet)
 
 
 
 #-------------------------------------------------------------------------------------#
 #   Serial communication
-def serial_init(speed=9600, port='/dev/ttyS2'):
+def serial_init(speed=19200, port='/dev/ttyS2'):
     try:
         dev = serial.Serial(
         port=port,

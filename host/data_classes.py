@@ -1,6 +1,9 @@
+import struct
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor
 
+DESCR1 = b'\x7e'
+DESCR2 = b'\xa5'
 
 #----------------------------------------------------------------------------------------------#
 #   Keeps 'host-to-road' data
@@ -11,15 +14,19 @@ class HTRData(QObject):
 
     def __init__(self):
         super().__init__()
+        self.descr1 = DESCR1
+        self.descr2 = DESCR2
 
         self._acceleration = 0.0
         self._braking = 0.0
         self._velocity = 0.0
-
         # FIXME: needed?
         self.mode = 0
         self.direction = 0
         self.set_base = 0
+        self.crc = 0
+
+        self.size = 7*4+2
 
     @property  # Acceleration value property
     def acceleration(self):
@@ -244,3 +251,82 @@ class HBData(QObject):
             else:
                 color, self.accelerometer_stop = self.color_red, 0
             self.set_color(sender, color)
+
+#----------------------------------------------------------------------------------------------#
+
+class PackageAnalyzer:
+    def __init__(self, serial_device):
+        self.dev = serial_device
+
+    def encrypt_package(self, package):
+        data = bytes()
+        data += package.descr1
+        data += package.descr2
+        data += float_to_bytes(package.acceleration)
+        data += float_to_bytes(package.braking)
+        data += float_to_bytes(package.velocity)
+        data += int_to_bytes(package.mode)
+        data += int_to_bytes(package.direction)
+        data += int_to_bytes(package.set_base)
+        # for i in range(2, package.size - 4):
+        #     package.crc += int(data[i])
+        data += int_to_bytes(package.crc)
+        # print(data)
+        return data
+
+    def decrypt_package(self):
+        packet = HTRData()
+        try:
+            while True:
+                packet.descr1 = self.dev.read(1)
+                packet.descr2 = self.dev.read(1)
+
+                if packet.descr1 != DESCR1 and packet.descr2 != DESCR2:
+                    if packet.descr2 == DESCR1:
+                        packet.descr1 = DESCR1
+                        packet.descr2 = self.dev.read(1)
+
+                        if packet.descr2 == DESCR2:
+                            break
+
+                    print("Bad index", packet.descr1, packet.descr2)
+                else: break
+
+            crc = 0
+            data = self.dev.read(packet.size)
+            for i in range(0, packet.size-2):
+                crc += data[i]
+
+            packet.crc = data[24:28]
+            if packet.crc != crc:
+                print('Bad crc')
+                return None
+
+            packet.acceleration = bytes_to_float(data[0:4])
+            packet.braking = bytes_to_float(data[4:8])
+            packet.velocity = bytes_to_float(data[8:12])
+            packet.mode = bytes_to_int(data[12:16])
+            packet.direction = bytes_to_int(data[16:20])
+            packet.set_base = bytes_to_int(data[20:24])
+
+        except ValueError or IndexError:
+            print('error')
+            return None
+        return packet
+
+
+def int_to_bytes(i):
+    b = struct.pack('i', i)
+    return b
+
+def float_to_bytes(f):
+    b = struct.pack('f', f)
+    return b
+
+def bytes_to_int(b):
+    [x] = struct.unpack('i', b)
+    return x
+
+def bytes_to_float(b):
+    [x] = struct.unpack('f', b)
+    return x

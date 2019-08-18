@@ -1,17 +1,26 @@
 import time
+import struct
+
+DESCR1 = b'\x7e'
+DESCR2 = b'\xa5'
 
 #----------------------------------------------------------------------------------------------#
 #   Keeps 'host-to-road' data
 class HTRData():
     def __init__(self):
+        self.descr1 = DESCR1
+        self.descr2 = DESCR2
+
         self.acceleration = 0.0
         self.braking = 0.0
         self.velocity = 0.0
-
         # FIXME: needed?
         self.mode = 0
         self.direction = 0
         self.set_base = 0
+        self.crc = 0
+
+        self.size = 7*4+2
 
 
 #----------------------------------------------------------------------------------------------#
@@ -57,7 +66,6 @@ class Controller:
         self.roadData = classes[1]
         self.specialData = classes[2]
 
-        self.data = ''
         self.starttime = time.time()
 
         self.t = 0.0
@@ -194,46 +202,6 @@ class Controller:
             tmp = " "
         return (self.t, self.speed, self.base1, self.base2, self.mode, self.coordinate, tmp)
 
-#    """
-    def packageResolver(self):
-        try:
-            if self.data != '':
-                start = self.data.find('255')
-                end = self.data.find('254', start+3, len(self.data))
-
-                if (end != -1) and (start != -1):
-                    self.data = self.data[start+3:end]
-                else:
-                    return
-
-                temp = self.data.split(' ')
-                est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
-                float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])
-
-# FIXME: MOVE  TO MBEE
-                if not self.is_braking:
-                    self.est_speed = est_speed
-
-                if self.mode > 2:
-                    self.mode = 0
-                self.accel = 3
-                self.braking = 3
-
-                # direction field: -1 if moving left, +1 if right, 0 if stop
-                if self.mode == BUTTONS:
-                    self.direction = direction
-
-                if self.set_base == 1 and not self.base1_set:
-                    self.base1 = self.coordinate
-                elif self.set_base == 2 and not self.base2_set:
-                    self.base2 = self.coordinate
-
-                self.data = ''
-
-        except ValueError or IndexError:
-            print('error')
-        return
-#    """
 
     """ Updates speed by given acceleration """
     def calc_dstep(self, speed_to):
@@ -329,3 +297,117 @@ class Controller:
             self.base2 = self.coordinate
 
         return
+
+    def get_package(self):
+        if self.data != '':
+            start = self.data.find('255')
+            end = self.data.find('254', start+3, len(self.data))
+
+            if (end != -1) and (start != -1):
+                self.data = self.data[start+3:end]
+            else:
+                return
+
+            temp = self.data.split(' ')
+            est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
+            float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])
+
+            if not self.is_braking:
+                self.est_speed = est_speed
+
+            if self.mode > 2:
+                self.mode = 0
+            self.accel = 3
+            self.braking = 3
+
+            # direction field: -1 if moving left, +1 if right, 0 if stop
+            if self.mode == BUTTONS:
+                self.direction = direction
+
+            if self.set_base == 1 and not self.base1_set:
+                self.base1 = self.coordinate
+            elif self.set_base == 2 and not self.base2_set:
+                self.base2 = self.coordinate
+
+            self.data = ''
+
+
+#----------------------------------------------------------------------------------------------#
+
+class PackageAnalyzer:
+    def __init__(self, serial_device):
+        self.dev = serial_device
+
+    def encrypt_package(self, package):
+        data = bytes()
+        data += package.descr1
+        data += package.descr2
+        data += float_to_bytes(package.acceleration)
+        data += float_to_bytes(package.braking)
+        data += float_to_bytes(package.velocity)
+        data += int_to_bytes(package.mode)
+        data += int_to_bytes(package.direction)
+        data += int_to_bytes(package.set_base)
+        # for i in range(2, package.size - 4):
+        #     package.crc += int(data[i])
+        data += int_to_bytes(package.crc)
+        print(data)
+        return data
+
+    def decrypt_package(self):
+        packet = HTRData()
+        try:
+            while True:
+                packet.descr1 = self.dev.read(1)
+                packet.descr2 = self.dev.read(1)
+                print(packet.descr1)
+
+                if packet.descr1 != DESCR1 and packet.descr2 != DESCR2:
+                    if packet.descr2 == DESCR1:
+                        packet.descr1 = DESCR1
+                        packet.descr2 = self.dev.read(1)
+
+                        if packet.descr2 == DESCR2:
+                            break
+
+                    # print("Bad index", packet.descr1, packet.descr2)
+                else: break
+
+            crc = 0
+            data = self.dev.read(packet.size)
+            for i in range(0, packet.size-2):
+                crc += data[i]
+
+            packet.crc = data[24:28]
+            if packet.crc != crc:
+                print('Bad crc')
+                return None
+
+            packet.acceleration = bytes_to_float(data[0:4])
+            packet.braking = bytes_to_float(data[4:8])
+            packet.velocity = bytes_to_float(data[8:12])
+            packet.mode = bytes_to_int(data[12:16])
+            packet.direction = bytes_to_int(data[16:20])
+            packet.set_base = bytes_to_int(data[20:24])
+
+        except ValueError or IndexError:
+            print('error')
+            return None
+        return packet
+
+
+def int_to_bytes(i):
+    b = struct.pack('i', i)
+    return b
+
+def float_to_bytes(f):
+    b = struct.pack('f', f)
+    return b
+
+def bytes_to_int(b):
+    [x] = struct.unpack('i', b)
+    return x
+
+def bytes_to_float(b):
+    [x] = struct.unpack('f', b)
+    return x

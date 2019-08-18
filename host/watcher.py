@@ -41,15 +41,18 @@ class MbeeThread(QThread):
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting / throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
-    def __init__(self, speed=9600, port='/dev/ttyUSB0', window=None, control=None, mbee_thread=None):
+    def __init__(self, speed=19200, port='/dev/ttyUSB0', window=None, control=None, mbee_thread=None):
         QThread.__init__(self)
-        # self.device = serial_init(speed, port)
+        self.device = serial_init(speed, port)
+        self.analyzer = PackageAnalyzer(self.device)
+
+        # TODO: MBee
         # self.mbee_thread = mbee_thread
-        try:
-            self.mbee = serialstar.SerialStar(port, speed)
-        except serial.serialutil.SerialException:
-            self.mbee = None
-            print('Could not open port')
+        # try:
+        #     self.mbee = serialstar.SerialStar(port, speed)
+        # except serial.serialutil.SerialException:
+        #     self.mbee = None
+        #     print('Could not open port')
 
         self.control = control
 
@@ -106,8 +109,12 @@ class WatcherThread(QThread):
         #            str(self.control.set_base)+\
         #            str(0xFE)
         #     serial_send(self.device, data)
-        while True and self.mbee:
-            self.mbee.send_tx_request(0x01, "0234", data="123456")
+        while True and self.device:
+            self.hostData.acceleration = 3
+            self.hostData.braking = 3
+            self.hostData.mode = -3
+            data = self.analyzer.encrypt_package(self.hostData)
+            self.device.write(data)
 
 #----------------------------------------------------------------------------------------------#
 
