@@ -3,6 +3,15 @@ from mbee import serialstar
 from data_classes import *
 from lib.lsm6ds3 import *
 
+import globals
+
+
+# lock = threading.Lock()
+# lock = 0
+# globals.hostData = HTRData()
+# roadData = RTHData()
+# specialData = HBData()
+
 
 #-------------------------------------------------------------------------------------#
 
@@ -27,44 +36,74 @@ class Writer(threading.Thread):
             time.sleep(0.2)
 
 #-------------------------------------------------------------------------------------#
+class Mbee_thread(threading.Thread):
+    def __init__(self, serial_device):
+        super().__init__()
+        self.dev = serial_device
+        self.analyzer = PackageAnalyzer(serial_device)
+
+    def run(self):
+        th = threading.currentThread()
+        while getattr(th, "do_run", True):
+
+            package = self.analyzer.decrypt_package()
+            if package and not globals.lock:
+                lock = 1
+                globals.hostData = package
+                lock = 0
+                # with lock:
+                #     # if lock.acquire(False):
+                #     globals.hostData = package
+                # print(globals.hostData.mode)
+
+#-------------------------------------------------------------------------------------#
 """ Used to control the motor by Motor_controller class """
 class Motor_thread(threading.Thread):
-    def __init__(self, lock, controller):
+    def __init__(self, controller):
         super().__init__()
-        self.lock = lock
         self.controller = controller
 
     def run(self):
         th = threading.currentThread()
         while getattr(th, "do_run", True):
+            # print(self.controller.globals.hostData.mode)
             # FIXME: MOTOR
-            # with self.lock:
-            #     if self.lock.acquire(False):
+            # with lock:
+            #     if lock.acquire(False):
             #         self.controller.control()
-            self.controller.get_package()
+            # self.controller.get_package()
             self.controller.control()
+
+    def update_host_to_road(self):
+        self.controller.accel = globals.hostData.acceleration
+        self.controller.braking = globals.hostData.braking
+        est_speed = globals.hostData.velocity
+        self.controller.mode = globals.hostData.mode
+        direction = globals.hostData.direction
+        self.controller.set_base = globals.hostData.set_base
+
+        if not self.controller.is_braking:
+            self.controller.est_speed = est_speed
+
+        if self.controller.mode == BUTTONS:
+            self.controller.direction = direction
+
+        if self.controller.set_base == 1 and not self.controller.base1_set:
+            self.controller.base1 = self.controller.coordinate
+        elif self.controller.set_base == 2 and not self.controller.base2_set:
+            self.controller.base2 = self.controller.coordinate
+
+        return
 
 #-------------------------------------------------------------------------------------#
 """ Used to control all operations """
 class Watcher(threading.Thread):
-    def __init__(self, lock, motor_thread, writer, serial_device, accel, classes):
+    def __init__(self, motor_thread, writer, serial_device, accel):
         super().__init__()
-        self.lock = lock
         self.motor_thread = motor_thread
         self.writer = writer
         self.dev = serial_device
         self.accel = accel
-
-        # self.analyzer = PackageAnalyzer(serial_device)
-
-        # TODO: MBee
-        # self.mbee = serialstar.SerialStar('/dev/ttyS2', 9600)
-        # self.mbee.callback_registring("81", self.frame_81_received)
-
-        self.hostData = classes[0]
-        self.roadData = classes[1]
-        self.specialData = classes[2]
-
 
     def run(self):
         stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
@@ -72,24 +111,20 @@ class Watcher(threading.Thread):
         th = threading.currentThread()
         while getattr(th, "do_run", True):
 
-            data = serial_recv(self.dev, 60)
-            print(data)
-            self.motor_thread.controller.data = data # old
+            # data = serial_recv(self.dev, 60)
+            # self.motor_thread.controller.data = data # old
             # package = self.analyzer.decrypt_package()
             # if package:
-            #     self.hostData = package
-
-            # TODO: MBee
-            # # Getting MBee data
-            # with self.lock:
-            #     if self.lock.acquire(False):
-            #         self.mbee.run()
+            #     globals.hostData = package
 
             # Updating motor controller data
-            # with self.lock:
-            #     if self.lock.acquire(False):
-            #         self.motor_thread.controller.update_host_to_road()
-            # self.motor_thread.controller.update_host_to_road()
+            # with lock:
+                # if lock.acquire(False):
+                # self.motor_thread.update_host_to_road()
+            if not globals.lock:
+                lock = 1
+                self.motor_thread.update_host_to_road()
+                lock = 0
 
             # Check accelerometer data
             [x, y, z] = self.accel.getdata()
@@ -101,10 +136,13 @@ class Watcher(threading.Thread):
 
             # Write data to console
             data = (0,0,0,0,0,0,'')
-            # with self.lock:
-            #     if self.lock.acquire(False):
-            #         data = self.motor_thread.controller.get_data()
-            data = self.motor_thread.controller.get_data()
+            # with lock:
+            #     # if lock.acquire(False):
+            #     data = self.motor_thread.controller.get_data()
+            if not globals.lock:
+                lock = 1
+                data = self.motor_thread.controller.get_data()
+                lock = 0
             self.writer.out = stringData.format(*data)
 
 
@@ -117,7 +155,7 @@ class Watcher(threading.Thread):
 
 #-------------------------------------------------------------------------------------#
 #   Serial communication
-def serial_init(speed=9600, port='/dev/ttyS2'):
+def serial_init(speed=19200, port='/dev/ttyS2'):
     try:
         dev = serial.Serial(
         port=port,

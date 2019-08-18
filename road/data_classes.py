@@ -1,8 +1,7 @@
-import time
-import struct
+import time, struct
 
-DESCR1 = b'\x7e'
-DESCR2 = b'\xa5'
+DESCR1 = struct.pack('B', 0x7e)
+DESCR2 = struct.pack('B', 0xa5)
 
 #----------------------------------------------------------------------------------------------#
 #   Keeps 'host-to-road' data
@@ -60,14 +59,11 @@ COURSING = 1
 BUTTONS = 2
 
 class Controller:
-    def __init__(self, motor, classes):
+    def __init__(self, motor):
         self.motor = motor
-        self.hostData = classes[0]
-        self.roadData = classes[1]
-        self.specialData = classes[2]
 
         self.starttime = time.time()
-        self.data = ''
+        # self.data = ''
 
         self.t = 0.0
         self.t_prev = 0.0
@@ -271,33 +267,34 @@ class Controller:
             elif self.mode == BUTTONS:
                 dstep = self.calc_dstep(speed_to=self.est_speed)
             else:
-                pass
+                dstep = 0
 
             self.coordinate += dstep
             # FIXME: return
             # self.motor.dstep = dstep
 
 
-    def update_host_to_road(self):
-        self.accel = self.hostData.acceleration
-        self.braking = self.hostData.braking
-        est_speed = self.hostData.velocity
-        self.mode = self.hostData.mode
-        direction = self.hostData.direction
-        self.set_base = self.hostData.set_base
+    # def update_host_to_road(self):
+    #     self.accel = self.hostData.acceleration
+    #     self.braking = self.hostData.braking
+    #     est_speed = self.hostData.velocity
+    #     self.mode = self.hostData.mode
+    #     direction = self.hostData.direction
+    #     self.set_base = self.hostData.set_base
 
-        if not self.is_braking:
-            self.est_speed = est_speed
+    #     if not self.is_braking:
+    #         self.est_speed = est_speed
 
-        if self.mode == BUTTONS:
-            self.direction = direction
+    #     if self.mode == BUTTONS:
+    #         self.direction = direction
 
-        if self.set_base == 1 and not self.base1_set:
-            self.base1 = self.coordinate
-        elif self.set_base == 2 and not self.base2_set:
-            self.base2 = self.coordinate
+    #     if self.set_base == 1 and not self.base1_set:
+    #         self.base1 = self.coordinate
+    #     elif self.set_base == 2 and not self.base2_set:
+    #         self.base2 = self.coordinate
 
-        return
+    #     return
+
 
     def get_package(self):
         try:
@@ -359,7 +356,7 @@ class PackageAnalyzer:
         # for i in range(2, package.size - 4):
         #     package.crc += int(data[i])
         data += int_to_bytes(package.crc)
-        print(data)
+        # print(data)
         return data
 
     def decrypt_package(self):
@@ -368,7 +365,7 @@ class PackageAnalyzer:
             while True:
                 packet.descr1 = self.dev.read(1)
                 packet.descr2 = self.dev.read(1)
-                print(packet.descr1)
+                # print(packet.descr1)
 
                 if packet.descr1 != DESCR1 and packet.descr2 != DESCR2:
                     if packet.descr2 == DESCR1:
@@ -382,14 +379,17 @@ class PackageAnalyzer:
                 else: break
 
             crc = 0
-            data = self.dev.read(packet.size)
-            for i in range(0, packet.size-2):
-                crc += data[i]
-
-            packet.crc = data[24:28]
-            if packet.crc != crc:
-                print('Bad crc')
+            data = self.dev.read(packet.size-2)
+            if len(data) < packet.size - 2:
+                print('less')
                 return None
+            # for i in range(0, packet.size-2-4):
+            #     crc += data[i]
+            #
+            # packet.crc = data[24:28]
+            # if packet.crc != crc:
+            #     print('Bad crc')
+            #     return None
 
             packet.acceleration = bytes_to_float(data[0:4])
             packet.braking = bytes_to_float(data[4:8])
@@ -401,21 +401,23 @@ class PackageAnalyzer:
         except ValueError or IndexError:
             print('error')
             return None
+        except struct.error:
+            print(data)
         return packet
 
 
 def int_to_bytes(i):
-    b = struct.pack('i', i)
+    b = struct.pack('=i', i)
     return b
 
 def float_to_bytes(f):
-    b = struct.pack('f', f)
+    b = struct.pack('=f', f)
     return b
 
 def bytes_to_int(b):
-    [x] = struct.unpack('i', b)
+    (x,) = struct.unpack('=i', b)
     return x
 
 def bytes_to_float(b):
-    [x] = struct.unpack('f', b)
+    (x,) = struct.unpack('=f', b)
     return x

@@ -1,4 +1,4 @@
-import sys
+import sys, time
 sys.path.append('../fortune-controls/Lib')
 import threading
 
@@ -8,7 +8,7 @@ from lib.indicator import *
 from watcher import *
 from data_classes import *
 from lib.lsm6ds3 import *
-import time
+import globals
 
 global NO_MOTOR
 
@@ -66,26 +66,27 @@ if __name__ == '__main__':
     try:
         client, M, portex, serial_device, accel = initAll()
 
-        hostData = HTRData()
-        roadData = RTHData()
-        specialData = HBData()
-        classes = [hostData, roadData, specialData]
-
+        globals.lock = 0
 
         writer = Writer()
         writer.start()
 
-        # lock = threading.Lock()
-        lock = None
+        mbee_thread = Mbee_thread(serial_device=serial_device)
+        mbee_thread.start()
 
-        controller = Controller(motor=M, classes=classes)
-        motor_thread = Motor_thread(lock=lock, controller=controller)
+        # lock = None
+
+        controller = Controller(motor=M)
+        motor_thread = Motor_thread(controller=controller)
         motor_thread.start()
 
-        watcher = Watcher(lock=lock, motor_thread=motor_thread, writer=writer,
-                            serial_device=serial_device, accel=accel,
-                            classes=classes)
+        watcher = Watcher(motor_thread=motor_thread, writer=writer,
+                            serial_device=serial_device, accel=accel)
         watcher.start()
+
+        # while True:
+        #     print(globals.lock)
+        #     time.sleep(0.5)
 
         # FIXME: MOTOR
         # while True:
@@ -100,8 +101,11 @@ if __name__ == '__main__':
         watcher.do_run = False
         watcher.join()
 
-        motor_control.do_run = False
-        motor_control.join()
+        motor_thread.do_run = False
+        motor_thread.join()
+
+        mbee_thread.do_run = False
+        mbee_thread.join()
 
         writer.do_run = False
         writer.join()

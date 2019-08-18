@@ -2,8 +2,8 @@ import struct
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor
 
-DESCR1 = b'\x7e'
-DESCR2 = b'\xa5'
+DESCR1 = struct.pack('B', 0x7e)
+DESCR2 = struct.pack('B', 0xa5)
 
 #----------------------------------------------------------------------------------------------#
 #   Keeps 'host-to-road' data
@@ -270,8 +270,9 @@ class PackageAnalyzer:
         data += int_to_bytes(package.set_base)
         # for i in range(2, package.size - 4):
         #     package.crc += int(data[i])
+        crc = int(0)
         data += int_to_bytes(package.crc)
-        # print(data)
+        # print('{}\t{}'.format(data, len(data)))
         return data
 
     def decrypt_package(self):
@@ -294,7 +295,7 @@ class PackageAnalyzer:
 
             crc = 0
             data = self.dev.read(packet.size)
-            for i in range(0, packet.size-2):
+            for i in range(0, packet.size-2-4):
                 crc += data[i]
 
             packet.crc = data[24:28]
@@ -316,17 +317,17 @@ class PackageAnalyzer:
 
 
 def int_to_bytes(i):
-    b = struct.pack('i', i)
+    b = struct.pack('=i', i)
     return b
 
 def float_to_bytes(f):
-    b = struct.pack('f', f)
+    b = struct.pack('=f', f)
     return b
 
 def bytes_to_int(b):
-    [x] = struct.unpack('i', b)
+    (x,) = struct.unpack('=i', b)
     return x
 
 def bytes_to_float(b):
-    [x] = struct.unpack('f', b)
+    (x,) = struct.unpack('=f', b)
     return x

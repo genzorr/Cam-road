@@ -1,4 +1,4 @@
-import sys
+import sys, globals
 from PyQt5.QtWidgets import QMainWindow, QWidget
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt, QEvent
 from PyQt5.QtGui import QColor
@@ -57,12 +57,11 @@ class QTelemetryWidget(QQWidget):
 class MainWindow(QMainWindow):
     keyPressed = pyqtSignal(QEvent)
 
-    def __init__(self, control=None):
+    def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_Watcher()
         self.ui.setupUi(self)
         self.setWindowTitle('Watcher')
-        self.control = control
 
         self.keyPressed.connect(self.on_key)
 
@@ -113,29 +112,29 @@ class MainWindow(QMainWindow):
             sys.exit()
 
         if event.key() == Qt.Key_1:
-            self.control.mode = 1
+            globals.control['mode'] = 1
 
         if event.key() == Qt.Key_2:
-            self.control.mode = 2
+            globals.control['mode'] = 2
 
         if event.key() == Qt.Key_A:
-            self.control.direction = -1
+            globals.control['direction'] = -1
 
         if event.key() == Qt.Key_D:
-            self.control.direction = 1
+            globals.control['direction'] = 1
 
         if event.key() == Qt.Key_S:
-            self.control.mode = 0
+            globals.control['mode'] = 0
             # FIXME: CHANGE DIRECTION HERE
             self.workWidget.ui.Velocity.setValue(0)
 
         if event.key() == Qt.Key_W:
-            if self.control.set_base == 1:
-                self.control.set_base = 2
+            if globals.control['set_base'] == 1:
+                globals.control['set_base'] = 2
             else:
-                self.control.set_base = 1
+                globals.control['set_base'] = 1
 
         if event.key() == Qt.Key_R:
-            self.control.mode = 0
-            self.control.direction = 0
-            self.control.set_base = 1
+            globals.control['mode'] = 0
+            globals.control['direction'] = 0
+            globals.control['set_base'] = 1

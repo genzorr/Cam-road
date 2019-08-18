@@ -6,13 +6,6 @@ from PyQt5.QtWidgets import QApplication
 from watcher import *
 from ui import MainWindow
 
-class Control:
-    def __init__(self):
-        self.mode = 0
-        self.direction = 0
-        self.set_base = 0
-
-
 #   TODO: think about advantages of properties (I should add there smth else)
 
 #   TODO: CONNECT BUTTONS TO DATA CLASSES
@@ -23,14 +16,15 @@ class Control:
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    control = Control()
-    window = MainWindow(control=control)
+    window = MainWindow()
     window.show()
 
     # mbee_thread = MbeeThread()
 
-    thread = WatcherThread(window=window, control=control)
+    thread = WatcherThread(window=window)
     thread.start()
 
     sys.exit(app.exec_())
+    # data = b'~\xa5\x00\x00@@\x00\x00@@\x00\x00pA\xfd\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    # print(struct.unpack('f', data[10:14]))
 
