@@ -32,25 +32,25 @@ config = {'id': 1,\
 
 def initAll():
     # FIXME: MOTOR
-    # print("Motor connection...")
-    # client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
-    #                      bytesize = 8, parity = 'N', baudrate= 115200,
-    #                      timeout = 0.8, strict=False )
+    print("Motor connection...")
+    client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
+                         bytesize = 8, parity = 'N', baudrate= 115200,
+                         timeout = 0.8, strict=False )
 
-    # #   Try to connect to modbus client
-    # client_status = client.connect()
+    #   Try to connect to modbus client
+    client_status = client.connect()
 
-    # #   Motor initialization
-    # M = X4Motor(client, settings = config)
-    # print("OK") if client_status and M else print("Failed")
+    #   Motor initialization
+    M = X4Motor(client, settings = config)
+    print("OK") if client_status and M else print("Failed")
 
-    # #   Print all registers
-    # registers = M.readAllRO()
-    # print(registers)
+    #   Print all registers
+    registers = M.readAllRO()
+    print(registers)
 
-    # #   Indicator initialization
-    # portex = indicator_init()
-    client, M, portex = None, None, None
+    #   Indicator initialization
+    portex = indicator_init()
+    # client, M, portex = None, None, None
 
     #   Serial init
     serial_device = serial_init()
@@ -84,33 +84,28 @@ if __name__ == '__main__':
                             serial_device=serial_device, accel=accel)
         watcher.start()
 
-        # while True:
-        #     print(globals.lock)
-        #     time.sleep(0.5)
-
         # FIXME: MOTOR
-        # while True:
-        #     V = M.readV()
-        #     indicate(V, portex)
-        #     time.sleep(10)
+        while True:
+            V = M.readV()
+            indicate(V, portex)
+            time.sleep(10)
 
 
     except KeyboardInterrupt:
         print()
 
+
         watcher.do_run = False
-        watcher.join()
-
         motor_thread.do_run = False
-        motor_thread.join()
-
         mbee_thread.do_run = False
-        mbee_thread.join()
-
         writer.do_run = False
+
+        watcher.join()
+        motor_thread.join()
+        mbee_thread.join()
         writer.join()
 
         # FIXME: MOTOR
-        # indicator_off(portex)
-        # M.release()             # Release motor
-        # client.close()
+        indicator_off(portex)
+        M.release()             # Release motor
+        client.close()

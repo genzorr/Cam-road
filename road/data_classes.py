@@ -52,7 +52,7 @@ class HBData():
         self.lock_buttons = 0
 
 #----------------------------------------------------------------------------------------------#
-SPEED_MAX = 20
+SPEED_MAX = 30
 
 STOP = 0
 COURSING = 1
@@ -165,7 +165,7 @@ class Controller:
 
     @base1.setter
     def base1(self, value):
-        if (value > self._base2) and (self.base2 != 0):
+        if (value > self._base2):# and (self.base2 != 0):
             self._base1 = self._base2
             self._base2 = value
             self.base2_set = 1
@@ -180,7 +180,7 @@ class Controller:
 
     @base2.setter
     def base2(self, value):
-        if (value < self.base1) and (self.base1 != 0):
+        if (value < self.base1):# and (self.base1 != 0):
             self._base2 = self._base1
             self._base1 = value
             self.base1_set = 1
@@ -270,8 +270,9 @@ class Controller:
                 dstep = 0
 
             self.coordinate += dstep
-            # FIXME: return
-            # self.motor.dstep = dstep
+            # FIXME: MOTOR
+            self.motor.dstep = dstep
+        return
 
 
     # def update_host_to_road(self):
@@ -353,10 +354,10 @@ class PackageAnalyzer:
         data += int_to_bytes(package.mode)
         data += int_to_bytes(package.direction)
         data += int_to_bytes(package.set_base)
-        # for i in range(2, package.size - 4):
-        #     package.crc += int(data[i])
-        data += int_to_bytes(package.crc)
-        # print(data)
+        package.crc = package.acceleration + package.braking + package.velocity + \
+                      package.mode + package.direction + package.set_base
+        data += float_to_bytes(package.crc)
+        # print('{}\t{}'.format(data, len(data)))
         return data
 
     def decrypt_package(self):
@@ -383,13 +384,9 @@ class PackageAnalyzer:
             if len(data) < packet.size - 2:
                 print('less')
                 return None
+
             # for i in range(0, packet.size-2-4):
-            #     crc += data[i]
-            #
-            # packet.crc = data[24:28]
-            # if packet.crc != crc:
-            #     print('Bad crc')
-            #     return None
+            #     crc += bytes_to_int(data[i])
 
             packet.acceleration = bytes_to_float(data[0:4])
             packet.braking = bytes_to_float(data[4:8])
@@ -397,12 +394,20 @@ class PackageAnalyzer:
             packet.mode = bytes_to_int(data[12:16])
             packet.direction = bytes_to_int(data[16:20])
             packet.set_base = bytes_to_int(data[20:24])
+            crc = packet.acceleration + packet.braking + packet.velocity + \
+                            packet.mode + packet.direction + packet.set_base
+            packet.crc = bytes_to_float(data[24:28])
+            # print('crc: ', crc, ' pack: ', packet.crc)
+            if packet.crc != crc:
+                print('Bad crc')
+                return None
 
         except ValueError or IndexError:
             print('error')
             return None
         except struct.error:
             print(data)
+            return None
         return packet
 
 

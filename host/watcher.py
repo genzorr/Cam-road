@@ -95,7 +95,7 @@ class WatcherThread(QThread):
 
 
     def run(self):
-        VELO_MAX = 30
+        # VELO_MAX = 30
         # while True and self.device:
             # accel = 3
             # braking = 3

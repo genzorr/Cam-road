@@ -5,6 +5,7 @@ from lib.lsm6ds3 import *
 
 import globals
 
+VELO_MAX = 30
 
 # lock = threading.Lock()
 # lock = 0
@@ -83,7 +84,7 @@ class Motor_thread(threading.Thread):
         self.controller.set_base = globals.hostData.set_base
 
         if not self.controller.is_braking:
-            self.controller.est_speed = est_speed
+            self.controller.est_speed = est_speed * VELO_MAX / 100
 
         if self.controller.mode == BUTTONS:
             self.controller.direction = direction
@@ -92,7 +93,6 @@ class Motor_thread(threading.Thread):
             self.controller.base1 = self.controller.coordinate
         elif self.controller.set_base == 2 and not self.controller.base2_set:
             self.controller.base2 = self.controller.coordinate
-
         return
 
 #-------------------------------------------------------------------------------------#

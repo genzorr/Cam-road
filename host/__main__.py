@@ -9,7 +9,9 @@ from ui import MainWindow
 #   TODO: think about advantages of properties (I should add there smth else)
 
 #   TODO: CONNECT BUTTONS TO DATA CLASSES
-#   TODO: ADD LOCK TO THREADS
+#   TODO: make indication when normal/ error exiting
+#   TODO: ADD LOCK TO THREADS!!!!!!!!!!!!!!!!!!!!!
+#   FIXME: CRC
 
 #   TODO: USE ISINSTANSE
 

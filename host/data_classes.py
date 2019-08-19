@@ -268,10 +268,9 @@ class PackageAnalyzer:
         data += int_to_bytes(package.mode)
         data += int_to_bytes(package.direction)
         data += int_to_bytes(package.set_base)
-        # for i in range(2, package.size - 4):
-        #     package.crc += int(data[i])
-        crc = int(0)
-        data += int_to_bytes(package.crc)
+        package.crc = package.acceleration + package.braking + package.velocity + \
+                      package.mode + package.direction + package.set_base
+        data += float_to_bytes(package.crc)
         # print('{}\t{}'.format(data, len(data)))
         return data
 
@@ -281,6 +280,7 @@ class PackageAnalyzer:
             while True:
                 packet.descr1 = self.dev.read(1)
                 packet.descr2 = self.dev.read(1)
+                # print(packet.descr1)
 
                 if packet.descr1 != DESCR1 and packet.descr2 != DESCR2:
                     if packet.descr2 == DESCR1:
@@ -290,18 +290,18 @@ class PackageAnalyzer:
                         if packet.descr2 == DESCR2:
                             break
 
-                    print("Bad index", packet.descr1, packet.descr2)
-                else: break
+                    # print("Bad index", packet.descr1, packet.descr2)
+                else:
+                    break
 
             crc = 0
-            data = self.dev.read(packet.size)
-            for i in range(0, packet.size-2-4):
-                crc += data[i]
-
-            packet.crc = data[24:28]
-            if packet.crc != crc:
-                print('Bad crc')
+            data = self.dev.read(packet.size - 2)
+            if len(data) < packet.size - 2:
+                print('less')
                 return None
+
+            # for i in range(0, packet.size-2-4):
+            #     crc += bytes_to_int(data[i])
 
             packet.acceleration = bytes_to_float(data[0:4])
             packet.braking = bytes_to_float(data[4:8])
@@ -309,10 +309,20 @@ class PackageAnalyzer:
             packet.mode = bytes_to_int(data[12:16])
             packet.direction = bytes_to_int(data[16:20])
             packet.set_base = bytes_to_int(data[20:24])
+            crc = packet.acceleration + packet.braking + packet.velocity + \
+                  packet.mode + packet.direction + packet.set_base
+            packet.crc = bytes_to_float(data[24:28])
+            # print('crc: ', crc, ' pack: ', packet.crc)
+            if packet.crc != crc:
+                print('Bad crc')
+                return None
 
-        except ValueError or IndexError:
-            print('error')
-            return None
+        # except ValueError or IndexError:
+        #     print('error')
+        #     return None
+        except struct.error:
+            print(data)
+            packet = None
         return packet
 
 
