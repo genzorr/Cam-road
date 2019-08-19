@@ -113,6 +113,7 @@ class WatcherThread(QThread):
             self.hostData.mode = globals.control['mode']
             self.hostData.direction = globals.control['direction']
             self.hostData.set_base = globals.control['set_base']
+            # print(globals.control['set_base'])
             data = self.analyzer.encrypt_package(self.hostData)
             self.device.write(data)
 

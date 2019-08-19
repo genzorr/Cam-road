@@ -1,111 +1,61 @@
 import sys, time
 sys.path.append('../fortune-controls/Lib')
-import threading
+import threading, signal
 
-from pymodbus.client.sync import ModbusSerialClient as ModbusClient #initialize a serial RTU client instance
-from x4motor import X4Motor
-from lib.indicator import *
 from watcher import *
 from data_classes import *
-from lib.lsm6ds3 import *
-import globals
+import global_
 
 global NO_MOTOR
 
+def handler(signal, frame):
+    print('Ctrl-C.... Exiting')
+    for t in global_.THREADS:
+        t.alive = False
+    sys.exit(0)
+
 #-------------------------------------------------------------------------------------#
-#   Settings
-config = {'id': 1,\
-        'Mode': 'Angle',\
-        'PWM_Limit' : 300,\
-        'PWM_inc_limit' : 2,\
-        'I_limit': 5.0,\
-        'V_min': 12.0,\
-        'Angle_PID_P' : 100,\
-        'Angle_PID_I' : 1,\
-        'Speed_PID_P' : 100,\
-        'Speed_PID_I' : 100,\
-        'StepsPerMM': 210,\
-        'TimeOut' : 1000,\
-        'TempShutDown' : 75,\
-        'Reverse': 0}           #   210 - 1step = 0.01m
-#-------------------------------------------------------------------------------------#
+def main():
+    global_.lock = 0
+    global_.hostData = HTRData()
+    global_.roadData = RTHData()
+    global_.specialData = HBData()
 
-def initAll():
-    # FIXME: MOTOR
-    print("Motor connection...")
-    client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
-                         bytesize = 8, parity = 'N', baudrate= 115200,
-                         timeout = 0.8, strict=False )
+    global_.writer = Writer()
+    global_.writer.start()
 
-    #   Try to connect to modbus client
-    client_status = client.connect()
+    global_.mbee_thread = Mbee_thread()
+    global_.mbee_thread.start()
 
-    #   Motor initialization
-    M = X4Motor(client, settings = config)
-    print("OK") if client_status and M else print("Failed")
+    global_.motor_thread = Motor_thread()
+    global_.motor_thread.start()
 
-    #   Print all registers
-    registers = M.readAllRO()
-    print(registers)
+    global_.watcher = Watcher()
+    global_.watcher.start()
 
-    #   Indicator initialization
-    portex = indicator_init()
-    # client, M, portex = None, None, None
+    global_.THREADS = [global_.mbee_thread, global_.motor_thread, global_.writer, global_.watcher]
 
-    #   Serial init
-    serial_device = serial_init()
-
-    #   Accel init
-    accel = Accelerometer()
-    accel.ctrl()
-
-    return client, M, portex, serial_device, accel
+    for t in global_.THREADS:
+        while True:
+            t.join(1000000)
+            if not t.alive:
+                break
 
 
 if __name__ == '__main__':
-    try:
-        client, M, portex, serial_device, accel = initAll()
+    signal.signal(signal.SIGINT, handler)
+    main()
+    # try:
+    #     main()
 
-        globals.lock = 0
+    # except KeyboardInterrupt:
+    #     print()
 
-        writer = Writer()
-        writer.start()
+    #     global_.motor_thread.join(10)
+    #     global_.writer.join(10)
+    #     global_.watcher.join(10)
+    #     global_.mbee_thread.join(10)
 
-        mbee_thread = Mbee_thread(serial_device=serial_device)
-        mbee_thread.start()
-
-        # lock = None
-
-        controller = Controller(motor=M)
-        motor_thread = Motor_thread(controller=controller)
-        motor_thread.start()
-
-        watcher = Watcher(motor_thread=motor_thread, writer=writer,
-                            serial_device=serial_device, accel=accel)
-        watcher.start()
-
-        # FIXME: MOTOR
-        while True:
-            V = M.readV()
-            indicate(V, portex)
-            time.sleep(10)
-
-
-    except KeyboardInterrupt:
-        print()
-
-
-        watcher.do_run = False
-        motor_thread.do_run = False
-        mbee_thread.do_run = False
-        writer.do_run = False
-
-        watcher.join()
-        motor_thread.join()
-        mbee_thread.join()
-        writer.join()
-
-        # FIXME: MOTOR
-        indicator_off(portex)
-        M.release()             # Release motor
-        client.close()
+    #     global_.motor_thread.off()
+    #     # while (not watcher.is_alive()) and (not motor_thread.is_alive()) and (not mbee_thread.is_alive()) and (not writer.is_alive()):
+    #     #     pass

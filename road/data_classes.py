@@ -1,7 +1,26 @@
-import time, struct
+import time, struct, global_
+from pymodbus.client.sync import ModbusSerialClient as ModbusClient #initialize a serial RTU client instance
+from x4motor import X4Motor
 
 DESCR1 = struct.pack('B', 0x7e)
 DESCR2 = struct.pack('B', 0xa5)
+
+#-------------------------------------------------------------------------------------#
+#   Settings
+config = {'id': 1,\
+        'Mode': 'Angle',\
+        'PWM_Limit' : 300,\
+        'PWM_inc_limit' : 2,\
+        'I_limit': 5.0,\
+        'V_min': 12.0,\
+        'Angle_PID_P' : 100,\
+        'Angle_PID_I' : 1,\
+        'Speed_PID_P' : 100,\
+        'Speed_PID_I' : 100,\
+        'StepsPerMM': 210,\
+        'TimeOut' : 1000,\
+        'TempShutDown' : 75,\
+        'Reverse': 0}           #   210 - 1step = 0.01m
 
 #----------------------------------------------------------------------------------------------#
 #   Keeps 'host-to-road' data
@@ -52,15 +71,28 @@ class HBData():
         self.lock_buttons = 0
 
 #----------------------------------------------------------------------------------------------#
-SPEED_MAX = 30
-
 STOP = 0
 COURSING = 1
 BUTTONS = 2
 
 class Controller:
-    def __init__(self, motor):
-        self.motor = motor
+    def __init__(self):
+        # FIXME: MOTOR
+        print("Motor connection...")
+        self.client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
+                             bytesize = 8, parity = 'N', baudrate= 115200,
+                             timeout = 0.8, strict=False )
+
+        #   Try to connect to modbus client
+        client_status = self.client.connect()
+
+        #   Motor initialization
+        self.motor = X4Motor(self.client, settings = config)
+        print("OK") if client_status and self.motor else print("Failed")
+
+        #   Print all registers
+        registers = self.motor.readAllRO()
+        print(registers)
 
         self.starttime = time.time()
         # self.data = ''
@@ -87,6 +119,10 @@ class Controller:
         self.set_base = 1
         self.base1_set = 0
         self.base2_set = 0
+
+    def off(self):
+        self.motor.release()             # Release motor
+        self.client.close()
 
     @property
     def HARD_STOP(self):
@@ -124,7 +160,7 @@ class Controller:
     @est_speed.setter
     def est_speed(self, value):
         if value is not None:
-            self._est_speed = min(value, SPEED_MAX)
+            self._est_speed = min(value, global_.VELO_MAX)
 
             if value < self.speed:
                 self.AB_choose = -1
@@ -165,7 +201,7 @@ class Controller:
 
     @base1.setter
     def base1(self, value):
-        if (value > self._base2):# and (self.base2 != 0):
+        if (value > self._base2) and (self.base2 != 0):
             self._base1 = self._base2
             self._base2 = value
             self.base2_set = 1
@@ -227,6 +263,9 @@ class Controller:
 
         if self.HARD_STOP == 1:
             # No moving if hard stop is enabled
+            if (self.speed == 0):
+                self.mode = 0
+                self.HARD_STOP = 0
             pass
         elif self.mode == STOP and self.speed == 0:
             pass
@@ -271,8 +310,8 @@ class Controller:
 
             self.coordinate += dstep
             # FIXME: MOTOR
-            self.motor.dstep = dstep
-        return
+            return dstep
+        return 0
 
 
     # def update_host_to_road(self):
