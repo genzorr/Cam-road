@@ -1,11 +1,10 @@
-import time, serial, globals
+import time, serial, global_
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from data_classes import *
 from mbee import serialstar
 
 
 ACCUM_LEN = 1
-
 
 #----------------------------------------------------------------------------------------------#
 #   Stores messages
@@ -24,58 +23,53 @@ class MsgAccumulator:
 #----------------------------------------------------------------------------------------------#
 
 class MbeeThread(QThread):
-    def __init__(self, port='/dev/ttyUSB0', speed=9600):
+    def __init__(self, port='/dev/ttyUSB0', speed=19200):
         QThread.__init__(self)
-        self.mbee = serialstar.SerialStar(port, speed)
+        # self.mbee = serialstar.SerialStar(port, speed)
+        self.mbee = serial_init(speed, port)
+        self.analyzer = PackageAnalyzer(self.mbee)
 
     def run(self):
         while True and self.mbee:
-            self.mbee.send_tx_request(0x01, "0234", data="123456")
-            # self.mbee.run()
+            global_.hostData.acceleration = 3
+            global_.hostData.braking = 3
+            global_.hostData.mode = global_.control['mode']
+            global_.hostData.direction = global_.control['direction']
+            global_.hostData.set_base = global_.control['set_base']
+            # print(global_.control['set_base'])
+            data = self.analyzer.encrypt_package(global_.hostData)
+            self.mbee.write(data)
+
 
     #   Callback functions for SerialStar
-    def frame_81_received(packet):
-        print("Received 81-frame.")
-        print(packet)
+    # def frame_81_received(packet):
+    #     print("Received 81-frame.")
+    #     print(packet)
 
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting / throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
-    def __init__(self, speed=19200, port='/dev/ttyUSB0', window=None, mbee_thread=None):
+    def __init__(self, window=None):
         QThread.__init__(self)
-        self.device = serial_init(speed, port)
-        self.analyzer = PackageAnalyzer(self.device)
-
-        # TODO: MBee
-        # self.mbee_thread = mbee_thread
-        # try:
-        #     self.mbee = serialstar.SerialStar(port, speed)
-        # except serial.serialutil.SerialException:
-        #     self.mbee = None
-        #     print('Could not open port')
-
-        self.hostData = HTRData()
-        self.roadData = RTHData()
-        self.outerData = HBData()
 
         #   Signals to slots connection
         if window.workWidget:
-            self.hostData.acceleration_signal.connect(window.workWidget.ui.Acceleration.setValue)
-            self.hostData.braking_signal.connect(window.workWidget.ui.Braking.setValue)
-            self.hostData.velocity_signal.connect(window.workWidget.ui.Velocity.setValue)
-            self.roadData.coordinate_signal.connect(window.workWidget.ui.Coordinate.setValue)
+            global_.hostData.acceleration_signal.connect(window.workWidget.ui.Acceleration.setValue)
+            global_.hostData.braking_signal.connect(window.workWidget.ui.Braking.setValue)
+            global_.hostData.velocity_signal.connect(window.workWidget.ui.Velocity.setValue)
+            global_.roadData.coordinate_signal.connect(window.workWidget.ui.Coordinate.setValue)
 
             # FIXME: REMOVE
             window.workWidget.ui.Velocity.valueChanged.connect(self.veloChange)
 
         if window.settingsWidget:
-            window.settingsWidget.ui.EnableEndPoints.toggled.connect(self.outerData.enable_end_points_)
-            window.settingsWidget.ui.EndPointsStop.toggled.connect(self.outerData.end_points_stop_)
-            window.settingsWidget.ui.EndPointsReverse.toggled.connect(self.outerData.end_points_reverse_)
-            window.settingsWidget.ui.SoundStop.toggled.connect(self.outerData.sound_stop_)
-            window.settingsWidget.ui.SwapDirection.toggled.connect(self.outerData.swap_direction_)
-            window.settingsWidget.ui.StopAccelerometer.toggled.connect(self.outerData.stop_accelerometer_)
-            window.settingsWidget.ui.LockButtons.toggled.connect(self.outerData.lock_buttons_)
+            window.settingsWidget.ui.EnableEndPoints.toggled.connect(global_.specialData.enable_end_points_)
+            window.settingsWidget.ui.EndPointsStop.toggled.connect(global_.specialData.end_points_stop_)
+            window.settingsWidget.ui.EndPointsReverse.toggled.connect(global_.specialData.end_points_reverse_)
+            window.settingsWidget.ui.SoundStop.toggled.connect(global_.specialData.sound_stop_)
+            window.settingsWidget.ui.SwapDirection.toggled.connect(global_.specialData.swap_direction_)
+            window.settingsWidget.ui.StopAccelerometer.toggled.connect(global_.specialData.stop_accelerometer_)
+            window.settingsWidget.ui.LockButtons.toggled.connect(global_.specialData.lock_buttons_)
 
             '''Stop-reverse end points behavior'''
             window.settingsWidget.ui.EndPointsStop.pressed.connect(window.settingsWidget.setChecked)
@@ -91,7 +85,7 @@ class WatcherThread(QThread):
 
     # FIXME: REMOVE
     def veloChange(self, value):
-        self.hostData.velocity = value
+        global_.hostData.velocity = value
 
 
     def run(self):
@@ -107,15 +101,8 @@ class WatcherThread(QThread):
             #        str(self.control.set_base)+\
             #        str(0xFE)
             # serial_send(self.device, data)
-        while True and self.device:
-            self.hostData.acceleration = 3
-            self.hostData.braking = 3
-            self.hostData.mode = globals.control['mode']
-            self.hostData.direction = globals.control['direction']
-            self.hostData.set_base = globals.control['set_base']
-            # print(globals.control['set_base'])
-            data = self.analyzer.encrypt_package(self.hostData)
-            self.device.write(data)
+        while True:
+            pass
 
 #----------------------------------------------------------------------------------------------#
 

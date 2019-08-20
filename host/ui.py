@@ -1,4 +1,4 @@
-import sys, globals
+import sys, global_
 from PyQt5.QtWidgets import QMainWindow, QWidget
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt, QEvent
 from PyQt5.QtGui import QColor
@@ -112,29 +112,29 @@ class MainWindow(QMainWindow):
             sys.exit()
 
         if event.key() == Qt.Key_1:
-            globals.control['mode'] = 1
+            global_.control['mode'] = 1
 
         if event.key() == Qt.Key_2:
-            globals.control['mode'] = 2
+            global_.control['mode'] = 2
 
         if event.key() == Qt.Key_A:
-            globals.control['direction'] = -1
+            global_.control['direction'] = -1
 
         if event.key() == Qt.Key_D:
-            globals.control['direction'] = 1
+            global_.control['direction'] = 1
 
         if event.key() == Qt.Key_S:
-            globals.control['mode'] = 0
+            global_.control['mode'] = 0
             # FIXME: CHANGE DIRECTION HERE
             self.workWidget.ui.Velocity.setValue(0)
 
         if event.key() == Qt.Key_W:
-            if globals.control['set_base'] == 1:
-                globals.control['set_base'] = 2
+            if global_.control['set_base'] == 1:
+                global_.control['set_base'] = 2
             else:
-                globals.control['set_base'] = 1
+                global_.control['set_base'] = 1
 
         if event.key() == Qt.Key_R:
-            globals.control['mode'] = 0
-            globals.control['direction'] = 0
-            globals.control['set_base'] = 1
+            global_.control['mode'] = 0
+            global_.control['direction'] = 0
+            global_.control['set_base'] = 1

@@ -1,4 +1,4 @@
-import struct
+import struct, global_
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor
 
@@ -274,41 +274,43 @@ class PackageAnalyzer:
         # print('{}\t{}'.format(data, len(data)))
         return data
 
+
     def decrypt_package(self):
-        packet = HTRData()
+        package = HTRData()
         try:
             while global_.mbee_thread.alive:
-                packet.descr1 = self.dev.read(1)
-                packet.descr2 = self.dev.read(1)
-                # print(packet.descr1)
+                package.descr1 = self.dev.read(1)
+                package.descr2 = self.dev.read(1)
+                # print(package.descr1)
 
-                if packet.descr1 != DESCR1 and packet.descr2 != DESCR2:
-                    if packet.descr2 == DESCR1:
-                        packet.descr1 = DESCR1
-                        packet.descr2 = self.dev.read(1)
+                if package.descr1 != DESCR1 and package.descr2 != DESCR2:
+                    if package.descr2 == DESCR1:
+                        package.descr1 = DESCR1
+                        package.descr2 = self.dev.read(1)
 
-                        if packet.descr2 == DESCR2:
+                        if package.descr2 == DESCR2:
                             break
 
-                    # print("Bad index", packet.descr1, packet.descr2)
-                else: break
+                    # print("Bad index", package.descr1, package.descr2)
+                else:
+                    break
 
             crc = 0
-            data = self.dev.read(packet.size-2)
-            if len(data) < packet.size - 2:
+            data = self.dev.read(package.size - 2)
+            if len(data) < package.size - 2:
                 # print('less')
                 return None
 
-            packet.acceleration = bytes_to_float(data[0:4])
-            packet.braking = bytes_to_float(data[4:8])
-            packet.velocity = bytes_to_float(data[8:12])
-            packet.mode = bytes_to_int(data[12:16])
-            packet.direction = bytes_to_int(data[16:20])
-            packet.set_base = bytes_to_int(data[20:24])
-            crc = packet.acceleration + packet.braking + packet.velocity + \
-                            packet.mode + packet.direction + packet.set_base
-            packet.crc = bytes_to_float(data[24:28])
-            if packet.crc != crc:
+            package.acceleration = bytes_to_float(data[0:4])
+            package.braking = bytes_to_float(data[4:8])
+            package.velocity = bytes_to_float(data[8:12])
+            package.mode = bytes_to_int(data[12:16])
+            package.direction = bytes_to_int(data[16:20])
+            package.set_base = bytes_to_int(data[20:24])
+            crc = package.acceleration + package.braking + package.velocity + \
+                  package.mode + package.direction + package.set_base
+            package.crc = bytes_to_float(data[24:28])
+            if package.crc != crc:
                 print('Bad crc')
                 return None
 
@@ -318,7 +320,7 @@ class PackageAnalyzer:
         except struct.error:
             # print(data)
             return None
-        return packet
+        return package
 
 
 def int_to_bytes(i):

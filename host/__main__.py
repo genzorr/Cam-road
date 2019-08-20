@@ -18,13 +18,18 @@ from ui import MainWindow
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
+    global_.hostData = HTRData()
+    global_.roadData = RTHData()
+    global_.specialData = HBData()
+
     window = MainWindow()
     window.show()
 
-    # mbee_thread = MbeeThread()
+    global_.mbee_thread = MbeeThread()
+    global_.mbee_thread.start()
 
-    thread = WatcherThread(window=window)
-    thread.start()
+    global_.watcher = WatcherThread(window=window)
+    global_.watcher.start()
 
     sys.exit(app.exec_())
     # data = b'~\xa5\x00\x00@@\x00\x00@@\x00\x00pA\xfd\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'

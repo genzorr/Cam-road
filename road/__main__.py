@@ -18,7 +18,7 @@ def handler(signal, frame):
 def main():
     global THREADS
 
-    global_.lock = 0
+    global_.lock = threading.Lock()
     global_.hostData = HTRData()
     global_.roadData = RTHData()
     global_.specialData = HBData()

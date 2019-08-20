@@ -6,19 +6,13 @@ from lib.indicator import *
 
 import global_
 
-# lock = threading.Lock()
-# lock = 0
-# global_.hostData = HTRData()
-# roadData = RTHData()
-# specialData = HBData()
-
-
 #-------------------------------------------------------------------------------------#
 
 class Writer(threading.Thread):
     def __init__(self, out=''):
         super().__init__()
         self.alive = True
+        self.name = 'Writer'
         self._out = out
 
     @property
@@ -40,22 +34,18 @@ class Mbee_thread(threading.Thread):
     def __init__(self):
         super().__init__()
         self.alive = True
+        self.name = 'MBee'
         self.dev = serial_init()
         self.analyzer = PackageAnalyzer(self.dev)
 
     def run(self):
         while self.alive:
-            # pass
             package = self.analyzer.decrypt_package()
-            if package and not global_.lock:
-                lock = 1
-                global_.hostData = package
-                lock = 0
 
-                # with lock:
-                #     # if lock.acquire(False):
-                #     global_.hostData = package
-                # print(global_.hostData.mode)
+            if package:
+                with global_.lock:
+                    global_.hostData = package
+
         self.off()
 
     def off(self):
@@ -69,6 +59,7 @@ class Motor_thread(threading.Thread):
     def __init__(self):
         super().__init__()
         self.alive = True
+        self.name = 'Motor'
         self.controller = Controller()
         #   Indicator initialization
         self.portex = indicator_init()
@@ -76,17 +67,14 @@ class Motor_thread(threading.Thread):
 
     def run(self):
         while self.alive:
-            # pass
             if self.controller.t % 10 == 0:
                 indicate(self.controller.motor.readV(), self.portex)
-            # FIXME: MOTOR
-            # with lock:
-            #     if lock.acquire(False):
-            #         self.controller.control()
-            # self.controller.get_package()
+
+            # FIXME: needed lock here?
             self.controller.motor.dstep = self.controller.control()
 
         self.off()
+
 
     def update_host_to_road(self):
         self.controller.accel = global_.hostData.acceleration
@@ -108,6 +96,7 @@ class Motor_thread(threading.Thread):
             self.controller.base2 = self.controller.coordinate
         return
 
+
     def off(self):
         # FIXME: MOTOR
         indicator_off(self.portex)
@@ -120,6 +109,7 @@ class Watcher(threading.Thread):
     def __init__(self):
         super().__init__()
         self.alive = True
+        self.name = 'Watcher'
         self.accel = Accelerometer()
         # FIXME: make interrupts
         self.accel.ctrl()
@@ -128,15 +118,9 @@ class Watcher(threading.Thread):
         stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
 
         while self.alive:
-            # pass
-            # with lock:
-            #     if lock.acquire(False):
-            #     self.motor_thread.update_host_to_road()
-
-            if (not global_.lock) and global_.motor_thread.alive:
-                lock = 1
-                global_.motor_thread.update_host_to_road()
-                lock = 0
+            if global_.motor_thread.alive:
+                with global_.lock:
+                    global_.motor_thread.update_host_to_road()
 
             if global_.motor_thread.alive:
                 # Check accelerometer data
@@ -149,16 +133,13 @@ class Watcher(threading.Thread):
 
             # Write data to console
             data = (0,0,0,0,0,0,'')
-            # with lock:
-            #     # if lock.acquire(False):
-            #     data = global_.motor_thread.controller.get_data()
-            if not global_.lock and global_.motor_thread.alive:
-                lock = 1
-                data = global_.motor_thread.controller.get_data()
-                lock = 0
+
+            if global_.motor_thread.alive:
+                with global_.lock:
+                    data = global_.motor_thread.controller.get_data()
+
             if global_.writer.alive:
                 global_.writer.out = stringData.format(*data)
-
 
     # #   Callback functions for SerialStar
     # def frame_81_received(packet):
