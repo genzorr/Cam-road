@@ -22,29 +22,58 @@ class MsgAccumulator:
 
 #----------------------------------------------------------------------------------------------#
 
-class MbeeThread(QThread):
-    def __init__(self, port='/dev/ttyUSB0', speed=19200):
+class MbeeThread_write(QThread):
+    def __init__(self, serial_device):
         QThread.__init__(self)
+        self.alive = 0
         # self.mbee = serialstar.SerialStar(port, speed)
-        self.mbee = serial_init(speed, port)
+        self.mbee = serial_device
         self.analyzer = PackageAnalyzer(self.mbee)
 
     def run(self):
         while True and self.mbee:
             global_.hostData.acceleration = 3
             global_.hostData.braking = 3
-            global_.hostData.mode = global_.control['mode']
-            global_.hostData.direction = global_.control['direction']
-            global_.hostData.set_base = global_.control['set_base']
-            # print(global_.control['set_base'])
+
+            # Transmitting
+            # if not global_.serial_lock:
+            #     global_.serial_lock = 1
+            #     data = self.analyzer.encrypt_package(global_.hostData)
+            #     self.mbee.write(data)
+            #     data = self.analyzer.encrypt_package(global_.specialData)
+            #     self.mbee.write(data)
+            #     global_.serial_lock = 0
+
             data = self.analyzer.encrypt_package(global_.hostData)
             self.mbee.write(data)
-
+            data = self.analyzer.encrypt_package(global_.specialData)
+            self.mbee.write(data)
 
     #   Callback functions for SerialStar
     # def frame_81_received(packet):
     #     print("Received 81-frame.")
     #     print(packet)
+
+class MbeeThread_read(QThread):
+    def __init__(self, serial_device):
+        QThread.__init__(self)
+        self.alive = 0
+        # self.mbee = serialstar.SerialStar(port, speed)
+        self.mbee = serial_device
+        self.analyzer = PackageAnalyzer(self.mbee)
+
+    def run(self):
+        while True and self.mbee:
+            # Receiving
+            # if not global_.serial_lock:
+            #     global_.serial_lock = 1
+            #     package = self.analyzer.decrypt_package()
+            #     global_.serial_lock = 1
+            package = self.analyzer.decrypt_package()
+
+            if isinstance(package, RTHData):
+                print('got')
+                global_.roadData = package
 
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting / throwing data from/to MBee module and for checking all's OK
@@ -102,11 +131,12 @@ class WatcherThread(QThread):
             #        str(0xFE)
             # serial_send(self.device, data)
         while True:
-            pass
+            if time.time() % 2 == 0:
+                print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
 
 #----------------------------------------------------------------------------------------------#
 
-def serial_init(speed, port):
+def serial_init(port='/dev/ttyUSB0', speed=19200):
     try:
         dev = serial.Serial(
         port=port,

@@ -112,29 +112,29 @@ class MainWindow(QMainWindow):
             sys.exit()
 
         if event.key() == Qt.Key_1:
-            global_.control['mode'] = 1
+            global_.hostData.mode = 1
 
         if event.key() == Qt.Key_2:
-            global_.control['mode'] = 2
+            global_.hostData.mode = 2
 
         if event.key() == Qt.Key_A:
-            global_.control['direction'] = -1
+            global_.hostData.direction = -1
 
         if event.key() == Qt.Key_D:
-            global_.control['direction'] = 1
+            global_.hostData.direction = 1
 
         if event.key() == Qt.Key_S:
-            global_.control['mode'] = 0
+            global_.hostData.mode = 0
             # FIXME: CHANGE DIRECTION HERE
             self.workWidget.ui.Velocity.setValue(0)
 
         if event.key() == Qt.Key_W:
-            if global_.control['set_base'] == 1:
-                global_.control['set_base'] = 2
+            if global_.hostData.set_base == 1:
+                global_.hostData.set_base = 2
             else:
-                global_.control['set_base'] = 1
+                global_.hostData.set_base = 1
 
         if event.key() == Qt.Key_R:
-            global_.control['mode'] = 0
-            global_.control['direction'] = 0
-            global_.control['set_base'] = 1
+            global_.hostData.mode = 0
+            global_.hostData.direction = 0
+            global_.hostData.set_base = 1

@@ -9,7 +9,6 @@ THREADS = []
 
 def handler(signal, frame):
     global THREADS
-    print('Ctrl-C.... Exiting')
     for t in THREADS:
         t.alive = False
     sys.exit(0)

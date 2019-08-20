@@ -36,15 +36,26 @@ class Mbee_thread(threading.Thread):
         self.alive = True
         self.name = 'MBee'
         self.dev = serial_init()
+        self.mbee_data = Mbee_data()
         self.analyzer = PackageAnalyzer(self.dev)
 
     def run(self):
         while self.alive:
+            # Receiving
             package = self.analyzer.decrypt_package()
 
-            if package:
+            if isinstance(package, HTRData):
                 with global_.lock:
                     global_.hostData = package
+
+            if isinstance(package, HBData):
+                with global_.lock:
+                    global_.specialData = package
+
+            # Transmitting
+            with global_.lock:
+                package = global_.roadData
+            self.dev.write(self.analyzer.encrypt_package(package))
 
         self.off()
 
@@ -76,27 +87,6 @@ class Motor_thread(threading.Thread):
         self.off()
 
 
-    def update_host_to_road(self):
-        self.controller.accel = global_.hostData.acceleration
-        self.controller.braking = global_.hostData.braking
-        est_speed = global_.hostData.velocity
-        self.controller.mode = global_.hostData.mode
-        direction = global_.hostData.direction
-        self.controller.set_base = global_.hostData.set_base
-
-        if not self.controller.is_braking:
-            self.controller.est_speed = est_speed * global_.VELO_MAX / 100
-
-        if self.controller.mode == BUTTONS:
-            self.controller.direction = direction
-
-        if self.controller.set_base == 1 and not self.controller.base1_set:
-            self.controller.base1 = self.controller.coordinate
-        elif self.controller.set_base == 2 and not self.controller.base2_set:
-            self.controller.base2 = self.controller.coordinate
-        return
-
-
     def off(self):
         # FIXME: MOTOR
         indicator_off(self.portex)
@@ -118,11 +108,20 @@ class Watcher(threading.Thread):
         stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
 
         while self.alive:
-            if global_.motor_thread.alive:
-                with global_.lock:
-                    global_.motor_thread.update_host_to_road()
+            # Write data to console
+            data = (0,0,0,0,0,0,'')
 
             if global_.motor_thread.alive:
+                # Update data
+                with global_.lock:
+                    self.update_host_to_road()
+
+                with global_.lock:
+                    self.update_road_to_host()
+
+                with global_.lock:
+                    self.update_special()
+
                 # Check accelerometer data
                 [x, y, z] = self.accel.getdata()
                 thr = 5
@@ -131,10 +130,7 @@ class Watcher(threading.Thread):
                     print('got')
                     print(x," ", y," ", z)
 
-            # Write data to console
-            data = (0,0,0,0,0,0,'')
-
-            if global_.motor_thread.alive:
+                # Get data for printing
                 with global_.lock:
                     data = global_.motor_thread.controller.get_data()
 
@@ -145,6 +141,39 @@ class Watcher(threading.Thread):
     # def frame_81_received(packet):
     #     print("Received 81-frame.")
     #     print(packet)
+
+    def update_host_to_road(self):
+        global_.motor_thread.controller.accel = global_.hostData.acceleration
+        global_.motor_thread.controller.braking = global_.hostData.braking
+        est_speed = global_.hostData.velocity
+        global_.motor_thread.controller.mode = global_.hostData.mode
+        direction = global_.hostData.direction
+        global_.motor_thread.controller.set_base = global_.hostData.set_base
+
+        if not global_.motor_thread.controller.is_braking:
+            global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
+
+        if global_.motor_thread.controller.mode == BUTTONS:
+            global_.motor_thread.controller.direction = direction
+
+        if global_.motor_thread.controller.set_base == 1 and not global_.motor_thread.controller.base1_set:
+            global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
+        elif global_.motor_thread.controller.set_base == 2 and not global_.motor_thread.controller.base2_set:
+            global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
+        return
+
+    def update_road_to_host(self):
+        global_.roadData.mode = global_.motor_thread.controller.mode
+        global_.roadData.coordinate = global_.motor_thread.controller.coordinate
+        global_.roadData.RSSI = global_.mbee_thread.mbee_data.RSSI
+        global_.roadData.voltage = global_.mbee_thread.mbee_data.voltage
+        global_.roadData.current = global_.mbee_thread.mbee_data.current
+        global_.roadData.temperature = global_.mbee_thread.mbee_data.temperature
+        global_.roadData.base1 = float(global_.motor_thread.controller.base1)
+        global_.roadData.base2 = float(global_.motor_thread.controller.base2)
+
+    def update_special(self):
+        pass
 
 #-------------------------------------------------------------------------------------#
 #   Serial communication

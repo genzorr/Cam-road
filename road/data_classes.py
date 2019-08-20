@@ -26,8 +26,7 @@ config = {'id': 1,\
 #   Keeps 'host-to-road' data
 class HTRData():
     def __init__(self):
-        self.descr1 = DESCR1
-        self.descr2 = DESCR2
+        self.type = 1
 
         self.acceleration = 0.0
         self.braking = 0.0
@@ -38,13 +37,16 @@ class HTRData():
         self.set_base = 0
         self.crc = 0
 
-        self.size = 7*4+2
+        # Size of package without descriptors and type
+        self.size = 4 * 7
 
 
 #----------------------------------------------------------------------------------------------#
 #   Keeps 'road-to-host' data
 class RTHData():
     def __init__(self):
+        self.type = 2
+
         self.mode = 0
         self.coordinate = 0.0
         self.RSSI = 0.0
@@ -54,12 +56,17 @@ class RTHData():
         self.base1 = 0.0
         self.base2 = 0.0
 
+        self.crc = 0
+        # Size of package without descriptors and type
+        self.size = 4 * 9
+
 #----------------------------------------------------------------------------------------------#
 #   Keeps host's buttons data
 class HBData():
     def __init__(self):
-        self.left = 0
-        self.right = 0
+        self.type = 3
+
+        self.direction = 0
         self.soft_stop = 0
         self.end_points = 0
         self.end_points_stop = 0
@@ -70,6 +77,10 @@ class HBData():
         self.HARD_STOP = 0
         self.lock_buttons = 0
 
+        self.crc = 0
+        # Size of package without descriptors and type
+        self.size = 4 * 11
+
 #----------------------------------------------------------------------------------------------#
 STOP = 0
 COURSING = 1
@@ -79,7 +90,7 @@ class Controller:
     def __init__(self):
         # FIXME: MOTOR
         print("Motor connection...")
-        self.client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
+        self.client = ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
                              bytesize = 8, parity = 'N', baudrate= 115200,
                              timeout = 0.8, strict=False )
 
@@ -354,7 +365,13 @@ class Controller:
         except IndexError:
             print('error')
         return
-
+#----------------------------------------------------------------------------------------------#
+class Mbee_data:
+    def __init__(self):
+        self.RSSI = 0
+        self.voltage = 0
+        self.current = 0
+        self.temperature = 0
 
 #----------------------------------------------------------------------------------------------#
 
@@ -364,57 +381,149 @@ class PackageAnalyzer:
 
     def encrypt_package(self, package):
         data = bytes()
-        data += package.descr1
-        data += package.descr2
-        data += float_to_bytes(package.acceleration)
-        data += float_to_bytes(package.braking)
-        data += float_to_bytes(package.velocity)
-        data += int_to_bytes(package.mode)
-        data += int_to_bytes(package.direction)
-        data += int_to_bytes(package.set_base)
-        package.crc = package.acceleration + package.braking + package.velocity + \
-                      package.mode + package.direction + package.set_base
+        data += DESCR1
+        data += DESCR2
+        data += int_to_bytes(package.type)
+
+        if package.type == 1:
+            data += float_to_bytes(package.acceleration)
+            data += float_to_bytes(package.braking)
+            data += float_to_bytes(package.velocity)
+            data += int_to_bytes(package.mode)
+            data += int_to_bytes(package.direction)
+            data += int_to_bytes(package.set_base)
+            package.crc = package.acceleration + package.braking + package.velocity + \
+                          package.mode + package.direction + package.set_base
+
+        elif package.type == 2:
+            data += int_to_bytes(package.mode)
+            data += float_to_bytes(package.coordinate)
+            data += float_to_bytes(package.RSSI)
+            data += float_to_bytes(package.voltage)
+            data += float_to_bytes(package.current)
+            data += float_to_bytes(package.temperature)
+            data += float_to_bytes(package.base1)
+            data += float_to_bytes(package.base2)
+            package.crc = package.mode + package.coordinate + package.RSSI + \
+                          package.voltage + package.current + package.temperature + \
+                          package.base1 + package.base2
+
+        elif package.type == 3:
+            data += int_to_bytes(package.direction)
+            data += int_to_bytes(package.soft_stop)
+            data += int_to_bytes(package.end_points)
+            data += int_to_bytes(package.end_points_stop)
+            data += int_to_bytes(package.end_points_reverse)
+            data += int_to_bytes(package.sound_stop)
+            data += int_to_bytes(package.swap_direction)
+            data += int_to_bytes(package.accelerometer_stop)
+            data += int_to_bytes(package.HARD_STOP)
+            data += int_to_bytes(package.lock_buttons)
+            package.crc = package.direction + package.soft_stop + package.end_points + \
+                          package.end_points_stop + package.end_points_reverse + package.sound_stop + \
+                          package.swap_direction + package.accelerometer_stop + package.HARD_STOP + package.lock_buttons
+
+        else:
+            return None
+
         data += float_to_bytes(package.crc)
-        # print('{}\t{}'.format(data, len(data)))
         return data
 
+
     def decrypt_package(self):
-        package = HTRData()
         try:
             while global_.mbee_thread.alive:
-                package.descr1 = self.dev.read(1)
-                package.descr2 = self.dev.read(1)
-                # print(package.descr1)
+                descr1 = self.dev.read(1)
+                descr2 = self.dev.read(1)
 
-                if package.descr1 != DESCR1 and package.descr2 != DESCR2:
-                    if package.descr2 == DESCR1:
-                        package.descr1 = DESCR1
-                        package.descr2 = self.dev.read(1)
+                if descr1 != DESCR1 and descr2 != DESCR2:
+                    if descr2 == DESCR1:
+                        descr1 = DESCR1
+                        descr2 = self.dev.read(1)
 
-                        if package.descr2 == DESCR2:
+                        if descr2 == DESCR2:
                             break
 
-                    # print("Bad index", package.descr1, package.descr2)
+                    # print("Bad index", descr1, descr2)
                 else: break
 
             crc = 0
-            data = self.dev.read(package.size-2)
-            if len(data) < package.size - 2:
-                # print('less')
+            type = bytes_to_int(self.dev.read(4))
+
+            if type == 1:
+                package = HTRData()
+                package.type = 1
+
+                data = self.dev.read(package.size)
+                if len(data) < package.size:
+                    return None
+
+                package.acceleration = bytes_to_float(data[0:4])
+                package.braking = bytes_to_float(data[4:8])
+                package.velocity = bytes_to_float(data[8:12])
+                package.mode = bytes_to_int(data[12:16])
+                package.direction = bytes_to_int(data[16:20])
+                package.set_base = bytes_to_int(data[20:24])
+                crc = package.acceleration + package.braking + package.velocity + \
+                        package.mode + package.direction + package.set_base
+                package.crc = bytes_to_float(data[24:28])
+                if package.crc != crc:
+                    print('Bad crc 1')
+                    return None
+
+            elif type == 2:
+                package = RTHData()
+                package.type = 2
+
+                data = self.dev.read(package.size)
+                if len(data) < package.size:
+                    return None
+
+                package.mode = bytes_to_int(data[0:4])
+                package.coordinate = bytes_to_float(data[4:8])
+                package.RSSI = bytes_to_float(data[8:12])
+                package.voltage = bytes_to_float(data[12:16])
+                package.current = bytes_to_float(data[16:20])
+                package.temperature = bytes_to_float(data[20:24])
+                package.base1 = bytes_to_float(data[24:28])
+                package.base2 = bytes_to_float(data[28:32])
+                crc = package.mode + package.coordinate + package.RSSI + \
+                      package.voltage + package.current + package.temperature + \
+                      package.base1 + package.base2
+                package.crc = bytes_to_float(data[32:36])
+                if package.crc != crc:
+                    print('Bad crc 2')
+                    return None
+
+            elif type == 3:
+                package = HBData()
+                package.type = 3
+
+                data = self.dev.read(package.size)
+                if len(data) < package.size:
+                    return None
+
+                package.direction = bytes_to_int(data[0:4])
+                package.soft_stop = bytes_to_int(data[4:8])
+                package.end_points = bytes_to_int(data[8:12])
+                package.end_points_stop = bytes_to_int(data[12:16])
+                package.end_points_reverse = bytes_to_int(data[16:20])
+                package.sound_stop = bytes_to_int(data[20:24])
+                package.swap_direction = bytes_to_int(data[24:28])
+                package.accelerometer_stop = bytes_to_int(data[28:32])
+                package.HARD_STOP = bytes_to_int(data[32:36])
+                package.lock_buttons = bytes_to_int(data[36:40])
+                crc = package.direction + package.soft_stop + package.end_points + \
+                      package.end_points_stop + package.end_points_reverse + package.sound_stop + \
+                      package.swap_direction + package.accelerometer_stop + package.HARD_STOP + package.lock_buttons
+                package.crc = bytes_to_float(data[40:44])
+                if package.crc != crc:
+                    print('Bad crc 3')
+                    return None
+            else:
                 return None
 
-            package.acceleration = bytes_to_float(data[0:4])
-            package.braking = bytes_to_float(data[4:8])
-            package.velocity = bytes_to_float(data[8:12])
-            package.mode = bytes_to_int(data[12:16])
-            package.direction = bytes_to_int(data[16:20])
-            package.set_base = bytes_to_int(data[20:24])
-            crc = package.acceleration + package.braking + package.velocity + \
-                            package.mode + package.direction + package.set_base
-            package.crc = bytes_to_float(data[24:28])
-            if package.crc != crc:
-                print('Bad crc')
-                return None
+            return package
 
         except ValueError or IndexError:
             # print('error')
@@ -422,7 +531,6 @@ class PackageAnalyzer:
         except struct.error:
             # print(data)
             return None
-        return package
 
 
 def int_to_bytes(i):
