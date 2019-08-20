@@ -45,15 +45,23 @@ class Mbee_thread(threading.Thread):
 
     def run(self):
         while self.alive:
+            # pass
             package = self.analyzer.decrypt_package()
             if package and not global_.lock:
                 lock = 1
                 global_.hostData = package
                 lock = 0
+
                 # with lock:
                 #     # if lock.acquire(False):
                 #     global_.hostData = package
                 # print(global_.hostData.mode)
+        self.off()
+
+    def off(self):
+        self.dev.close()
+        print('############  Serial port closed  ############')
+
 
 #-------------------------------------------------------------------------------------#
 """ Used to control the motor by Motor_controller class """
@@ -68,15 +76,17 @@ class Motor_thread(threading.Thread):
 
     def run(self):
         while self.alive:
+            # pass
             if self.controller.t % 10 == 0:
                 indicate(self.controller.motor.readV(), self.portex)
-            # print(self.controller.global_.hostData.mode)
             # FIXME: MOTOR
             # with lock:
             #     if lock.acquire(False):
             #         self.controller.control()
             # self.controller.get_package()
             self.controller.motor.dstep = self.controller.control()
+
+        self.off()
 
     def update_host_to_road(self):
         self.controller.accel = global_.hostData.acceleration
@@ -102,6 +112,7 @@ class Motor_thread(threading.Thread):
         # FIXME: MOTOR
         indicator_off(self.portex)
         self.controller.off()
+        print('##############  Motor released  ##############')
 
 #-------------------------------------------------------------------------------------#
 """ Used to control all operations """
@@ -117,28 +128,24 @@ class Watcher(threading.Thread):
         stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
 
         while self.alive:
-            # data = serial_recv(self.dev, 60)
-            # global_.motor_thread.controller.data = data # old
-            # package = self.analyzer.decrypt_package()
-            # if package:
-            #     global_.hostData = package
-
-            # Updating motor controller data
+            # pass
             # with lock:
-                # if lock.acquire(False):
-                # self.motor_thread.update_host_to_road()
-            if not global_.lock and global_.motor_thread.alive:
+            #     if lock.acquire(False):
+            #     self.motor_thread.update_host_to_road()
+
+            if (not global_.lock) and global_.motor_thread.alive:
                 lock = 1
                 global_.motor_thread.update_host_to_road()
                 lock = 0
 
-            # Check accelerometer data
-            [x, y, z] = self.accel.getdata()
-            thr = 5
-            if (x > thr) or (z > thr):
-                global_.motor_thread.controller.HARD_STOP = 1
-                print('got')
-                print(x," ", y," ", z)
+            if global_.motor_thread.alive:
+                # Check accelerometer data
+                [x, y, z] = self.accel.getdata()
+                thr = 5
+                if (x > thr) or (z > thr):
+                    global_.motor_thread.controller.HARD_STOP = 1
+                    print('got')
+                    print(x," ", y," ", z)
 
             # Write data to console
             data = (0,0,0,0,0,0,'')
@@ -157,8 +164,6 @@ class Watcher(threading.Thread):
     # def frame_81_received(packet):
     #     print("Received 81-frame.")
     #     print(packet)
-
-
 
 #-------------------------------------------------------------------------------------#
 #   Serial communication

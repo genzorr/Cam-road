@@ -277,7 +277,7 @@ class PackageAnalyzer:
     def decrypt_package(self):
         packet = HTRData()
         try:
-            while True:
+            while global_.mbee_thread.alive:
                 packet.descr1 = self.dev.read(1)
                 packet.descr2 = self.dev.read(1)
                 # print(packet.descr1)
@@ -291,17 +291,13 @@ class PackageAnalyzer:
                             break
 
                     # print("Bad index", packet.descr1, packet.descr2)
-                else:
-                    break
+                else: break
 
             crc = 0
-            data = self.dev.read(packet.size - 2)
+            data = self.dev.read(packet.size-2)
             if len(data) < packet.size - 2:
-                print('less')
+                # print('less')
                 return None
-
-            # for i in range(0, packet.size-2-4):
-            #     crc += bytes_to_int(data[i])
 
             packet.acceleration = bytes_to_float(data[0:4])
             packet.braking = bytes_to_float(data[4:8])
@@ -310,19 +306,18 @@ class PackageAnalyzer:
             packet.direction = bytes_to_int(data[16:20])
             packet.set_base = bytes_to_int(data[20:24])
             crc = packet.acceleration + packet.braking + packet.velocity + \
-                  packet.mode + packet.direction + packet.set_base
+                            packet.mode + packet.direction + packet.set_base
             packet.crc = bytes_to_float(data[24:28])
-            # print('crc: ', crc, ' pack: ', packet.crc)
             if packet.crc != crc:
                 print('Bad crc')
                 return None
 
-        # except ValueError or IndexError:
-        #     print('error')
-        #     return None
+        except ValueError or IndexError:
+            # print('error')
+            return None
         except struct.error:
-            print(data)
-            packet = None
+            # print(data)
+            return None
         return packet
 
 

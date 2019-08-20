@@ -4,18 +4,20 @@ import threading, signal
 
 from watcher import *
 from data_classes import *
-import global_
 
-global NO_MOTOR
+THREADS = []
 
 def handler(signal, frame):
+    global THREADS
     print('Ctrl-C.... Exiting')
-    for t in global_.THREADS:
+    for t in THREADS:
         t.alive = False
     sys.exit(0)
 
 #-------------------------------------------------------------------------------------#
 def main():
+    global THREADS
+
     global_.lock = 0
     global_.hostData = HTRData()
     global_.roadData = RTHData()
@@ -33,29 +35,19 @@ def main():
     global_.watcher = Watcher()
     global_.watcher.start()
 
-    global_.THREADS = [global_.mbee_thread, global_.motor_thread, global_.writer, global_.watcher]
+    THREADS.append(global_.mbee_thread)
+    THREADS.append(global_.motor_thread)
+    THREADS.append(global_.writer)
+    THREADS.append(global_.watcher)
 
-    for t in global_.THREADS:
+    for t in THREADS:
         while True:
-            t.join(1000000)
-            if not t.alive:
+            t.join(1000000000)
+            if not t.isAlive:
                 break
+        t.off()
 
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
     main()
-    # try:
-    #     main()
-
-    # except KeyboardInterrupt:
-    #     print()
-
-    #     global_.motor_thread.join(10)
-    #     global_.writer.join(10)
-    #     global_.watcher.join(10)
-    #     global_.mbee_thread.join(10)
-
-    #     global_.motor_thread.off()
-    #     # while (not watcher.is_alive()) and (not motor_thread.is_alive()) and (not mbee_thread.is_alive()) and (not writer.is_alive()):
-    #     #     pass
