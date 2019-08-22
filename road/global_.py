@@ -8,3 +8,5 @@ global motor_thread
 global writer
 global mbee_thread
 global watcher
+
+global serial_device

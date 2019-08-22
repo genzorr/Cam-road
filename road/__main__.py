@@ -1,9 +1,11 @@
-import sys, time
+import sys
 sys.path.append('../fortune-controls/Lib')
 import threading, signal
 
+import global_
 from watcher import *
 from data_classes import *
+
 
 THREADS = []
 
@@ -16,6 +18,8 @@ def handler(signal, frame):
 #-------------------------------------------------------------------------------------#
 def main():
     global THREADS
+
+    global_.serial_device = serial_init()
 
     global_.lock = threading.Lock()
     global_.hostData = HTRData()

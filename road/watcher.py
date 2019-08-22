@@ -1,5 +1,5 @@
 import sys, time, threading, serial
-from mbee import serialstar
+# from mbee import serialstar
 from data_classes import *
 from lib.lsm6ds3 import *
 from lib.indicator import *
@@ -35,32 +35,31 @@ class Mbee_thread(threading.Thread):
         super().__init__()
         self.alive = True
         self.name = 'MBee'
-        self.dev = serial_init()
         self.mbee_data = Mbee_data()
-        self.analyzer = PackageAnalyzer(self.dev)
+        self.analyzer = PackageAnalyzer()
 
     def run(self):
         while self.alive:
+            # Transmitting
+            package = None
+            with global_.lock:
+                package = global_.roadData
+            if package:
+                global_.serial_device.write(self.analyzer.encrypt_package(package))
+
             # Receiving
             package = self.analyzer.decrypt_package()
-
             if isinstance(package, HTRData):
                 with global_.lock:
                     global_.hostData = package
-
             if isinstance(package, HBData):
                 with global_.lock:
                     global_.specialData = package
 
-            # Transmitting
-            with global_.lock:
-                package = global_.roadData
-            self.dev.write(self.analyzer.encrypt_package(package))
-
         self.off()
 
     def off(self):
-        self.dev.close()
+        global_.serial_device.close()
         print('############  Serial port closed  ############')
 
 
@@ -169,8 +168,8 @@ class Watcher(threading.Thread):
         global_.roadData.voltage = global_.mbee_thread.mbee_data.voltage
         global_.roadData.current = global_.mbee_thread.mbee_data.current
         global_.roadData.temperature = global_.mbee_thread.mbee_data.temperature
-        global_.roadData.base1 = float(global_.motor_thread.controller.base1)
-        global_.roadData.base2 = float(global_.motor_thread.controller.base2)
+        global_.roadData.base1 = global_.motor_thread.controller.base1
+        global_.roadData.base2 = global_.motor_thread.controller.base2
 
     def update_special(self):
         pass

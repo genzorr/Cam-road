@@ -159,18 +159,18 @@ class HBData(QObject):
         self.type = 3
 
         self.direction = 0
-        self.soft_stop = 0
-        self.end_points = 0
-        self.end_points_stop = 0
-        self.end_points_reverse = 0
-        self.sound_stop = 0
-        self.swap_direction = 0
-        self.accelerometer_stop = 0
-        self.HARD_STOP = 0
-        self.lock_buttons = 0
+        self.soft_stop = False
+        self.end_points = False
+        self.end_points_stop = False
+        self.end_points_reverse = False
+        self.sound_stop = False
+        self.swap_direction = False
+        self.accelerometer_stop = False
+        self.HARD_STOP = False
+        self.lock_buttons = False
 
         self.crc = 0
-        self.size = 11 * 4
+        self.size = 4 * 2 + 9
 
         self.color_red = QColor(255, 0, 0).name()
         self.color_green = QColor(0, 255, 0).name()
@@ -183,9 +183,9 @@ class HBData(QObject):
     def lock_buttons_(self, value):
         sender = self.sender()
         if value:
-            color, self.lock_buttons = self.color_green, 1
+            color, self.lock_buttons = self.color_green, True
         else:
-            color, self.lock_buttons = self.color_red, 0
+            color, self.lock_buttons = self.color_red, False
         self.set_color(sender, color)
 
     @pyqtSlot(bool)
@@ -193,9 +193,9 @@ class HBData(QObject):
         if not self.lock_buttons:
             sender = self.sender()
             if value:
-                color, self.end_points = self.color_green, 1
+                color, self.end_points = self.color_green, True
             else:
-                color, self.end_points = self.color_red, 0
+                color, self.end_points = self.color_red, False
             self.set_color(sender, color)
 
     @pyqtSlot(bool)
@@ -203,9 +203,9 @@ class HBData(QObject):
         if not self.lock_buttons:
             sender = self.sender()
             if value:
-                color, self.end_points_stop = self.color_green, 1
+                color, self.end_points_stop = self.color_green, True
             else:
-                color, self.end_points_stop = self.color_red, 0
+                color, self.end_points_stop = self.color_red, False
             self.set_color(sender, color)
 
     @pyqtSlot(bool)
@@ -213,9 +213,9 @@ class HBData(QObject):
         if not self.lock_buttons:
             sender = self.sender()
             if value:
-                color, self.end_points_reverse = self.color_green, 1
+                color, self.end_points_reverse = self.color_green, True
             else:
-                color, self.end_points_reverse = self.color_red, 0
+                color, self.end_points_reverse = self.color_red, False
             self.set_color(sender, color)
 
     @pyqtSlot(bool)
@@ -223,9 +223,9 @@ class HBData(QObject):
         if not self.lock_buttons:
             sender = self.sender()
             if value:
-                color, self.sound_stop = self.color_green, 1
+                color, self.sound_stop = self.color_green, True
             else:
-                color, self.sound_stop = self.color_red, 0
+                color, self.sound_stop = self.color_red, False
             self.set_color(sender, color)
 
     @pyqtSlot(bool)
@@ -233,9 +233,9 @@ class HBData(QObject):
         if not self.lock_buttons:
             sender = self.sender()
             if value:
-                color, self.swap_direction = self.color_green, 1
+                color, self.swap_direction = self.color_green, True
             else:
-                color, self.swap_direction = self.color_red, 0
+                color, self.swap_direction = self.color_red, False
             self.set_color(sender, color)
 
     @pyqtSlot(bool)
@@ -243,16 +243,16 @@ class HBData(QObject):
         if not self.lock_buttons:
             sender = self.sender()
             if value:
-                color, self.accelerometer_stop = self.color_green, 1
+                color, self.accelerometer_stop = self.color_green, True
             else:
-                color, self.accelerometer_stop = self.color_red, 0
+                color, self.accelerometer_stop = self.color_red, False
             self.set_color(sender, color)
 
 #----------------------------------------------------------------------------------------------#
 
 class PackageAnalyzer:
-    def __init__(self, serial_device):
-        self.dev = serial_device
+    def __init__(self):
+        pass
 
     def encrypt_package(self, package):
         data = bytes()
@@ -269,6 +269,7 @@ class PackageAnalyzer:
             data += int_to_bytes(package.set_base)
             package.crc = package.acceleration + package.braking + package.velocity + \
                           package.mode + package.direction + package.set_base
+            data += float_to_bytes(package.crc)
 
         elif package.type == 2:
             data += int_to_bytes(package.mode)
@@ -282,54 +283,54 @@ class PackageAnalyzer:
             package.crc = package.mode + package.coordinate + package.RSSI + \
                           package.voltage + package.current + package.temperature + \
                           package.base1 + package.base2
+            data += float_to_bytes(package.crc)
 
         elif package.type == 3:
             data += int_to_bytes(package.direction)
-            data += int_to_bytes(package.soft_stop)
-            data += int_to_bytes(package.end_points)
-            data += int_to_bytes(package.end_points_stop)
-            data += int_to_bytes(package.end_points_reverse)
-            data += int_to_bytes(package.sound_stop)
-            data += int_to_bytes(package.swap_direction)
-            data += int_to_bytes(package.accelerometer_stop)
-            data += int_to_bytes(package.HARD_STOP)
-            data += int_to_bytes(package.lock_buttons)
+            data += bool_to_bytes(package.soft_stop)
+            data += bool_to_bytes(package.end_points)
+            data += bool_to_bytes(package.end_points_stop)
+            data += bool_to_bytes(package.end_points_reverse)
+            data += bool_to_bytes(package.sound_stop)
+            data += bool_to_bytes(package.swap_direction)
+            data += bool_to_bytes(package.accelerometer_stop)
+            data += bool_to_bytes(package.HARD_STOP)
+            data += bool_to_bytes(package.lock_buttons)
             package.crc = package.direction + package.soft_stop + package.end_points + \
                           package.end_points_stop + package.end_points_reverse + package.sound_stop + \
                           package.swap_direction + package.accelerometer_stop + package.HARD_STOP + package.lock_buttons
+            data += int_to_bytes(package.crc)
 
         else:
             return None
 
-        data += float_to_bytes(package.crc)
         return data
 
     def decrypt_package(self):
         try:
             while True:
-                descr1 = self.dev.read(1)
-                descr2 = self.dev.read(1)
+                descr1 = global_.serial_device.read(1)
+                descr2 = global_.serial_device.read(1)
 
                 if descr1 != DESCR1 and descr2 != DESCR2:
                     if descr2 == DESCR1:
                         descr1 = DESCR1
-                        descr2 = self.dev.read(1)
+                        descr2 = global_.serial_device.read(1)
 
                         if descr2 == DESCR2:
                             break
 
                     # print("Bad index", descr1, descr2)
-                else:
-                    break
+                else: break
 
             crc = 0
-            type = bytes_to_int(self.dev.read(4))
+            type = bytes_to_int(global_.serial_device.read(4))
 
             if type == 1:
                 package = HTRData()
                 package.type = 1
 
-                data = self.dev.read(package.size)
+                data = global_.serial_device.read(package.size)
                 if len(data) < package.size:
                     return None
 
@@ -340,7 +341,7 @@ class PackageAnalyzer:
                 package.direction = bytes_to_int(data[16:20])
                 package.set_base = bytes_to_int(data[20:24])
                 crc = package.acceleration + package.braking + package.velocity + \
-                      package.mode + package.direction + package.set_base
+                        package.mode + package.direction + package.set_base
                 package.crc = bytes_to_float(data[24:28])
                 if package.crc != crc:
                     print('Bad crc 1')
@@ -350,7 +351,7 @@ class PackageAnalyzer:
                 package = RTHData()
                 package.type = 2
 
-                data = self.dev.read(package.size)
+                data = global_.serial_device.read(package.size)
                 if len(data) < package.size:
                     return None
 
@@ -374,29 +375,32 @@ class PackageAnalyzer:
                 package = HBData()
                 package.type = 3
 
-                data = self.dev.read(package.size)
+                data = global_.serial_device.read(package.size)
                 if len(data) < package.size:
                     return None
 
                 package.direction = bytes_to_int(data[0:4])
-                package.soft_stop = bytes_to_int(data[4:8])
-                package.end_points = bytes_to_int(data[8:12])
-                package.end_points_stop = bytes_to_int(data[12:16])
-                package.end_points_reverse = bytes_to_int(data[16:20])
-                package.sound_stop = bytes_to_int(data[20:24])
-                package.swap_direction = bytes_to_int(data[24:28])
-                package.accelerometer_stop = bytes_to_int(data[28:32])
-                package.HARD_STOP = bytes_to_int(data[32:36])
-                package.lock_buttons = bytes_to_int(data[36:40])
+                package.soft_stop = bytes_to_bool(data[4:5])
+                package.end_points = bytes_to_bool(data[5:6])
+                package.end_points_stop = bytes_to_bool(data[6:7])
+                package.end_points_reverse = bytes_to_bool(data[7:8])
+                package.sound_stop = bytes_to_bool(data[8:9])
+                package.swap_direction = bytes_to_bool(data[9:10])
+                package.accelerometer_stop = bytes_to_bool(data[10:11])
+                package.HARD_STOP = bytes_to_bool(data[11:12])
+                package.lock_buttons = bytes_to_bool(data[12:13])
                 crc = package.direction + package.soft_stop + package.end_points + \
                       package.end_points_stop + package.end_points_reverse + package.sound_stop + \
                       package.swap_direction + package.accelerometer_stop + package.HARD_STOP + package.lock_buttons
-                package.crc = bytes_to_float(data[40:44])
+                package.crc = bytes_to_int(data[13:17])
                 if package.crc != crc:
                     print('Bad crc 3')
                     return None
             else:
+                print('error: no such package')
                 return None
+
+            return package
 
         except ValueError or IndexError:
             # print('error')
@@ -404,8 +408,11 @@ class PackageAnalyzer:
         except struct.error:
             # print(data)
             return None
-        return package
 
+
+def bool_to_bytes(c):
+    b = struct.pack('=?', c)
+    return b
 
 def int_to_bytes(i):
     b = struct.pack('=i', i)
@@ -414,6 +421,10 @@ def int_to_bytes(i):
 def float_to_bytes(f):
     b = struct.pack('=f', f)
     return b
+
+def bytes_to_bool(b):
+    (x,) = struct.unpack('=?', b)
+    return x
 
 def bytes_to_int(b):
     (x,) = struct.unpack('=i', b)
