@@ -28,15 +28,19 @@ class Writer(threading.Thread):
             sys.stdout.write(self._out)
             sys.stdout.flush()
             time.sleep(0.2)
+        self.off()
+
+    def off(self):
+        print('############  Writer stopped  ############')
 
 #-------------------------------------------------------------------------------------#
-class Mbee_thread(threading.Thread):
+class Mbee_thread_write(threading.Thread):
     def __init__(self):
         super().__init__()
         self.alive = True
-        self.name = 'MBee'
+        self.name = 'MBee_write'
         self.mbee_data = Mbee_data()
-        self.analyzer = PackageAnalyzer()
+        self.dev_write = serial_init()
 
     def run(self):
         while self.alive:
@@ -45,10 +49,10 @@ class Mbee_thread(threading.Thread):
             with global_.lock:
                 package = global_.roadData
             if package:
-                global_.serial_device.write(self.analyzer.encrypt_package(package))
+                self.dev_write.write(encrypt_package(package))
 
             # Receiving
-            package = self.analyzer.decrypt_package()
+            package = decrypt_package(self.dev_write)
             if isinstance(package, HTRData):
                 with global_.lock:
                     global_.hostData = package
@@ -59,8 +63,31 @@ class Mbee_thread(threading.Thread):
         self.off()
 
     def off(self):
-        global_.serial_device.close()
-        print('############  Serial port closed  ############')
+        print('############  Write closed  ############')
+
+
+class Mbee_thread_read(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.alive = True
+        self.name = 'MBee_read'
+        self.dev_read = global_.serial_device
+
+    def run(self):
+        while self.alive:
+            # Receiving
+            package = decrypt_package(self.dev_read)
+            if isinstance(package, HTRData):
+                with global_.lock:
+                    global_.hostData = package
+            if isinstance(package, HBData):
+                with global_.lock:
+                    global_.specialData = package
+
+        self.off()
+
+    def off(self):
+        print('############  Read closed  ############')
 
 
 #-------------------------------------------------------------------------------------#
@@ -136,6 +163,11 @@ class Watcher(threading.Thread):
             if global_.writer.alive:
                 global_.writer.out = stringData.format(*data)
 
+        self.off()
+
+    def off(self):
+        print('############  Watcher stopped  ############')
+
     # #   Callback functions for SerialStar
     # def frame_81_received(packet):
     #     print("Received 81-frame.")
@@ -164,10 +196,10 @@ class Watcher(threading.Thread):
     def update_road_to_host(self):
         global_.roadData.mode = global_.motor_thread.controller.mode
         global_.roadData.coordinate = global_.motor_thread.controller.coordinate
-        global_.roadData.RSSI = global_.mbee_thread.mbee_data.RSSI
-        global_.roadData.voltage = global_.mbee_thread.mbee_data.voltage
-        global_.roadData.current = global_.mbee_thread.mbee_data.current
-        global_.roadData.temperature = global_.mbee_thread.mbee_data.temperature
+        global_.roadData.RSSI = global_.mbee_thread_write.mbee_data.RSSI
+        global_.roadData.voltage = global_.mbee_thread_write.mbee_data.voltage
+        global_.roadData.current = global_.mbee_thread_write.mbee_data.current
+        global_.roadData.temperature = global_.mbee_thread_write.mbee_data.temperature
         global_.roadData.base1 = global_.motor_thread.controller.base1
         global_.roadData.base2 = global_.motor_thread.controller.base2
 
@@ -184,7 +216,7 @@ def serial_init(speed=19200, port='/dev/ttyS2'):
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=0.1
+        timeout=0
     )
     except serial.serialutil.SerialException:
         print('Could not open port')

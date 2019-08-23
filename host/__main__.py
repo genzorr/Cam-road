@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys, time, signal
+import sys, time, signal, os
 from PyQt5.QtWidgets import QApplication
 
 from watcher import *
 from ui import MainWindow
 
+os.environ['DISPLAY'] = ':0'
 #   TODO: think about advantages of properties (I should add there smth else)
 
 #   TODO: CONNECT BUTTONS TO DATA CLASSES
@@ -27,10 +28,13 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
 
-    global_.serial_device = serial_init()
+    # global_.serial_device = serial_init()
 
-    global_.mbee_thread = MbeeThread()
-    global_.mbee_thread.start()
+    global_.mbee_thread_write = MbeeThread_write()
+    global_.mbee_thread_write.start()
+
+    global_.mbee_thread_read = MbeeThread_read()
+    global_.mbee_thread_read.start()
 
     global_.watcher = WatcherThread(window=window)
     global_.watcher.start()
