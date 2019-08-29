@@ -40,25 +40,31 @@ class Mbee_thread_write(threading.Thread):
         self.alive = True
         self.name = 'MBee_write'
         self.mbee_data = Mbee_data()
-        self.dev_write = serial_init()
+        self.dev = serial_init()
 
     def run(self):
+        buff = b''
         while self.alive:
             # Transmitting
             package = None
             with global_.lock:
                 package = global_.roadData
             if package:
-                self.dev_write.write(encrypt_package(package))
+                self.dev.write(encrypt_package(package))
+
+            buff += self.dev.read(30)
 
             # Receiving
-            package = decrypt_package(self.dev_write)
+            print('here')
+            if buff:
+                package = decrypt_data(buff)
             if isinstance(package, HTRData):
                 with global_.lock:
                     global_.hostData = package
             if isinstance(package, HBData):
                 with global_.lock:
                     global_.specialData = package
+        self.dev.close()
 
         self.off()
 
@@ -71,12 +77,11 @@ class Mbee_thread_read(threading.Thread):
         super().__init__()
         self.alive = True
         self.name = 'MBee_read'
-        self.dev_read = global_.serial_device
 
     def run(self):
-        while self.alive:
+        while self.alives:
             # Receiving
-            package = decrypt_package(self.dev_read)
+            package = decrypt_package()
             if isinstance(package, HTRData):
                 with global_.lock:
                     global_.hostData = package
@@ -99,24 +104,29 @@ class Motor_thread(threading.Thread):
         self.name = 'Motor'
         self.controller = Controller()
         #   Indicator initialization
-        self.portex = indicator_init()
+        if global_.motor:
+            self.portex = indicator_init()
 
 
     def run(self):
         while self.alive:
-            if self.controller.t % 10 == 0:
+            if global_.motor and self.controller.t % 10 == 0:
                 indicate(self.controller.motor.readV(), self.portex)
 
             # FIXME: needed lock here?
-            self.controller.motor.dstep = self.controller.control()
+
+            if global_.motor:
+                self.controller.motor.dstep = self.controller.control()
+            else:
+                value = self.controller.control()
 
         self.off()
 
 
     def off(self):
-        # FIXME: MOTOR
-        indicator_off(self.portex)
-        self.controller.off()
+        if global_.motor:
+            indicator_off(self.portex)
+            self.controller.off()
         print('##############  Motor released  ##############')
 
 #-------------------------------------------------------------------------------------#
@@ -216,7 +226,7 @@ def serial_init(speed=19200, port='/dev/ttyS2'):
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=0
+        timeout=0.1
     )
     except serial.serialutil.SerialException:
         print('Could not open port')

@@ -28,8 +28,6 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
 
-    # global_.serial_device = serial_init()
-
     global_.mbee_thread_write = MbeeThread_write()
     global_.mbee_thread_write.start()
 

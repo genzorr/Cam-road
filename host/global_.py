@@ -7,4 +7,4 @@ global hostData
 global roadData
 global specialData
 
-# global serial_device
+global dev

@@ -3,7 +3,6 @@ from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from data_classes import *
 # from mbee import serialstar
 
-
 ACCUM_LEN = 1
 
 #----------------------------------------------------------------------------------------------#
@@ -47,14 +46,14 @@ class MbeeThread_read(QThread):
     def __init__(self):
         QThread.__init__(self)
         # self.mbee = serialstar.SerialStar(port, speed)
-        # self.dev_read = open('/dev/ttySAC3', 'r')
 
     def run(self):
+        # dev_read = serial_init()
         while True:
             with open('/dev/ttySAC3', 'rb') as dev_read:
                 package = decrypt_package(dev_read)
+                print('got')
                 if isinstance(package, RTHData):
-                    print('got')
                     global_.roadData = package
 
 #----------------------------------------------------------------------------------------------#
@@ -114,7 +113,7 @@ def serial_init(port='/dev/ttySAC3', speed=19200):
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=0.1
+        timeout=0.5
     )
     except serial.serialutil.SerialException:
         print('Could not open port')

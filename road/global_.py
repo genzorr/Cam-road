@@ -10,4 +10,4 @@ global mbee_thread_write
 global mbee_thread_read
 global watcher
 
-global serial_device
+global motor

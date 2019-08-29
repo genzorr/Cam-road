@@ -62,6 +62,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_Watcher()
         self.ui.setupUi(self)
         self.setWindowTitle('Watcher')
+        self.showFullScreen()
 
         self.keyPressed.connect(self.on_key)
 
@@ -69,7 +70,7 @@ class MainWindow(QMainWindow):
         self.settingsWidget = QSettingsWidget(layout=self.ui.layoutidontwant)
         self.telemetryWidget = QTelemetryWidget(layout=self.ui.layoutidontwant)
 
-        self.workWidget.hide()
+        self.workWidget.show()
         self.settingsWidget.hide()
         self.telemetryWidget.hide()
 

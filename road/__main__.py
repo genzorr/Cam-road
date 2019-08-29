@@ -6,7 +6,6 @@ import global_
 from watcher import *
 from data_classes import *
 
-
 THREADS = []
 
 def handler(signal, frame):
@@ -18,8 +17,10 @@ def handler(signal, frame):
 #-------------------------------------------------------------------------------------#
 def main():
     global THREADS
+    global_.mbee_thread_write = None
+    global_.mbee_thread_read = None
 
-    global_.serial_device = serial_init()
+    global_.motor = 0
 
     global_.lock = threading.Lock()
     global_.hostData = HTRData()
@@ -53,8 +54,6 @@ def main():
             t.join(1000000000)
             if not t.is_alive():
                 break
-
-    global_.serial_device.close()
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
