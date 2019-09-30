@@ -43,32 +43,37 @@ class Mbee_thread_write(threading.Thread):
         self.dev = serial_init()
 
     def run(self):
-        buff = b''
+        buff = self.dev.read(50)
         while self.alive:
-            # Transmitting
             package = None
-            with global_.lock:
-                package = global_.roadData
-            if package:
-                self.dev.write(encrypt_package(package))
 
-            buff += self.dev.read(30)
+            # # Transmitting
+            # with global_.lock:
+            #     package = global_.roadData
+            # if package:
+            #     self.dev.write(encrypt_package(package))
+
+            tmp = self.dev.read(30)
+            if tmp:
+                buff += tmp
+                # print('data read')
+                print(tmp)
+                package = decrypt_data(buff)
+            tmp = None
 
             # Receiving
-            print('here')
-            if buff:
-                package = decrypt_data(buff)
+            # package = decrypt_package(self.dev)
             if isinstance(package, HTRData):
                 with global_.lock:
                     global_.hostData = package
             if isinstance(package, HBData):
                 with global_.lock:
                     global_.specialData = package
-        self.dev.close()
 
         self.off()
 
     def off(self):
+        self.dev.close()
         print('############  Write closed  ############')
 
 
@@ -144,20 +149,21 @@ class Watcher(threading.Thread):
         stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
 
         while self.alive:
-            # Write data to console
-            data = (0,0,0,0,0,0,'')
+            self.update_host_to_road()
+            self.update_road_to_host()
+            self.update_special()
+
+            # Update data
+            # with global_.lock:
+            #     self.update_host_to_road()
+
+            # with global_.lock:
+            #     self.update_road_to_host()
+
+            # with global_.lock:
+            #     self.update_special()
 
             if global_.motor_thread.alive:
-                # Update data
-                with global_.lock:
-                    self.update_host_to_road()
-
-                with global_.lock:
-                    self.update_road_to_host()
-
-                with global_.lock:
-                    self.update_special()
-
                 # Check accelerometer data
                 [x, y, z] = self.accel.getdata()
                 thr = 5
@@ -171,6 +177,7 @@ class Watcher(threading.Thread):
                     data = global_.motor_thread.controller.get_data()
 
             if global_.writer.alive:
+                data = (0,0,0,0,0,0,'')
                 global_.writer.out = stringData.format(*data)
 
         self.off()
@@ -226,7 +233,7 @@ def serial_init(speed=19200, port='/dev/ttyS2'):
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=0.1
+        timeout=1
     )
     except serial.serialutil.SerialException:
         print('Could not open port')

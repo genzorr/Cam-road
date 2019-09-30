@@ -27,19 +27,20 @@ class MbeeThread_write(QThread):
         # self.mbee = serialstar.SerialStar(port, speed)
 
     def run(self):
+        dev_write = serial_init()
         while True:
-            with open('/dev/ttySAC3', 'wb') as dev_write:
-                global_.hostData.acceleration = 3
-                global_.hostData.braking = 3
+            # with open('/dev/ttySAC3', 'wb') as dev_write:
+            global_.hostData.acceleration = 3
+            global_.hostData.braking = 3
 
-                # Transmitting
-                package = global_.hostData
-                data = encrypt_package(package)
-                dev_write.write(data)
+            # Transmitting
+            package = global_.hostData
+            data = encrypt_package(package)
+            dev_write.write(data)
 
-                package = global_.specialData
-                data = encrypt_package(package)
-                dev_write.write(data)
+            package = global_.specialData
+            data = encrypt_package(package)
+            dev_write.write(data)
 
 
 class MbeeThread_read(QThread):
@@ -50,11 +51,11 @@ class MbeeThread_read(QThread):
     def run(self):
         # dev_read = serial_init()
         while True:
-            with open('/dev/ttySAC3', 'rb') as dev_read:
-                package = decrypt_package(dev_read)
-                print('got')
-                if isinstance(package, RTHData):
-                    global_.roadData = package
+            pass
+            # with open('/dev/ttySAC3', 'rb') as dev_read:
+            #     package = decrypt_package(dev_read)
+            #     if isinstance(package, RTHData):
+            #         global_.roadData = package
 
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting / throwing data from/to MBee module and for checking all's OK
@@ -105,7 +106,7 @@ class WatcherThread(QThread):
 
 #----------------------------------------------------------------------------------------------#
 
-def serial_init(port='/dev/ttySAC3', speed=19200):
+def serial_init(port='/dev/ttySAC3', speed=9600):
     try:
         dev = serial.Serial(
         port=port,
@@ -113,7 +114,7 @@ def serial_init(port='/dev/ttySAC3', speed=19200):
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=0.5
+        timeout=0.3
     )
     except serial.serialutil.SerialException:
         print('Could not open port')

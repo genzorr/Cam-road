@@ -17,6 +17,7 @@ os.environ['DISPLAY'] = ':0'
 #   TODO: USE ISINSTANSE
 
 
+# sudo stty -F /dev/ttySAC3 19200 cs8 -cstopb -parenb cread
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     app = QApplication(sys.argv)
@@ -31,12 +32,9 @@ if __name__ == "__main__":
     global_.mbee_thread_write = MbeeThread_write()
     global_.mbee_thread_write.start()
 
-    global_.mbee_thread_read = MbeeThread_read()
-    global_.mbee_thread_read.start()
+    # global_.mbee_thread_read = MbeeThread_read()
+    # global_.mbee_thread_read.start()
 
     global_.watcher = WatcherThread(window=window)
     global_.watcher.start()
     sys.exit(app.exec_())
-
-    # data = b'~\xa5\x00\x00@@\x00\x00@@\x00\x00pA\xfd\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-    # print(struct.unpack('f', data[10:14]))
