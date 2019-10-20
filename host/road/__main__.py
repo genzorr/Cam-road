@@ -4,7 +4,7 @@ import threading, signal
 
 import global_
 from watcher import *
-from lib.data_classes import *
+from data_classes import *
 
 THREADS = []
 
@@ -20,37 +20,34 @@ def main():
     global_.mbee_thread_write = None
     global_.mbee_thread_read = None
 
-    ## Variables.
     global_.motor = 0
+
     global_.lock = threading.Lock()
     global_.hostData = HTRData()
     global_.roadData = RTHData()
     global_.specialData = HBData()
 
-    global_.dev = None
-    global_.dev = serial_init()
-    global_.serial_lock = threading.Lock()
 
-    ## Threads.
     global_.mbee_thread_write = Mbee_thread_write()
     global_.mbee_thread_write.start()
-    THREADS.append(global_.mbee_thread_write)
 
-    global_.mbee_thread_read = Mbee_thread_read()
-    global_.mbee_thread_read.start()
-    THREADS.append(global_.mbee_thread_read)
+    # global_.mbee_thread_read = Mbee_thread_read()
+    # global_.mbee_thread_read.start()
 
     global_.writer = Writer()
     global_.writer.start()
-    THREADS.append(global_.writer)
 
     global_.motor_thread = Motor_thread()
     global_.motor_thread.start()
-    THREADS.append(global_.motor_thread)
 
     global_.watcher = Watcher()
     global_.watcher.start()
+
     THREADS.append(global_.watcher)
+    THREADS.append(global_.writer)
+    THREADS.append(global_.motor_thread)
+    # THREADS.append(global_.mbee_thread_read)
+    THREADS.append(global_.mbee_thread_write)
 
     for t in THREADS:
         while True:

@@ -539,20 +539,15 @@ def decrypt_package(dev_read):
 
 def decrypt_data(data):
     try:
-        start = 0
-        data_len = len(data)
         while True:
-            if start >= data_len - 1:
-                break
-
-            descr1 = data[start]
-            descr2 = data[start+1]
-            start += 1
+            descr1 = data[0]
+            descr2 = data[1]
 
             if descr1 != DESCR1 and descr2 != DESCR2:
                 if descr2 == DESCR1:
+                    data = data[1:len(data)]
                     descr1 = DESCR1
-                    descr2 = data[start]
+                    descr2 = data[1]
 
                     if descr2 == DESCR2:
                         break
@@ -560,17 +555,10 @@ def decrypt_data(data):
                 # print("Bad index", descr1, descr2)
             else: break
 
-        if data_len < start:
-            return None
-
-        return None
-
-
         crc = 0
         type = bytes_to_int(data[2:6])
 
         if type == 1:
-            print('got 1')
             package = HTRData()
             package.type = 1
 
@@ -592,7 +580,6 @@ def decrypt_data(data):
                 return None
 
         elif type == 2:
-            print('got 2')
             package = RTHData()
             package.type = 2
 
@@ -617,7 +604,6 @@ def decrypt_data(data):
                 return None
 
         elif type == 3:
-            print('got 3')
             package = HBData()
             package.type = 3
 

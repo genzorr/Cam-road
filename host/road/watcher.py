@@ -1,8 +1,6 @@
 import sys, time, threading, serial
 # from mbee import serialstar
-from lib.data_classes import *
-from lib.motor_controller import *
-from lib.data_parser import *
+from data_classes import *
 from lib.lsm6ds3 import *
 from lib.indicator import *
 
@@ -33,7 +31,7 @@ class Writer(threading.Thread):
         self.off()
 
     def off(self):
-        print('############  Writer stopped  #############')
+        print('############  Writer stopped  ############')
 
 #-------------------------------------------------------------------------------------#
 class Mbee_thread_write(threading.Thread):
@@ -41,45 +39,37 @@ class Mbee_thread_write(threading.Thread):
         super().__init__()
         self.alive = True
         self.name = 'MBee_write'
+        self.mbee_data = Mbee_data()
+        self.dev = serial_init()
 
     def run(self):
-        # buff = self.dev.read(50)
+        buff = b''
         while self.alive:
-            package = None
-
-    #/ self.dev
-            # # Transmitting
-            # with global_.lock:
-            #     package = global_.roadData
-            # if package:
-            #     self.dev.write(encrypt_package(package))
-
-    #/ global_.dev
             # Transmitting
+            package = None
             with global_.lock:
                 package = global_.roadData
-            with global_.serial_lock:
-                if package:
-                    global_.dev.write(encrypt_package(package))
+            if package:
+                self.dev.write(encrypt_package(package))
 
+            buff += self.dev.read(30)
 
-            # # Receiving
-            # package = get_decrypt_package(self.dev)
-            # if isinstance(package, HTRData):
-            #     with global_.lock:
-            #         global_.hostData = package
-            # if isinstance(package, HBData):
-            #     with global_.lock:
-            #         global_.specialData = package
+            # Receiving
+            print('here')
+            if buff:
+                package = decrypt_data(buff)
+            if isinstance(package, HTRData):
+                with global_.lock:
+                    global_.hostData = package
+            if isinstance(package, HBData):
+                with global_.lock:
+                    global_.specialData = package
+        self.dev.close()
 
         self.off()
 
     def off(self):
-        # self.dev.close()
-        if global_.dev:
-            global_.dev.close()
-            global_.dev = None
-        print('############  Write closed  ###############')
+        print('############  Write closed  ############')
 
 
 class Mbee_thread_read(threading.Thread):
@@ -87,24 +77,11 @@ class Mbee_thread_read(threading.Thread):
         super().__init__()
         self.alive = True
         self.name = 'MBee_read'
-        self.mbee_data = Mbee_data()
 
     def run(self):
-        while self.alive:
-    #/ self.dev
-            # # Receiving
-            # package = get_decrypt_package(self.dev)
-            # if isinstance(package, HTRData):
-            #     with global_.lock:
-            #         global_.hostData = package
-            # if isinstance(package, HBData):
-            #     with global_.lock:
-            #         global_.specialData = package
-
-    #/ global_.dev
+        while self.alives:
             # Receiving
-            with global_.serial_lock:
-                package = get_decrypt_package(global_.dev)
+            package = decrypt_package()
             if isinstance(package, HTRData):
                 with global_.lock:
                     global_.hostData = package
@@ -112,27 +89,10 @@ class Mbee_thread_read(threading.Thread):
                 with global_.lock:
                     global_.specialData = package
 
-            # # Transmitting
-            # with global_.lock:
-            #     package = global_.roadData
-            # if package:
-            #     global_.dev.write(encrypt_package(package))
-
-            ##  Other method
-            # tmp = self.dev.read(30)
-            # if tmp:
-            #     buff += tmp
-            #     # print('data read')
-            #     package = decrypt_data(buff)
-            # tmp = None
-
         self.off()
 
     def off(self):
-        if global_.dev:
-            global_.dev.close()
-            global_.dev = None
-        print('############  Read closed  ################')
+        print('############  Read closed  ############')
 
 
 #-------------------------------------------------------------------------------------#
@@ -167,7 +127,7 @@ class Motor_thread(threading.Thread):
         if global_.motor:
             indicator_off(self.portex)
             self.controller.off()
-        print('############  Motor released  #############')
+        print('##############  Motor released  ##############')
 
 #-------------------------------------------------------------------------------------#
 """ Used to control all operations """
@@ -184,24 +144,20 @@ class Watcher(threading.Thread):
         stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
 
         while self.alive:
-            with global_.lock:
-                self.update_host_to_road()
-            with global_.lock:
-                self.update_road_to_host()
-            with global_.lock:
-                self.update_special()
-
-            # Update data
-            # with global_.lock:
-            #     self.update_host_to_road()
-
-            # with global_.lock:
-            #     self.update_road_to_host()
-
-            # with global_.lock:
-            #     self.update_special()
+            # Write data to console
+            data = (0,0,0,0,0,0,'')
 
             if global_.motor_thread.alive:
+                # Update data
+                with global_.lock:
+                    self.update_host_to_road()
+
+                with global_.lock:
+                    self.update_road_to_host()
+
+                with global_.lock:
+                    self.update_special()
+
                 # Check accelerometer data
                 [x, y, z] = self.accel.getdata()
                 thr = 5
@@ -213,17 +169,19 @@ class Watcher(threading.Thread):
                 # Get data for printing
                 with global_.lock:
                     data = global_.motor_thread.controller.get_data()
-                    if (data == None):
-                        data = (0,0,0,0,0,0,'')
 
-                    if global_.writer.alive:
-                        global_.writer.out = stringData.format(*data)
+            if global_.writer.alive:
+                global_.writer.out = stringData.format(*data)
 
         self.off()
 
     def off(self):
         print('############  Watcher stopped  ############')
 
+    # #   Callback functions for SerialStar
+    # def frame_81_received(packet):
+    #     print("Received 81-frame.")
+    #     print(packet)
 
     def update_host_to_road(self):
         global_.motor_thread.controller.accel = global_.hostData.acceleration
@@ -248,10 +206,10 @@ class Watcher(threading.Thread):
     def update_road_to_host(self):
         global_.roadData.mode = global_.motor_thread.controller.mode
         global_.roadData.coordinate = global_.motor_thread.controller.coordinate
-        global_.roadData.RSSI = global_.mbee_thread_read.mbee_data.RSSI
-        global_.roadData.voltage = global_.mbee_thread_read.mbee_data.voltage
-        global_.roadData.current = global_.mbee_thread_read.mbee_data.current
-        global_.roadData.temperature = global_.mbee_thread_read.mbee_data.temperature
+        global_.roadData.RSSI = global_.mbee_thread_write.mbee_data.RSSI
+        global_.roadData.voltage = global_.mbee_thread_write.mbee_data.voltage
+        global_.roadData.current = global_.mbee_thread_write.mbee_data.current
+        global_.roadData.temperature = global_.mbee_thread_write.mbee_data.temperature
         global_.roadData.base1 = global_.motor_thread.controller.base1
         global_.roadData.base2 = global_.motor_thread.controller.base2
 
@@ -268,7 +226,7 @@ def serial_init(speed=19200, port='/dev/ttyS2'):
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=0.2
+        timeout=0.1
     )
     except serial.serialutil.SerialException:
         print('Could not open port')
