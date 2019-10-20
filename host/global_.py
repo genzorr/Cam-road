@@ -1,3 +1,5 @@
+global lock
+
 global watcher
 global mbee_thread_write
 global mbee_thread_read

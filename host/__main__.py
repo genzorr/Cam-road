@@ -35,8 +35,8 @@ if __name__ == "__main__":
     global_.mbee_thread_write = MbeeThread_write()
     global_.mbee_thread_write.start()
 
-    global_.mbee_thread_read = MbeeThread_read()
-    global_.mbee_thread_read.start()
+    # global_.mbee_thread_read = MbeeThread_read()
+    # global_.mbee_thread_read.start()
 
     global_.watcher = WatcherThread(window=window)
     global_.watcher.start()

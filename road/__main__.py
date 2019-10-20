@@ -32,9 +32,9 @@ def main():
     global_.serial_lock = threading.Lock()
 
     ## Threads.
-    global_.mbee_thread_write = Mbee_thread_write()
-    global_.mbee_thread_write.start()
-    THREADS.append(global_.mbee_thread_write)
+    # global_.mbee_thread_write = Mbee_thread_write()
+    # global_.mbee_thread_write.start()
+    # THREADS.append(global_.mbee_thread_write)
 
     global_.mbee_thread_read = Mbee_thread_read()
     global_.mbee_thread_read.start()

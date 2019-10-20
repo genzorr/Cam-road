@@ -28,8 +28,11 @@ class MbeeThread_write(QThread):
         # self.mbee = serialstar.SerialStar(port, speed)
 
     def run(self):
-        with open('/dev/ttySAC3', 'wb') as dev:
+        # with open('/dev/ttySAC3', 'wb') as dev:
+        while True:
+            dev = serial_init()
             while dev:
+                # with global_.lock
                 global_.hostData.acceleration = 3
                 global_.hostData.braking = 3
 
@@ -41,6 +44,12 @@ class MbeeThread_write(QThread):
                 package = global_.specialData
                 data = encrypt_package(package)
                 dev.write(data)
+
+                # Receiving.
+                package = get_decrypt_package(dev)
+                if isinstance(package, RTHData):
+                    print('got roadData')
+                    global_.roadData = package
 
 
 class MbeeThread_read(QThread):

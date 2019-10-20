@@ -112,11 +112,12 @@ class Mbee_thread_read(threading.Thread):
                 with global_.lock:
                     global_.specialData = package
 
-            # # Transmitting
-            # with global_.lock:
-            #     package = global_.roadData
-            # if package:
-            #     global_.dev.write(encrypt_package(package))
+            # Transmitting
+            with global_.lock:
+                package = global_.roadData
+            with global_.serial_lock:
+                if package:
+                    global_.dev.write(encrypt_package(package))
 
             ##  Other method
             # tmp = self.dev.read(30)
