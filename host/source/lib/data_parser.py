@@ -1,5 +1,5 @@
 import struct, time
-from data_classes import *
+from .data_classes import *
 
 DESCR1 = struct.pack('B', 0x7e)
 DESCR2 = struct.pack('B', 0xa5)

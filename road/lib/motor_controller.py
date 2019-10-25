@@ -2,6 +2,7 @@ import time, global_
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from x4motor import X4Motor
 
+# sudo ./modbus -r -d /dev/ttySAC3 -b 115200 -f 3 -s 2 -a 0 -n 20
 #-------------------------------------------------------------------------------------#
 #   Settings
 config = {'id': 1,\

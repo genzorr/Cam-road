@@ -3,10 +3,10 @@ from PyQt5.QtWidgets import QMainWindow, QWidget
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt, QEvent
 from PyQt5.QtGui import QColor
 
-from window import Ui_Watcher
-from workwidget import Ui_Form
-from settingswidget import Ui_SForm
-from telemetrywidget import Ui_TForm
+from .window import Ui_Watcher
+from .workwidget import Ui_Form
+from .settingswidget import Ui_SForm
+from .telemetrywidget import Ui_TForm
 
 #----------------------------------------------------------------------------------------------#
 #   Base class

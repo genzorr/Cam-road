@@ -1,38 +1,20 @@
 import time, serial, global_
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
-from data_classes import *
-from data_parser import *
-# from mbee import serialstar
-
-ACCUM_LEN = 1
+from lib.data_classes import *
+from lib.data_parser import *
+from lib.controls import *
 
 #----------------------------------------------------------------------------------------------#
-#   Stores messages
-class MsgAccumulator:
-    def __init__(self, batch_size, signal):
-        self.batch_size = batch_size
-        self.signal = signal
-        self.accumulator = []
-
-    def push_message(self, msg):
-        self.accumulator.append(msg)
-        if len(self.accumulator) >= self.batch_size:
-            self.signal.emit(self.accumulator)
-            self.accumulator = []
-
-#----------------------------------------------------------------------------------------------#
-
-class MbeeThread_write(QThread):
+#   A thread used to operate with MBee.
+class MbeeThread(QThread):
     def __init__(self):
         QThread.__init__(self)
-        # self.mbee = serialstar.SerialStar(port, speed)
 
     def run(self):
-        # with open('/dev/ttySAC3', 'wb') as dev:
+        # Initialize serial device.
+        dev = serial_init()
         while True:
-            dev = serial_init()
             while dev:
-                # with global_.lock
                 global_.hostData.acceleration = 3
                 global_.hostData.braking = 3
 
@@ -48,22 +30,20 @@ class MbeeThread_write(QThread):
                 # Receiving.
                 package = get_decrypt_package(dev)
                 if isinstance(package, RTHData):
-                    print('got roadData')
                     global_.roadData = package
 
 
-class MbeeThread_read(QThread):
-    def __init__(self):
-        QThread.__init__(self)
-        # self.mbee = serialstar.SerialStar(port, speed)
+# class MbeeThread_read(QThread):
+#     def __init__(self):
+#         QThread.__init__(self)
 
-    def run(self):
-        with open('/dev/ttySAC3', 'rb') as dev:
-            while dev:
-                package = get_decrypt_package(dev)
-                if isinstance(package, RTHData):
-                    print('got roadData')
-                    global_.roadData = package
+#     def run(self):
+#         with open('/dev/ttySAC3', 'rb') as dev:
+#             while dev:
+#                 package = get_decrypt_package(dev)
+#                 if isinstance(package, RTHData):
+#                     print('got roadData')
+#                     global_.roadData = package
 
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting/throwing data from/to MBee module and for checking all's OK
@@ -109,8 +89,22 @@ class WatcherThread(QThread):
 
     def run(self):
         while True:
-            print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
+            # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
             time.sleep(2)
+
+#----------------------------------------------------------------------------------------------#
+#   A thread used to communitate with remote control.
+class ControlThread(QThread):
+    def __init__(self, window=None):
+        QThread.__init__(self)
+        self.controller = Controller()
+
+
+    def run(self):
+        while True:
+            print(self.controller.getEncoderValue(0))
+            time.sleep(0.5)
+
 
 #----------------------------------------------------------------------------------------------#
 
