@@ -110,6 +110,7 @@ class MainWindow(QMainWindow):
             self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 5)
 
         if event.key() == Qt.Key_Q:
+            global_.killer.kill()
             sys.exit()
 
         if event.key() == Qt.Key_1:

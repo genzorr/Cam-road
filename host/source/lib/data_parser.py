@@ -60,7 +60,7 @@ def encrypt_package(package):
 def get_decrypt_package(dev_read):
     try:
         curr_time = time.time()
-        while True:
+        while currentThread.alive:
             if (time.time() - curr_time > 1):
                 return None
 

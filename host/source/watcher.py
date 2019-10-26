@@ -4,16 +4,21 @@ from lib.data_classes import *
 from lib.data_parser import *
 from lib.controls import *
 
+ACCEL_MAX = 20
+BRAKE_MAX = 20
+ENC_MAX = 100
+
 #----------------------------------------------------------------------------------------------#
 #   A thread used to operate with MBee.
 class MbeeThread(QThread):
     def __init__(self):
         QThread.__init__(self)
+        self.alive = True
 
     def run(self):
         # Initialize serial device.
         dev = serial_init()
-        while True:
+        while self.alive:
             while dev:
                 global_.hostData.acceleration = 3
                 global_.hostData.braking = 3
@@ -50,6 +55,7 @@ class MbeeThread(QThread):
 class WatcherThread(QThread):
     def __init__(self, window=None):
         QThread.__init__(self)
+        self.alive = True
 
         #   Signals to slots connection
         if window.workWidget:
@@ -88,27 +94,41 @@ class WatcherThread(QThread):
 
 
     def run(self):
-        while True:
+        while self.alive:
             # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
             time.sleep(2)
+
+    def off(self):
+        pass
 
 #----------------------------------------------------------------------------------------------#
 #   A thread used to communitate with remote control.
 class ControlThread(QThread):
     def __init__(self, window=None):
         QThread.__init__(self)
+        self.alive = True
         self.controller = Controller()
-
+        self.finished.connect(self.controller.off)
 
     def run(self):
-        while True:
-            print(self.controller.getEncoderValue(0))
-            time.sleep(0.5)
+        while self.alive and self.controller.status:
+            for i in range(1, 3+1):
+                encValue = self.controller.getEncoderValue(i)
+                self.controller.setIndicator(i, round(encValue/10))
+
+            global_.hostData.acceleration_signal.emit(self.controller.encoders[0])
+            global_.hostData.braking_signal.emit(self.controller.encoders[1])
+            global_.hostData.velocity_signal.emit(self.controller.encoders[2])
+
+            time.sleep(0.1)
+
+    def off(self):
+        self.controller.off()
 
 
 #----------------------------------------------------------------------------------------------#
 
-def serial_init(port='/dev/ttySAC3', speed=19200):
+def serial_init(port='/dev/ttySAC2', speed=19200):
     try:
         dev = serial.Serial(
         port=port,
