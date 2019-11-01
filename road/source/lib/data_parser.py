@@ -64,7 +64,7 @@ def get_decrypt_package(dev_read):
         curr_time = time.time()
         while thread.alive and dev_read:
             if (time.time() - curr_time > 2):
-                print('exit')
+                # print('exit')
                 return None
 
             descr1 = dev_read.read(1)

@@ -1,5 +1,4 @@
 import sys
-sys.path.append('../fortune-controls/Lib')
 import threading, signal
 
 import global_

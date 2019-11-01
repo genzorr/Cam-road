@@ -54,7 +54,6 @@ class Controller:
 
         self.off()
 
-    @pyqtSlot()
     def off(self):
         self.setEncoderValue(1, 0)
         self.setEncoderValue(2, 0)
@@ -63,7 +62,6 @@ class Controller:
         self.setIndicator(1, 0)
         self.setIndicator(2, 0)
         self.setIndicator(3, 0)
-
 
     def saferead(self, addr, count, unit, retry = 3):
         if not self.status:

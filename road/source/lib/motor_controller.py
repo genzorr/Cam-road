@@ -1,4 +1,6 @@
 import time, global_
+import sys
+sys.path.append('../../fortune-controls/Lib')
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from x4motor import X4Motor
 
@@ -271,7 +273,7 @@ class Controller:
         return 0
 
 
-        # old finction
+        # old function
     def get_package(self):
         try:
             if self.data != '':

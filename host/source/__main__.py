@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys, signal, os
+import sys, signal, os, subprocess
 from PyQt5.QtWidgets import QApplication
 
 from watcher import *
@@ -22,6 +22,12 @@ os.environ['DISPLAY'] = ':0'
 # sudo stty -F /dev/ttySAC3 19200 cs8 -cstopb -parenb cread time 1 min 0
 # sudo ~/Downloads/modbus-cli/src/modbus -r -d /dev/ttySAC3 -b 115200 -f 3 -s 2 -a 0 -n 20
 
+# radio UP
+# echo 63 > /sys/class/gpio/export
+# echo out > /sys/class/gpio/gpio63/direction
+# echo 1 > /sys/class/gpio/gpio63/value
+# echo 63 > /sys/class/gpio/unexport
+
 THREADS = []
 
 class Killer:
@@ -33,7 +39,8 @@ class Killer:
         for thread in THREADS:
             thread.alive = False
             thread.off()
-        # self.kill_now = True
+        subprocess.call('./radio_off.sh')
+
         print('exiting..')
         time.sleep(1)
         sys.exit()
@@ -50,9 +57,6 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
 
-    # global_.mbeeThread = MbeeThread()
-    # global_.mbeeThread.start()
-
     global_.watcher = WatcherThread(window=window)
     global_.watcher.start()
     THREADS.append(global_.watcher)
@@ -60,5 +64,9 @@ if __name__ == "__main__":
     global_.controlThread = ControlThread()
     global_.controlThread.start()
     THREADS.append(global_.controlThread)
+
+    global_.mbeeThread = MbeeThread()
+    global_.mbeeThread.start()
+    THREADS.append(global_.mbeeThread)
 
     sys.exit(app.exec_())

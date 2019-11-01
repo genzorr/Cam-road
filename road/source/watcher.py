@@ -36,50 +36,51 @@ class Writer(threading.Thread):
         print('############  Writer stopped  #############')
 
 #-------------------------------------------------------------------------------------#
-class Mbee_thread_write(threading.Thread):
-    def __init__(self):
-        super().__init__()
-        self.alive = True
-        self.name = 'MBee_write'
+# class Mbee_thread_write(threading.Thread):
+#     def __init__(self):
+#         super().__init__()
+#         self.alive = True
+#         self.name = 'MBee_write'
 
-    def run(self):
-        # buff = self.dev.read(50)
-        while self.alive:
-            package = None
+#     def run(self):
+#         # buff = self.dev.read(50)
+#         while self.alive:
+#             package = None
 
-    #/ self.dev
-            # # Transmitting
-            # with global_.lock:
-            #     package = global_.roadData
-            # if package:
-            #     self.dev.write(encrypt_package(package))
+#     #/ self.dev
+#             # # Transmitting
+#             # with global_.lock:
+#             #     package = global_.roadData
+#             # if package:
+#             #     self.dev.write(encrypt_package(package))
 
-    #/ global_.dev
-            # Transmitting
-            with global_.lock:
-                package = global_.roadData
-            with global_.serial_lock:
-                if package:
-                    global_.dev.write(encrypt_package(package))
+#     #/ global_.dev
+#             # # Transmitting
+#             # with global_.lock:
+#             #     package = global_.roadData
+#             # if package:
+#             #     package = encrypt_package(package)
+#             #     with global_.serial_lock:
+#             #         global_.dev.write(package)
 
 
-            # # Receiving
-            # package = get_decrypt_package(self.dev)
-            # if isinstance(package, HTRData):
-            #     with global_.lock:
-            #         global_.hostData = package
-            # if isinstance(package, HBData):
-            #     with global_.lock:
-            #         global_.specialData = package
+#             # Receiving
+#             package = get_decrypt_package(self.dev)
+#             if isinstance(package, HTRData):
+#                 with global_.lock:
+#                     global_.hostData = package
+#             if isinstance(package, HBData):
+#                 with global_.lock:
+#                     global_.specialData = package
 
-        self.off()
+#         self.off()
 
-    def off(self):
-        # self.dev.close()
-        if global_.dev:
-            global_.dev.close()
-            global_.dev = None
-        print('############  Write closed  ###############')
+#     def off(self):
+#         # self.dev.close()
+#         if global_.dev:
+#             global_.dev.close()
+#             global_.dev = None
+#         print('############  Write closed  ###############')
 
 
 class Mbee_thread_read(threading.Thread):
@@ -103,8 +104,8 @@ class Mbee_thread_read(threading.Thread):
 
     #/ global_.dev
             # Receiving
-            with global_.serial_lock:
-                package = get_decrypt_package(global_.dev)
+            # with global_.serial_lock:
+            package = get_decrypt_package(global_.dev)
             if isinstance(package, HTRData):
                 with global_.lock:
                     global_.hostData = package
@@ -112,12 +113,12 @@ class Mbee_thread_read(threading.Thread):
                 with global_.lock:
                     global_.specialData = package
 
-            # Transmitting
-            with global_.lock:
-                package = global_.roadData
-            with global_.serial_lock:
-                if package:
-                    global_.dev.write(encrypt_package(package))
+            # # Transmitting
+            # with global_.lock:
+            #     package = global_.roadData
+            # with global_.serial_lock:
+            #     if package:
+            #         global_.dev.write(encrypt_package(package))
 
             ##  Other method
             # tmp = self.dev.read(30)
@@ -131,8 +132,9 @@ class Mbee_thread_read(threading.Thread):
 
     def off(self):
         if global_.dev:
-            global_.dev.close()
-            global_.dev = None
+            with global_.serial_lock:
+                global_.dev.close()
+                global_.dev = None
         print('############  Read closed  ################')
 
 
@@ -244,6 +246,7 @@ class Watcher(threading.Thread):
             global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
         elif global_.motor_thread.controller.set_base == 2 and not global_.motor_thread.controller.base2_set:
             global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
+
         return
 
     def update_road_to_host(self):

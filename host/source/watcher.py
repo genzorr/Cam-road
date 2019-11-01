@@ -1,4 +1,4 @@
-import time, serial, global_
+import time, subprocess, serial, global_
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from lib.data_classes import *
 from lib.data_parser import *
@@ -14,15 +14,13 @@ class MbeeThread(QThread):
     def __init__(self):
         QThread.__init__(self)
         self.alive = True
+        subprocess.call('./radio_on.sh')
 
     def run(self):
         # Initialize serial device.
         dev = serial_init()
         while self.alive:
             while dev:
-                global_.hostData.acceleration = 3
-                global_.hostData.braking = 3
-
                 # Transmitting.
                 package = global_.hostData
                 data = encrypt_package(package)
@@ -32,11 +30,13 @@ class MbeeThread(QThread):
                 data = encrypt_package(package)
                 dev.write(data)
 
-                # Receiving.
-                package = get_decrypt_package(dev)
-                if isinstance(package, RTHData):
-                    global_.roadData = package
+                # # Receiving.
+                # package = get_decrypt_package(dev)
+                # if isinstance(package, RTHData):
+                #     global_.roadData = package
 
+    def off(self):
+        pass
 
 # class MbeeThread_read(QThread):
 #     def __init__(self):
@@ -96,6 +96,9 @@ class WatcherThread(QThread):
     def run(self):
         while self.alive:
             # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
+            print('{}\t{}\t{}'.format(global_.hostData.acceleration,
+                                    global_.hostData.braking,
+                                    global_.hostData.velocity))
             time.sleep(2)
 
     def off(self):
@@ -108,6 +111,7 @@ class ControlThread(QThread):
         QThread.__init__(self)
         self.alive = True
         self.controller = Controller()
+
         self.finished.connect(self.controller.off)
 
     def run(self):
@@ -115,6 +119,10 @@ class ControlThread(QThread):
             for i in range(1, 3+1):
                 encValue = self.controller.getEncoderValue(i)
                 self.controller.setIndicator(i, round(encValue/10))
+
+            global_.hostData.acceleration = self.controller.encoders[0]
+            global_.hostData.braking    = self.controller.encoders[1]
+            global_.hostData.velocity   = self.controller.encoders[2]
 
             global_.hostData.acceleration_signal.emit(self.controller.encoders[0])
             global_.hostData.braking_signal.emit(self.controller.encoders[1])
@@ -127,8 +135,8 @@ class ControlThread(QThread):
 
 
 #----------------------------------------------------------------------------------------------#
-
-def serial_init(port='/dev/ttySAC2', speed=19200):
+# /dev/ttySAC4!!
+def serial_init(port='/dev/ttySAC4', speed=19200):
     try:
         dev = serial.Serial(
         port=port,

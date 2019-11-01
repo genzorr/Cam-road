@@ -1,4 +1,5 @@
 import struct, time
+from PyQt5.QtCore import QThread
 from .data_classes import *
 
 DESCR1 = struct.pack('B', 0x7e)
@@ -60,7 +61,7 @@ def encrypt_package(package):
 def get_decrypt_package(dev_read):
     try:
         curr_time = time.time()
-        while currentThread.alive:
+        while QThread.currentThread().alive:
             if (time.time() - curr_time > 1):
                 return None
 
