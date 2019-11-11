@@ -222,9 +222,9 @@ class Controller:
 
         if self.HARD_STOP == 1:
             # No moving if hard stop is enabled
-            if (self.speed == 0):
-                self.mode = 0
-                self.HARD_STOP = 0
+            # if (self.speed == 0):
+            #     self.mode = 0
+            #     self.HARD_STOP = 0
             pass
         elif self.mode == STOP and self.speed == 0:
             pass

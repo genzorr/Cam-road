@@ -1,5 +1,6 @@
-import time, subprocess, serial, global_
+import time, global_
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
+from mbee import serialstar
 from lib.data_classes import *
 from lib.data_parser import *
 from lib.controls import *
@@ -9,53 +10,14 @@ BRAKE_MAX = 20
 ENC_MAX = 100
 
 #----------------------------------------------------------------------------------------------#
-#   A thread used to operate with MBee.
-class MbeeThread(QThread):
-    def __init__(self):
-        QThread.__init__(self)
-        self.alive = True
-        subprocess.call('./radio_on.sh')
-
-    def run(self):
-        # Initialize serial device.
-        dev = serial_init()
-        while self.alive:
-            while dev:
-                # Transmitting.
-                package = global_.hostData
-                data = encrypt_package(package)
-                dev.write(data)
-
-                package = global_.specialData
-                data = encrypt_package(package)
-                dev.write(data)
-
-                # # Receiving.
-                # package = get_decrypt_package(dev)
-                # if isinstance(package, RTHData):
-                #     global_.roadData = package
-
-    def off(self):
-        pass
-
-# class MbeeThread_read(QThread):
-#     def __init__(self):
-#         QThread.__init__(self)
-
-#     def run(self):
-#         with open('/dev/ttySAC3', 'rb') as dev:
-#             while dev:
-#                 package = get_decrypt_package(dev)
-#                 if isinstance(package, RTHData):
-#                     print('got roadData')
-#                     global_.roadData = package
-
-#----------------------------------------------------------------------------------------------#
 #   Main thread for getting/throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
     def __init__(self, window=None):
         QThread.__init__(self)
         self.alive = True
+
+        if window:
+            global_.roadData.RSSI_signal.connect(window.ui.RSSI.display)
 
         #   Signals to slots connection
         if window.workWidget:
@@ -96,9 +58,9 @@ class WatcherThread(QThread):
     def run(self):
         while self.alive:
             # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
-            print('{}\t{}\t{}'.format(global_.hostData.acceleration,
-                                    global_.hostData.braking,
-                                    global_.hostData.velocity))
+            # print('{}\t{}\t{}'.format(global_.hostData.acceleration,
+            #                         global_.hostData.braking,
+            #                         global_.hostData.velocity))
             time.sleep(2)
 
     def off(self):

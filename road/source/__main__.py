@@ -3,6 +3,7 @@ import threading, signal
 
 import global_
 from watcher import *
+from mbee_ import Mbee_thread
 from lib.data_classes import *
 
 THREADS = []
@@ -17,10 +18,10 @@ def handler(signal, frame):
 def main():
     global THREADS
     global_.mbee_thread_write = None
-    global_.mbee_thread_read = None
+    global_.mbee_thread = None
 
     ## Variables.
-    global_.motor = 0
+    global_.motor = 1
     global_.lock = threading.Lock()
     global_.hostData = HTRData()
     global_.roadData = RTHData()
@@ -31,13 +32,10 @@ def main():
     global_.serial_lock = threading.Lock()
 
     ## Threads.
-    # global_.mbee_thread_write = Mbee_thread_write()
-    # global_.mbee_thread_write.start()
-    # THREADS.append(global_.mbee_thread_write)
 
-    global_.mbee_thread_read = Mbee_thread_read()
-    global_.mbee_thread_read.start()
-    THREADS.append(global_.mbee_thread_read)
+    global_.mbee_thread = Mbee_thread()
+    global_.mbee_thread.start()
+    THREADS.append(global_.mbee_thread)
 
     global_.writer = Writer()
     global_.writer.start()

@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(480, 740)
+        Form.resize(480, 715)
         self.verticalLayoutWidget = QtWidgets.QWidget(Form)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(-1, -1, 241, 441))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
@@ -61,7 +61,7 @@ class Ui_Form(object):
         self.Braking.setObjectName("Braking")
         self.verticalLayout_2.addWidget(self.Braking, 0, QtCore.Qt.AlignHCenter)
         self.verticalLayoutWidget_3 = QtWidgets.QWidget(Form)
-        self.verticalLayoutWidget_3.setGeometry(QtCore.QRect(0, 440, 481, 161))
+        self.verticalLayoutWidget_3.setGeometry(QtCore.QRect(0, 440, 481, 141))
         self.verticalLayoutWidget_3.setObjectName("verticalLayoutWidget_3")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_3)
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
@@ -86,7 +86,7 @@ class Ui_Form(object):
         self.Velocity.setObjectName("Velocity")
         self.verticalLayout_3.addWidget(self.Velocity, 0, QtCore.Qt.AlignHCenter)
         self.verticalLayoutWidget_4 = QtWidgets.QWidget(Form)
-        self.verticalLayoutWidget_4.setGeometry(QtCore.QRect(0, 600, 481, 141))
+        self.verticalLayoutWidget_4.setGeometry(QtCore.QRect(0, 580, 481, 131))
         self.verticalLayoutWidget_4.setObjectName("verticalLayoutWidget_4")
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_4)
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)

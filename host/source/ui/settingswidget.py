@@ -12,9 +12,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_SForm(object):
     def setupUi(self, SForm):
         SForm.setObjectName("SForm")
-        SForm.resize(480, 740)
+        SForm.resize(480, 715)
         self.verticalLayoutWidget = QtWidgets.QWidget(SForm)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(-1, -1, 481, 661))
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(-1, -1, 481, 621))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -139,7 +139,7 @@ class Ui_SForm(object):
         self.label_8.setObjectName("label_8")
         self.verticalLayout.addWidget(self.widget_8)
         self.horizontalLayoutWidget = QtWidgets.QWidget(SForm)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(-1, 660, 481, 80))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 620, 481, 80))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)

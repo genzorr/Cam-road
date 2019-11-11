@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_TForm(object):
     def setupUi(self, TForm):
         TForm.setObjectName("TForm")
-        TForm.resize(480, 740)
+        TForm.resize(480, 715)
         self.radioButton = QtWidgets.QRadioButton(TForm)
         self.radioButton.setGeometry(QtCore.QRect(120, 150, 100, 22))
         self.radioButton.setObjectName("radioButton")

@@ -4,6 +4,7 @@ import sys, signal, os, subprocess
 from PyQt5.QtWidgets import QApplication
 
 from watcher import *
+from mbee_ import *
 from ui.ui import MainWindow
 
 os.environ['DISPLAY'] = ':0'
@@ -40,6 +41,7 @@ class Killer:
             thread.alive = False
             thread.off()
         subprocess.call('./radio_off.sh')
+        print('radio off')
 
         print('exiting..')
         time.sleep(1)
