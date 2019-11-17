@@ -1,64 +1,114 @@
-import sys, os, struct
+import sys, os, struct, time
 import threading
 import global_
 from mbee import serialstar
 from lib.data_classes import *
 
+TX_ADDR = '0001'
 
 def frame_81_received(package):
-    pass
-    # print("Received 81-frame.")
-    # print(package)
-
-def frame_83_received(package):
-    pass
-    # print("Received 83-frame.")
-    # print(package)
-
-def frame_87_received(package):
-    pass
-    # print("Received 87-frame.")
-    # print(package)
-
-def frame_88_received(package):
-    pass
-    # print("Received 88-frame.")
-    # print(package)
-
-def frame_89_received(package):
-    pass
-    # print("Received 89-frame.")
-    # print(package)
-
-def frame_8A_received(package):
-    pass
-    # print("Received 8A-frame.")
-    # print(package)
-
-def frame_8B_received(package):
-    pass
-    # print("Received 8B-frame.")
-    # print(package)
-
-def frame_8C_received(package):
-    pass
-    # print("Received 8C-frame.")
-    # print(package)
-
-def frame_8F_received(package):
     data = decrypt_package(package['DATA'])
     if isinstance(data, HTRData):
+        # print(time.time())
         with global_.lock:
             global_.hostData = data
+            update_host_to_road()
+        # print(global_.hostData.mode)
     if isinstance(data, HBData):
-        with global_.lock:
-            global_.specialData = data
+        # with global_.lock:
+        global_.specialData = data
+    # print("Received 81-frame.")
+    # print(package)
+    pass
+
+def frame_83_received(package):
+    # print("Received 83-frame.")
+    # print(package)
+    pass
+
+def frame_87_received(package):
+    # print("Received 87-frame.")
+    # print(package)
+    pass
+
+def frame_88_received(package):
+    # print("Received 88-frame.")
+    # print(package)
+    pass
+
+def frame_89_received(package):
+    # print("Received 89-frame.")
+    # print(package)
+    pass
+
+def frame_8A_received(package):
+    # print("Received 8A-frame.")
+    # print(package)
+    pass
+
+def frame_8B_received(package):
+    # print("Received 8B-frame.")
+    # print(package)
+    pass
+
+def frame_8C_received(package):
+    # print("Received 8C-frame.")
+    # print(package)
+    pass
+
+def frame_8F_received(package):
+    # print(time.time())
+    # data = decrypt_package(package['DATA'])
+    # if isinstance(data, HTRData):
+    #     # print(time.time())
+    #     with global_.lock:
+    #         global_.hostData = data
+    #         update_host_to_road()
+    #     # print(global_.hostData.mode)
+    # if isinstance(data, HBData):
+    #     # with global_.lock:
+    #     global_.specialData = data
+    pass
 
 
 def frame_97_received(package):
     pass
     # print("Received 97-frame.")
     # print(package)
+
+
+def update_host_to_road():
+    global_.motor_thread.controller.accel = global_.hostData.acceleration
+    global_.motor_thread.controller.braking = global_.hostData.braking
+    est_speed = global_.hostData.velocity
+    global_.motor_thread.controller.mode = global_.hostData.mode
+    direction = global_.hostData.direction
+    global_.motor_thread.controller.set_base = global_.hostData.set_base
+
+    if not global_.motor_thread.controller.is_braking:
+        global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
+
+    if global_.motor_thread.controller.mode == 2:
+        global_.motor_thread.controller.direction = direction
+
+    if global_.motor_thread.controller.set_base == 1 and not global_.motor_thread.controller.base1_set:
+        global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
+    elif global_.motor_thread.controller.set_base == 2 and not global_.motor_thread.controller.base2_set:
+        global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
+
+    return
+
+
+def update_road_to_host():
+    global_.roadData.mode = global_.motor_thread.controller.mode
+    global_.roadData.coordinate = global_.motor_thread.controller.coordinate
+    global_.roadData.RSSI = global_.mbee_thread.mbee_data.RSSI
+    global_.roadData.voltage = global_.mbee_thread.mbee_data.voltage
+    global_.roadData.current = global_.mbee_thread.mbee_data.current
+    global_.roadData.temperature = global_.mbee_thread.mbee_data.temperature
+    global_.roadData.base1 = global_.motor_thread.controller.base1
+    global_.roadData.base2 = global_.motor_thread.controller.base2
+
 
 
 class Mbee_thread(threading.Thread):
@@ -68,31 +118,44 @@ class Mbee_thread(threading.Thread):
         self.name = 'MBee'
         self.mbee_data = Mbee_data()
 
-        global_.dev = serialstar.SerialStar(port, baudrate)
+        self.t = 0
+        self.t_prev = 0
+
+        self.dev = serialstar.SerialStar(port, baudrate, 0.4)
 
         #  Callback-functions registering.
-        global_.dev.callback_registring("81", frame_81_received)
-        global_.dev.callback_registring("83", frame_83_received)
-        global_.dev.callback_registring("87", frame_87_received)
-        global_.dev.callback_registring("88", frame_88_received)
-        global_.dev.callback_registring("89", frame_89_received)
-        global_.dev.callback_registring("8A", frame_8A_received)
-        global_.dev.callback_registring("8B", frame_8B_received)
-        global_.dev.callback_registring("8C", frame_8C_received)
-        global_.dev.callback_registring("8F", frame_8F_received)
-        global_.dev.callback_registring("97", frame_97_received)
+        self.dev.callback_registring("81", frame_81_received)
+        self.dev.callback_registring("83", frame_83_received)
+        self.dev.callback_registring("87", frame_87_received)
+        self.dev.callback_registring("88", frame_88_received)
+        self.dev.callback_registring("89", frame_89_received)
+        self.dev.callback_registring("8A", frame_8A_received)
+        self.dev.callback_registring("8B", frame_8B_received)
+        self.dev.callback_registring("8C", frame_8C_received)
+        self.dev.callback_registring("8F", frame_8F_received)
+        self.dev.callback_registring("97", frame_97_received)
 
     def run(self):
         while self.alive:
             # Receive
-            frame = global_.dev.run()
+            # print('receive 1: ', time.time())
+            frame = self.dev.run()
+            # print('receive 2: ', time.time())
 
             # Transmit
-            global_.dev.send_tx_request('01', '0001', '012345')
+            self.dev.send_tx_request('01', TX_ADDR, '00')
+
+            # Flush dev buffers
+            self.t = time.time()
+            if ((self.t - self.t_prev) > 7):
+                self.t_prev = self.t
+                self.dev.ser.flush()
+                self.dev.ser.reset_input_buffer()
+                self.dev.ser.reset_output_buffer()
 
             # Receiving
             # with global_.serial_lock:
-            # package = get_decrypt_package(global_.dev)
+            # package = get_decrypt_package(self.dev)
             # if isinstance(package, HTRData):
             #     with global_.lock:
             #         global_.hostData = package
@@ -105,7 +168,7 @@ class Mbee_thread(threading.Thread):
             #     package = global_.roadData
             # with global_.serial_lock:
             #     if package:
-            #         global_.dev.write(encrypt_package(package))
+            #         self.dev.write(encrypt_package(package))
 
             ##  Other method
             # tmp = self.dev.read(30)
@@ -118,17 +181,15 @@ class Mbee_thread(threading.Thread):
         self.off()
 
     def off(self):
-        if global_.dev:
-            with global_.serial_lock:
-                global_.dev.ser.close()
-                global_.dev = None
+        if self.dev:
+            self.dev.ser.close()
+            self.dev = None
         print('############  Mbee closed  ################')
 
 
 def decrypt_package(package):
     try:
         data = package
-        package = None
         package_type = hex_to_int(data[0:8])
         data = data[8:]
 

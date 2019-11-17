@@ -103,11 +103,11 @@ class MainWindow(QMainWindow):
         self.keyPressed.emit(event)
 
     def on_key(self, event):
-        if event.key() == Qt.Key_BracketLeft:
-            self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 5)
+        # if event.key() == Qt.Key_BracketLeft:
+        #     self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 5)
 
-        if event.key() == Qt.Key_BracketRight:
-            self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 5)
+        # if event.key() == Qt.Key_BracketRight:
+        #     self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 5)
 
         if event.key() == Qt.Key_Q:
             global_.killer.kill()
@@ -119,16 +119,16 @@ class MainWindow(QMainWindow):
         if event.key() == Qt.Key_2:
             global_.hostData.mode = 2
 
-        if event.key() == Qt.Key_A:
-            global_.hostData.direction = -1
+        # if event.key() == Qt.Key_A:
+        #     global_.hostData.direction = -1
 
-        if event.key() == Qt.Key_D:
-            global_.hostData.direction = 1
+        # if event.key() == Qt.Key_D:
+        #     global_.hostData.direction = 1
 
-        if event.key() == Qt.Key_S:
-            global_.hostData.mode = 0
-            # FIXME: CHANGE DIRECTION HERE
-            self.workWidget.ui.Velocity.setValue(0)
+        # if event.key() == Qt.Key_S:
+        #     global_.hostData.mode = 0
+        #     # FIXME: CHANGE DIRECTION HERE
+        #     self.workWidget.ui.Velocity.setValue(0)
 
         if event.key() == Qt.Key_W:
             if global_.hostData.set_base == 1:
@@ -136,7 +136,7 @@ class MainWindow(QMainWindow):
             else:
                 global_.hostData.set_base = 1
 
-        if event.key() == Qt.Key_R:
-            global_.hostData.mode = 0
-            global_.hostData.direction = 0
-            global_.hostData.set_base = 1
+        # if event.key() == Qt.Key_R:
+        #     global_.hostData.mode = 0
+        #     global_.hostData.direction = 0
+        #     global_.hostData.set_base = 1

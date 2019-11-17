@@ -1,5 +1,5 @@
 import time, global_
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, QMutex
 from mbee import serialstar
 from lib.data_classes import *
 from lib.data_parser import *
@@ -26,9 +26,6 @@ class WatcherThread(QThread):
             global_.hostData.velocity_signal.connect(window.workWidget.ui.Velocity.setValue)
             global_.roadData.coordinate_signal.connect(window.workWidget.ui.Coordinate.setValue)
 
-            # FIXME: REMOVE
-            window.workWidget.ui.Velocity.valueChanged.connect(self.veloChange)
-
         if window.settingsWidget:
             window.settingsWidget.ui.EnableEndPoints.toggled.connect(global_.specialData.enable_end_points_)
             window.settingsWidget.ui.EndPointsStop.toggled.connect(global_.specialData.end_points_stop_)
@@ -50,13 +47,10 @@ class WatcherThread(QThread):
             window.settingsWidget.ui.StopAccelerometer.toggled.emit(False)
             window.settingsWidget.ui.LockButtons.toggled.emit(False)
 
-    # FIXME: REMOVE
-    def veloChange(self, value):
-        global_.hostData.velocity = value
-
 
     def run(self):
         while self.alive:
+            # print(global_.hostData.mode)
             # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
             # print('{}\t{}\t{}'.format(global_.hostData.acceleration,
             #                         global_.hostData.braking,
@@ -82,15 +76,37 @@ class ControlThread(QThread):
                 encValue = self.controller.getEncoderValue(i)
                 self.controller.setIndicator(i, round(encValue/10))
 
-            global_.hostData.acceleration = self.controller.encoders[0]
-            global_.hostData.braking    = self.controller.encoders[1]
-            global_.hostData.velocity   = self.controller.encoders[2]
+            global_.mutex.tryLock(timeout=10)
+            global_.hostData.acceleration = self.controller.encoders[1]
+            global_.hostData.braking    = self.controller.encoders[2]
+            global_.hostData.velocity   = self.controller.encoders[0]
+            global_.mutex.unlock()
 
-            global_.hostData.acceleration_signal.emit(self.controller.encoders[0])
-            global_.hostData.braking_signal.emit(self.controller.encoders[1])
-            global_.hostData.velocity_signal.emit(self.controller.encoders[2])
+            global_.hostData.acceleration_signal.emit(self.controller.encoders[1])
+            global_.hostData.braking_signal.emit(self.controller.encoders[2])
+            global_.hostData.velocity_signal.emit(self.controller.encoders[0])
 
-            time.sleep(0.1)
+            (dummy, value) = self.controller.getButtonValue(0)
+            stop = 0
+            global_.mutex.tryLock(timeout=10)
+            if not (value & (1 << 13)):
+                global_.hostData.mode = 0
+                stop = 1
+            if global_.hostData.mode == 2:
+                if not (value & (1 << 15)):
+                    global_.hostData.direction = -1
+                elif not (value & (1 << 14)):
+                    global_.hostData.direction = 1
+            global_.mutex.unlock()
+
+            if stop:
+                global_.hostData.direction = 0
+                self.controller.setEncoderValue(1, 0)
+                self.controller.setIndicator(1, 0)
+
+            # print(global_.hostData.mode)
+
+            time.sleep(0.2)
 
     def off(self):
         self.controller.off()

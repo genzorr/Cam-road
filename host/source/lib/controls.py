@@ -111,8 +111,8 @@ class Controller:
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
         value = decoder.decode_16bit_int()
-        self.buttons[button-1] = (value and (1 << (button-1)))
-        return (self.buttons[button-1], value)
+        self.buttons[button] = (value & (1 << (button)))
+        return (self.buttons[button], value)
 
     def setButtonValue(self, button, value):
         if (value == 1):
@@ -120,8 +120,7 @@ class Controller:
             if (register == False):
                 return
 
-            button -= 1
-            register = ~(~register and (value << button))
+            register = ~(~register & (value << button))
             builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                            wordorder=Endian.Little)
             builder.add_16bit_int(value)

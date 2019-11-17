@@ -126,7 +126,7 @@ class Watcher(threading.Thread):
         if not global_.motor_thread.controller.is_braking:
             global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
 
-        if global_.motor_thread.controller.mode == BUTTONS:
+        if global_.motor_thread.controller.mode == 2:
             global_.motor_thread.controller.direction = direction
 
         if global_.motor_thread.controller.set_base == 1 and not global_.motor_thread.controller.base1_set:

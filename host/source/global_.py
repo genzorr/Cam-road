@@ -1,4 +1,4 @@
-global lock
+global mutex
 
 global watcher
 global controlThread

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys, signal, os, subprocess
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QMutex
 
 from watcher import *
 from mbee_ import *
@@ -16,8 +17,6 @@ os.environ['DISPLAY'] = ':0'
 #   FIXME: CRC
 #
 #   BUGS: in buttons switches, when lock button is pushed
-
-#   TODO: USE ISINSTANSE
 
 # ssh -X pi@10.0.0.10 x2x -west -to :0
 # sudo stty -F /dev/ttySAC3 19200 cs8 -cstopb -parenb cread time 1 min 0
@@ -51,6 +50,8 @@ class Killer:
 if __name__ == "__main__":
     global_.killer = Killer()
     app = QApplication(sys.argv)
+
+    global_.mutex = QMutex()
 
     global_.hostData = HTRData()
     global_.roadData = RTHData()

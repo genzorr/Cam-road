@@ -9,7 +9,5 @@ global writer
 global watcher
 
 global mbee_thread
-global dev
-global serial_lock
 
 global motor    # Used to on/off motor

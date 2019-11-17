@@ -6,7 +6,7 @@ DESCR1 = struct.pack('B', 0x7e)
 DESCR2 = struct.pack('B', 0xa5)
 
 #----------------------------------------------------------------------------------------------#
-def encrypt_package(package):
+def encrypt_package_(package):
     data = bytes()
     data += DESCR1
     data += DESCR2
