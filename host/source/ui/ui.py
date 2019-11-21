@@ -130,11 +130,11 @@ class MainWindow(QMainWindow):
         #     # FIXME: CHANGE DIRECTION HERE
         #     self.workWidget.ui.Velocity.setValue(0)
 
-        if event.key() == Qt.Key_W:
-            if global_.hostData.set_base == 1:
-                global_.hostData.set_base = 2
-            else:
-                global_.hostData.set_base = 1
+        # if event.key() == Qt.Key_W:
+        #     if global_.hostData.set_base == 1:
+        #         global_.hostData.set_base = 2
+        #     else:
+        #         global_.hostData.set_base = 1
 
         # if event.key() == Qt.Key_R:
         #     global_.hostData.mode = 0

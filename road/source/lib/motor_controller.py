@@ -61,10 +61,11 @@ class Controller:
         self.AB_choose = 0
         self._est_speed = 0.0
         self._HARD_STOP = 0
+        self.direction_changed = 0
 
         self.coordinate = 0
 
-        self.mode = 0
+        self._mode = 0
         self.direction = 1
         self.change_direction = 0
         self.is_braking = 0
@@ -89,6 +90,20 @@ class Controller:
         if value == 1:
             self._speed = 0
             self._est_speed = 0
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @mode.setter
+    def mode(self, value):
+        if value == 0:
+            if self._mode == 1:
+                self.AB_choose = self.direction
+        elif value == 1:
+            if self._mode == 0:
+                self.AB_choose = -1
+        self._mode = value
 
     @property
     def accel(self):
@@ -161,11 +176,11 @@ class Controller:
             self._base2 = value
             self.base2_set = 1
             self.base1_set = 1
-            print('####### BASE2 SET: \t{}\t ######'.format(value))
+            # print('####### BASE2 SET: \t{}\t ######'.format(value))
         else:
             self._base1 = value
             self.base1_set = 1
-            print('####### BASE1 SET: \t{}\t ######'.format(value))
+            # print('####### BASE1 SET: \t{}\t ######'.format(value))
 
     @property
     def base2(self):
@@ -178,11 +193,11 @@ class Controller:
             self._base1 = value
             self.base1_set = 1
             self.base2_set = 1
-            print('####### BASE1 SET: \t{}\t ######'.format(value))
+            # print('####### BASE1 SET: \t{}\t ######'.format(value))
         else:
             self._base2 = value
             self.base2_set = 1
-            print('####### BASE2 SET: \t{}\t ######'.format(value))
+            # print('####### BASE2 SET: \t{}\t ######'.format(value))
 
     def get_data(self):
         # Print message
@@ -230,7 +245,6 @@ class Controller:
             pass
         else:
             if self.mode == STOP:
-                #   Braking if S was pressed
                 dstep = self.calc_dstep(speed_to=0)
 
             elif self.mode == COURSING:
@@ -243,7 +257,7 @@ class Controller:
                     else:
                         dist_to_base = self.base2 - coord
 
-                    braking_dist = speed * speed / (2 * braking) # if braking != 0 else 0
+                    braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
                     if dist_to_base <= braking_dist:
                         self.is_braking = 1
                         self.est_speed = 0
@@ -262,13 +276,12 @@ class Controller:
                 else:
                     dstep = self.calc_dstep(speed_to=self.est_speed)
 
-            elif self.mode == BUTTONS:
-                dstep = self.calc_dstep(speed_to=self.est_speed)
+            # elif self.mode == BUTTONS:
+            #     dstep = self.calc_dstep(speed_to=self.est_speed)
             else:
                 dstep = 0
 
             self.coordinate += dstep
-            # FIXME: MOTOR
             return dstep
         return 0
 

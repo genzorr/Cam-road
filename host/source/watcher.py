@@ -60,8 +60,16 @@ class WatcherThread(QThread):
     def off(self):
         pass
 
+
 #----------------------------------------------------------------------------------------------#
 #   A thread used to communitate with remote control.
+MENU = 3
+HOME = 0
+BASE = 1
+LEFT = 15
+STOP = 13
+RIGHT = 14
+
 class ControlThread(QThread):
     def __init__(self, window=None):
         QThread.__init__(self)
@@ -76,6 +84,7 @@ class ControlThread(QThread):
                 encValue = self.controller.getEncoderValue(i)
                 self.controller.setIndicator(i, round(encValue/10))
 
+            #  Encoders.
             global_.mutex.tryLock(timeout=10)
             global_.hostData.acceleration = self.controller.encoders[1]
             global_.hostData.braking    = self.controller.encoders[2]
@@ -86,25 +95,43 @@ class ControlThread(QThread):
             global_.hostData.braking_signal.emit(self.controller.encoders[2])
             global_.hostData.velocity_signal.emit(self.controller.encoders[0])
 
+            ##  Buttons.
             (dummy, value) = self.controller.getButtonValue(0)
-            stop = 0
+
+            # Stop.
+            stop_flag = 0
             global_.mutex.tryLock(timeout=10)
-            if not (value & (1 << 13)):
+            if not (value & (1 << STOP)):
                 global_.hostData.mode = 0
-                stop = 1
-            if global_.hostData.mode == 2:
-                if not (value & (1 << 15)):
-                    global_.hostData.direction = -1
-                elif not (value & (1 << 14)):
-                    global_.hostData.direction = 1
+                stop_flag = 1
+            # if global_.hostData.mode == 2:
+            if not (value & (1 << LEFT)):
+                global_.hostData.direction = -1
+                global_.hostData.mode = 1
+            elif not (value & (1 << RIGHT)):
+                global_.hostData.direction = 1
+                global_.hostData.mode = 1
             global_.mutex.unlock()
 
-            if stop:
-                global_.hostData.direction = 0
+            if stop_flag:
+                # global_.hostData.direction = 0
                 self.controller.setEncoderValue(1, 0)
                 self.controller.setIndicator(1, 0)
 
-            # print(global_.hostData.mode)
+            # Set base.
+            global_.specialData.end_points_reset = False
+            global_.mutex.tryLock(timeout=10)
+            if not (value & (1 << BASE)):
+                if stop_flag: # Reset base points when STOP and BASE buttons pressed.
+                    global_.hostData.mode = 0
+                    global_.hostData.direction = 0
+                    global_.hostData.set_base = 0
+                    global_.specialData.end_points_reset = True
+                if global_.hostData.set_base == 1:
+                    global_.hostData.set_base = 2
+                else:
+                    global_.hostData.set_base = 1
+            global_.mutex.unlock()
 
             time.sleep(0.2)
 

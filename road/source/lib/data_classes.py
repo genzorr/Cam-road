@@ -11,8 +11,8 @@ class HTRData():
         self.mode = 0
         self.direction = 0
         self.set_base = 0
-        self.crc = 0
 
+        # self.crc = 0
         # Size of package without descriptors and type
         self.size = 4 * 7
 
@@ -32,7 +32,7 @@ class RTHData():
         self.base1 = 0.0
         self.base2 = 0.0
 
-        self.crc = 0
+        # self.crc = 0
         # Size of package without descriptors and type
         self.size = 4 * 9
 
@@ -42,8 +42,8 @@ class HBData():
     def __init__(self):
         self.type = 3
 
-        self.direction = 0
         self.soft_stop = False
+        self.end_points_reset = False
         self.end_points = False
         self.end_points_stop = False
         self.end_points_reverse = False
@@ -53,9 +53,9 @@ class HBData():
         self.HARD_STOP = False
         self.lock_buttons = False
 
-        self.crc = 0
+        # self.crc = 0
         # Size of package without descriptors and type
-        self.size = 4 * 2 + 9
+        self.size = 4 * 1 + 10
 
 #----------------------------------------------------------------------------------------------#
 class Mbee_data:

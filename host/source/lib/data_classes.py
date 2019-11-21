@@ -153,8 +153,8 @@ class HBData(QObject):
         super().__init__()
         self.type = 3
 
-        self.direction = 0
         self.soft_stop = False
+        self.end_points_reset = False
         self.end_points = False
         self.end_points_stop = False
         self.end_points_reverse = False
@@ -164,7 +164,7 @@ class HBData(QObject):
         self.HARD_STOP = False
         self.lock_buttons = False
 
-        self.size = 4 * 1 + 9
+        self.size = 4 * 1 + 10
 
         self.color_red = QColor(255, 0, 0).name()
         self.color_green = QColor(0, 255, 0).name()

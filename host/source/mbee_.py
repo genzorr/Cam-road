@@ -92,18 +92,21 @@ class MbeeThread(QThread):
     def run(self):
         while self.alive:
             # Receive
-            # print('receive 1: ', time.time())
             frame = self.dev.run()
-            # print('receive 2: ', time.time())
 
             # Transmit
             global_.mutex.tryLock(timeout=10)
             package = global_.hostData
             global_.mutex.unlock()
-
             package = encrypt_package(package)
             self.dev.send_tx_request('00', TX_ADDR, package, '11')
-            time.sleep(0.2)
+
+            global_.mutex.tryLock(timeout=10)
+            package = global_.specialData
+            global_.mutex.unlock()
+            package = encrypt_package(package)
+            self.dev.send_tx_request('00', TX_ADDR, package, '11')
+            # time.sleep(0.2)
 
             # Flush dev buffers
             self.t = time.time()
@@ -126,8 +129,6 @@ class MbeeThread(QThread):
             # package = get_decrypt_package(dev)
             # if isinstance(package, RTHData):
             #     self.roadData = package
-
-            time.sleep(0.3)
 
         self.off()
 
@@ -164,8 +165,8 @@ def encrypt_package(package):
         data += float_to_hex(package.base2)
 
     elif package.type == 3:
-        data += int_to_hex(package.direction)
         data += bool_to_hex(package.soft_stop)
+        data += bool_to_hex(package.end_points_reset)
         data += bool_to_hex(package.end_points)
         data += bool_to_hex(package.end_points_stop)
         data += bool_to_hex(package.end_points_reverse)

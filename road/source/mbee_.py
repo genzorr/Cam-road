@@ -15,8 +15,9 @@ def frame_81_received(package):
             update_host_to_road()
         # print(global_.hostData.mode)
     if isinstance(data, HBData):
-        # with global_.lock:
-        global_.specialData = data
+        with global_.lock:
+            global_.specialData = data
+            update_special()
     # print("Received 81-frame.")
     # print(package)
     pass
@@ -81,15 +82,34 @@ def update_host_to_road():
     global_.motor_thread.controller.accel = global_.hostData.acceleration
     global_.motor_thread.controller.braking = global_.hostData.braking
     est_speed = global_.hostData.velocity
-    global_.motor_thread.controller.mode = global_.hostData.mode
     direction = global_.hostData.direction
+    # direction_new = global_.motor_thread.controller.direction_new
     global_.motor_thread.controller.set_base = global_.hostData.set_base
 
     if not global_.motor_thread.controller.is_braking:
         global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
 
-    if global_.motor_thread.controller.mode == 2:
+    # if global_.motor_thread.controller.mode == 2:
+    if global_.motor_thread.controller.direction != direction:
+        global_.motor_thread.controller.direction_changed = 1
+
+
+    if global_.motor_thread.controller.direction_changed != 0:
+        # print('cnahged')
+        if (global_.motor_thread.controller.speed == 0):
+            print('zero')
+            # global_.motor_thread.controller.direction = direction_new if direction_new != 0 else direction
+            global_.motor_thread.controller.direction_changed = 0
+            global_.motor_thread.controller.mode = 1 if direction != 0 else 0
+            global_.motor_thread.controller.direction = direction
+        else:
+            print('here', global_.motor_thread.controller.mode, global_.motor_thread.controller.direction, global_.motor_thread.controller.AB_choose)
+            # global_.motor_thread.controller.direction = direction
+            global_.motor_thread.controller.mode = 0
+            # global_.motor_thread.controller.AB_choose = -1
+    else:
         global_.motor_thread.controller.direction = direction
+        global_.motor_thread.controller.mode = global_.hostData.mode
 
     if global_.motor_thread.controller.set_base == 1 and not global_.motor_thread.controller.base1_set:
         global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
@@ -108,6 +128,12 @@ def update_road_to_host():
     global_.roadData.temperature = global_.mbee_thread.mbee_data.temperature
     global_.roadData.base1 = global_.motor_thread.controller.base1
     global_.roadData.base2 = global_.motor_thread.controller.base2
+
+
+def update_special():
+    if global_.specialData.end_points_reset:
+        global_.motor_thread.controller.base1 = 0
+        global_.motor_thread.controller.base2 = 0
 
 
 
@@ -138,9 +164,7 @@ class Mbee_thread(threading.Thread):
     def run(self):
         while self.alive:
             # Receive
-            # print('receive 1: ', time.time())
             frame = self.dev.run()
-            # print('receive 2: ', time.time())
 
             # Transmit
             self.dev.send_tx_request('01', TX_ADDR, '00')
@@ -221,16 +245,16 @@ def decrypt_package(package):
             package = HBData()
             package.type = 3
 
-            package.direction = hex_to_int(data[0:8])
-            package.soft_stop = hex_to_bool(data[8:10])
-            package.end_points = hex_to_bool(data[10:12])
-            package.end_points_stop = hex_to_bool(data[12:14])
-            package.end_points_reverse = hex_to_bool(data[14:16])
-            package.sound_stop = hex_to_bool(data[16:18])
-            package.swap_direction = hex_to_bool(data[18:20])
-            package.accelerometer_stop = hex_to_bool(data[20:22])
-            package.HARD_STOP = hex_to_bool(data[22:24])
-            package.lock_buttons = hex_to_bool(data[24:26])
+            package.soft_stop = hex_to_bool(data[0:2])
+            package.end_points_reset = hex_to_bool(data[2:4])
+            package.end_points = hex_to_bool(data[4:6])
+            package.end_points_stop = hex_to_bool(data[6:8])
+            package.end_points_reverse = hex_to_bool(data[8:10])
+            package.sound_stop = hex_to_bool(data[10:12])
+            package.swap_direction = hex_to_bool(data[12:14])
+            package.accelerometer_stop = hex_to_bool(data[14:16])
+            package.HARD_STOP = hex_to_bool(data[16:18])
+            package.lock_buttons = hex_to_bool(data[18:20])
 
         else:
             print('error: no such package')
