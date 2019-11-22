@@ -120,6 +120,7 @@ class ControlThread(QThread):
 
             # Set base.
             global_.specialData.end_points_reset = False
+            # global_.hostData.set_base = 0
             global_.mutex.tryLock(timeout=10)
             if not (value & (1 << BASE)):
                 if stop_flag: # Reset base points when STOP and BASE buttons pressed.
@@ -127,11 +128,21 @@ class ControlThread(QThread):
                     global_.hostData.direction = 0
                     global_.hostData.set_base = 0
                     global_.specialData.end_points_reset = True
+
+                # global_.hostData.set_base = 1
                 if global_.hostData.set_base == 1:
                     global_.hostData.set_base = 2
                 else:
                     global_.hostData.set_base = 1
+                print(global_.hostData.set_base)
             global_.mutex.unlock()
+
+            # Reset hard stop.
+            global_.mutex.tryLock(timeout=10)
+            global_.specialData.HARD_STOP = False
+            if not (value & (1 << HOME)):
+                if stop_flag:
+                    global_.specialData.HARD_STOP = True
 
             time.sleep(0.2)
 

@@ -5,4 +5,4 @@ rmate __main__.py
 rmate watcher.py
 rmate mbee_.py
 rmate lib/data_classes.py
-rmate lib/data_parser.py
+rmate lib/motor_controller.py

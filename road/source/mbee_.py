@@ -83,19 +83,28 @@ def update_host_to_road():
     global_.motor_thread.controller.braking = global_.hostData.braking
     est_speed = global_.hostData.velocity
     direction = global_.hostData.direction
-    # direction_new = global_.motor_thread.controller.direction_new
     global_.motor_thread.controller.set_base = global_.hostData.set_base
 
-    if not global_.motor_thread.controller.is_braking:
-        global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
+    # if global_.motor_thread.controller.direction_changed == 0:
+    #     global_.motor_thread.controller.mode = global_.hostData.mode
+    # else:
+    #     global_.motor_thread.controller.mode = 0
+    # if global_.motor_thread.controller.direction != direction:
+    #     if (global_.motor_thread.controller.speed == 0):
+    #         print('zero')
+    #         # global_.motor_thread.controller.direction = direction_new if direction_new != 0 else direction
+    #         global_.motor_thread.controller.direction_changed = 0
+    #         global_.motor_thread.controller.mode = 1 if direction != 0 else 0
+    #         global_.motor_thread.controller.direction = direction
+    #     else:
+    #         global_.motor_thread.controller.direction = direction
+    #         global_.motor_thread.controller.mode = 0
+    #         global_.motor_thread.controller.direction_changed = 1
 
-    # if global_.motor_thread.controller.mode == 2:
-    if global_.motor_thread.controller.direction != direction:
+    if direction != global_.motor_thread.controller.direction:
         global_.motor_thread.controller.direction_changed = 1
 
-
     if global_.motor_thread.controller.direction_changed != 0:
-        # print('cnahged')
         if (global_.motor_thread.controller.speed == 0):
             print('zero')
             # global_.motor_thread.controller.direction = direction_new if direction_new != 0 else direction
@@ -103,13 +112,17 @@ def update_host_to_road():
             global_.motor_thread.controller.mode = 1 if direction != 0 else 0
             global_.motor_thread.controller.direction = direction
         else:
-            print('here', global_.motor_thread.controller.mode, global_.motor_thread.controller.direction, global_.motor_thread.controller.AB_choose)
+            # print('here', global_.motor_thread.controller.mode, global_.motor_thread.controller.direction, global_.motor_thread.controller.AB_choose)
             # global_.motor_thread.controller.direction = direction
             global_.motor_thread.controller.mode = 0
+            global_.motor_thread.controller.est_speed = 0
             # global_.motor_thread.controller.AB_choose = -1
     else:
         global_.motor_thread.controller.direction = direction
         global_.motor_thread.controller.mode = global_.hostData.mode
+        if not global_.motor_thread.controller.is_braking:
+            global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
+
 
     if global_.motor_thread.controller.set_base == 1 and not global_.motor_thread.controller.base1_set:
         global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
@@ -134,6 +147,8 @@ def update_special():
     if global_.specialData.end_points_reset:
         global_.motor_thread.controller.base1 = 0
         global_.motor_thread.controller.base2 = 0
+    if global_.specialData.HARD_STOP:
+        global_.motor_thread.controller.HARD_STOP = 0
 
 
 

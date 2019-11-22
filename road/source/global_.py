@@ -1,5 +1,5 @@
 VELO_MAX = 50
-lock = 0
+global lock
 global hostData
 global roadData
 global specialData

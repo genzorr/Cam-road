@@ -5,6 +5,7 @@ from lib.motor_controller import *
 from lib.data_parser import *
 from lib.lsm6ds3 import *
 from lib.indicator import *
+from lib.usound import *
 
 import global_
 
@@ -53,8 +54,6 @@ class Motor_thread(threading.Thread):
             if global_.motor and self.controller.t % 10 == 0:
                 indicate(self.controller.motor.readV(), self.portex)
 
-            # FIXME: needed lock here?
-
             if global_.motor:
                 self.controller.motor.dstep = self.controller.control()
             else:
@@ -77,19 +76,18 @@ class Watcher(threading.Thread):
         self.alive = True
         self.name = 'Watcher'
         self.accel = Accelerometer()
-        # FIXME: make interrupts
         self.accel.ctrl()
 
+        self.usound = USound()
+
     def run(self):
-        stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}\n'
+        stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}'
 
         while self.alive:
-            # with global_.lock:
-            #     self.update_host_to_road()
-            # with global_.lock:
-            #     self.update_road_to_host()
-            # with global_.lock:
-            #     self.update_special()
+            # Usound.
+            # print(self.usound.read())
+            if (self.usound.read() < 100):
+                global_.motor_thread.controller.HARD_STOP = 1
 
             if global_.motor_thread.alive:
                 # Check accelerometer data.
@@ -104,10 +102,10 @@ class Watcher(threading.Thread):
                 with global_.lock:
                     data = global_.motor_thread.controller.get_data()
                     if (data == None):
-                        data = (0,0,0,0,0,0,'')
+                        data = (0,0,0,0,0,0,'',0)
 
                     if global_.writer.alive:
-                        global_.writer.out = stringData.format(*data)
+                        global_.writer.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\t'+str(global_.motor_thread.controller.set_base)+'\n'#+str(self.usound.read())+'\n'
 
         self.off()
 
