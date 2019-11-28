@@ -105,69 +105,9 @@ class Watcher(threading.Thread):
                         data = (0,0,0,0,0,0,'',0)
 
                     if global_.writer.alive:
-                        global_.writer.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\t'+str(global_.motor_thread.controller.set_base)+'\n'#+str(self.usound.read())+'\n'
+                        global_.writer.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\n'#+str(self.usound.read())+'\n'
 
         self.off()
 
     def off(self):
         print('############  Watcher stopped  ############')
-
-
-    # def update_host_to_road(self):
-    #     global_.motor_thread.controller.accel = global_.hostData.acceleration
-    #     global_.motor_thread.controller.braking = global_.hostData.braking
-    #     est_speed = global_.hostData.velocity
-    #     global_.motor_thread.controller.mode = global_.hostData.mode
-    #     direction = global_.hostData.direction
-    #     global_.motor_thread.controller.set_base = global_.hostData.set_base
-
-    #     if not global_.motor_thread.controller.is_braking:
-    #         global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
-
-    #     if global_.motor_thread.controller.mode == 2:
-    #         global_.motor_thread.controller.direction = direction
-
-    #     if global_.motor_thread.controller.set_base == 1 and not global_.motor_thread.controller.base1_set:
-    #         global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
-    #     elif global_.motor_thread.controller.set_base == 2 and not global_.motor_thread.controller.base2_set:
-    #         global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
-
-    #     return
-
-    # def update_road_to_host(self):
-    #     global_.roadData.mode = global_.motor_thread.controller.mode
-    #     global_.roadData.coordinate = global_.motor_thread.controller.coordinate
-    #     global_.roadData.RSSI = global_.mbee_thread.mbee_data.RSSI
-    #     global_.roadData.voltage = global_.mbee_thread.mbee_data.voltage
-    #     global_.roadData.current = global_.mbee_thread.mbee_data.current
-    #     global_.roadData.temperature = global_.mbee_thread.mbee_data.temperature
-    #     global_.roadData.base1 = global_.motor_thread.controller.base1
-    #     global_.roadData.base2 = global_.motor_thread.controller.base2
-
-    # def update_special(self):
-    #     pass
-
-#-------------------------------------------------------------------------------------#
-#   Serial communication
-def serial_init(speed=19200, port='/dev/ttyS2'):
-    try:
-        dev = serial.Serial(
-        port=port,
-        baudrate=speed,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_ONE,
-        bytesize=serial.EIGHTBITS,
-        timeout=0.2
-    )
-    except serial.serialutil.SerialException:
-        print('Could not open port')
-        dev = None
-
-    return dev
-
-def serial_recv(dev, size):
-    string = dev.read(size).decode()
-    return string
-
-def serial_send(dev, string):
-    dev.write(string.encode('utf-8'))

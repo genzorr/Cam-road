@@ -1,6 +1,7 @@
 import sys, os, struct, time
 import threading
 import global_
+import binascii
 from mbee import serialstar
 from lib.data_classes import *
 
@@ -12,6 +13,7 @@ def frame_81_received(package):
         # print(time.time())
         with global_.lock:
             global_.hostData = data
+            global_.roadData.RSSI = package['RSSI']
             update_host_to_road()
         # print(global_.hostData.mode)
     if isinstance(data, HBData):
@@ -23,42 +25,42 @@ def frame_81_received(package):
     pass
 
 def frame_83_received(package):
-    # print("Received 83-frame.")
+    print("Received 83-frame.")
     # print(package)
     pass
 
 def frame_87_received(package):
-    # print("Received 87-frame.")
+    print("Received 87-frame.")
     # print(package)
     pass
 
 def frame_88_received(package):
-    # print("Received 88-frame.")
+    print("Received 88-frame.")
     # print(package)
     pass
 
 def frame_89_received(package):
-    # print("Received 89-frame.")
+    print("Received 89-frame.")
     # print(package)
     pass
 
 def frame_8A_received(package):
-    # print("Received 8A-frame.")
+    print("Received 8A-frame.")
     # print(package)
     pass
 
 def frame_8B_received(package):
-    # print("Received 8B-frame.")
+    print("Received 8B-frame.")
     # print(package)
     pass
 
 def frame_8C_received(package):
-    # print("Received 8C-frame.")
+    print("Received 8C-frame.")
     # print(package)
     pass
 
 def frame_8F_received(package):
-    # print(time.time())
+    print(time.time())
     # data = decrypt_package(package['DATA'])
     # if isinstance(data, HTRData):
     #     # print(time.time())
@@ -83,40 +85,18 @@ def update_host_to_road():
     global_.motor_thread.controller.braking = global_.hostData.braking
     est_speed = global_.hostData.velocity
     direction = global_.hostData.direction
-    global_.motor_thread.controller.set_base = global_.hostData.set_base
-
-    # if global_.motor_thread.controller.direction_changed == 0:
-    #     global_.motor_thread.controller.mode = global_.hostData.mode
-    # else:
-    #     global_.motor_thread.controller.mode = 0
-    # if global_.motor_thread.controller.direction != direction:
-    #     if (global_.motor_thread.controller.speed == 0):
-    #         print('zero')
-    #         # global_.motor_thread.controller.direction = direction_new if direction_new != 0 else direction
-    #         global_.motor_thread.controller.direction_changed = 0
-    #         global_.motor_thread.controller.mode = 1 if direction != 0 else 0
-    #         global_.motor_thread.controller.direction = direction
-    #     else:
-    #         global_.motor_thread.controller.direction = direction
-    #         global_.motor_thread.controller.mode = 0
-    #         global_.motor_thread.controller.direction_changed = 1
 
     if direction != global_.motor_thread.controller.direction:
         global_.motor_thread.controller.direction_changed = 1
 
     if global_.motor_thread.controller.direction_changed != 0:
         if (global_.motor_thread.controller.speed == 0):
-            print('zero')
-            # global_.motor_thread.controller.direction = direction_new if direction_new != 0 else direction
             global_.motor_thread.controller.direction_changed = 0
             global_.motor_thread.controller.mode = 1 if direction != 0 else 0
             global_.motor_thread.controller.direction = direction
         else:
-            # print('here', global_.motor_thread.controller.mode, global_.motor_thread.controller.direction, global_.motor_thread.controller.AB_choose)
-            # global_.motor_thread.controller.direction = direction
             global_.motor_thread.controller.mode = 0
             global_.motor_thread.controller.est_speed = 0
-            # global_.motor_thread.controller.AB_choose = -1
     else:
         global_.motor_thread.controller.direction = direction
         global_.motor_thread.controller.mode = global_.hostData.mode
@@ -124,10 +104,12 @@ def update_host_to_road():
             global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
 
 
-    if global_.motor_thread.controller.set_base == 1 and not global_.motor_thread.controller.base1_set:
+    if global_.hostData.set_base == 1 and not global_.roadData.base1_set:
         global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
-    elif global_.motor_thread.controller.set_base == 2 and not global_.motor_thread.controller.base2_set:
+        global_.roadData.base1_set = True
+    elif global_.hostData.set_base == 2 and not global_.roadData.base2_set:
         global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
+        global_.roadData.base2_set = True
 
     return
 
@@ -141,12 +123,17 @@ def update_road_to_host():
     global_.roadData.temperature = global_.mbee_thread.mbee_data.temperature
     global_.roadData.base1 = global_.motor_thread.controller.base1
     global_.roadData.base2 = global_.motor_thread.controller.base2
+    global_.roadData.direction = global_.motor_thread.controller.direction
 
 
 def update_special():
     if global_.specialData.end_points_reset:
+        global_.roadData.base1_set = False
+        global_.roadData.base2_set = False
         global_.motor_thread.controller.base1 = 0
         global_.motor_thread.controller.base2 = 0
+        global_.motor_thread.controller.base1_set = False
+        global_.motor_thread.controller.base2_set = False
     if global_.specialData.HARD_STOP:
         global_.motor_thread.controller.HARD_STOP = 0
 
@@ -182,40 +169,23 @@ class Mbee_thread(threading.Thread):
             frame = self.dev.run()
 
             # Transmit
-            self.dev.send_tx_request('01', TX_ADDR, '00')
+            package = None
+            with global_.lock:
+                update_road_to_host()
+                package = global_.roadData
+
+
+            if package is not None:
+                package = encrypt_package(package)
+                self.dev.send_tx_request('01', TX_ADDR, package, '11')
 
             # Flush dev buffers
             self.t = time.time()
-            if ((self.t - self.t_prev) > 7):
+            if ((self.t - self.t_prev) > 5):
                 self.t_prev = self.t
                 self.dev.ser.flush()
                 self.dev.ser.reset_input_buffer()
                 self.dev.ser.reset_output_buffer()
-
-            # Receiving
-            # with global_.serial_lock:
-            # package = get_decrypt_package(self.dev)
-            # if isinstance(package, HTRData):
-            #     with global_.lock:
-            #         global_.hostData = package
-            # if isinstance(package, HBData):
-            #     with global_.lock:
-            #         global_.specialData = package
-
-            # # Transmitting
-            # with global_.lock:
-            #     package = global_.roadData
-            # with global_.serial_lock:
-            #     if package:
-            #         self.dev.write(encrypt_package(package))
-
-            ##  Other method
-            # tmp = self.dev.read(30)
-            # if tmp:
-            #     buff += tmp
-            #     # print('data read')
-            #     package = decrypt_data(buff)
-            # tmp = None
 
         self.off()
 
@@ -255,6 +225,9 @@ def decrypt_package(package):
             package.temperature = hex_to_float(data[40:48])
             package.base1 = hex_to_float(data[48:56])
             package.base2 = hex_to_float(data[56:64])
+            package.base1_set = hex_to_bool(data[64:66])
+            package.base2_set = hex_to_bool(data[66:68])
+            package.direction = hex_to_int(data[68:76])
 
         elif package_type == 3:
             package = HBData()
@@ -286,17 +259,67 @@ def decrypt_package(package):
         return None
 
 
+def encrypt_package(package):
+    if not package:
+        return None
+
+    data = str()
+    data += int_to_hex(package.type)
+
+    if package.type == 1:
+        data += float_to_hex(package.acceleration)
+        data += float_to_hex(package.braking)
+        data += float_to_hex(package.velocity)
+        data += int_to_hex(package.mode)
+        data += int_to_hex(package.direction)
+        data += int_to_hex(package.set_base)
+
+    elif package.type == 2:
+        data += int_to_hex(package.mode)
+        data += float_to_hex(package.coordinate)
+        data += float_to_hex(package.RSSI)
+        data += float_to_hex(package.voltage)
+        data += float_to_hex(package.current)
+        data += float_to_hex(package.temperature)
+        data += float_to_hex(package.base1)
+        data += float_to_hex(package.base2)
+        data += bool_to_hex(package.base1_set)
+        data += bool_to_hex(package.base2_set)
+        data += int_to_hex(package.direction)
+
+    elif package.type == 3:
+        data += bool_to_hex(package.soft_stop)
+        data += bool_to_hex(package.end_points_reset)
+        data += bool_to_hex(package.end_points)
+        data += bool_to_hex(package.end_points_stop)
+        data += bool_to_hex(package.end_points_reverse)
+        data += bool_to_hex(package.sound_stop)
+        data += bool_to_hex(package.swap_direction)
+        data += bool_to_hex(package.accelerometer_stop)
+        data += bool_to_hex(package.HARD_STOP)
+        data += bool_to_hex(package.lock_buttons)
+
+    else:
+        return None
+
+    return data
+
+
+
 def bool_to_hex(c):
     b = struct.pack('>?', c)
-    return b.hex()
+    h = binascii.hexlify(b).decode('ascii')
+    return h
 
 def int_to_hex(i):
     b = struct.pack('>i', i)
-    return b.hex()
+    h = binascii.hexlify(b).decode('ascii')
+    return h
 
 def float_to_hex(f):
     b = struct.pack('>f', f)
-    return b.hex()
+    h = binascii.hexlify(b).decode('ascii')
+    return h
 
 def hex_to_bool(b):
     (x,) = struct.unpack('>?', bytes.fromhex(b))

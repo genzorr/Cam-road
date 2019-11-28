@@ -27,6 +27,8 @@ STOP = 0
 COURSING = 1
 BUTTONS = 2
 
+DEAD_ZONE = 1
+
 class Controller:
     def __init__(self):
         # FIXME: MOTOR
@@ -72,9 +74,11 @@ class Controller:
 
         self._base1 = 0.0
         self._base2 = 0.0
-        self.set_base = 0
-        self.base1_set = 0
-        self.base2_set = 0
+        self.base1_set = False
+        self.base2_set = False
+
+        self.was_in_zone = False
+
 
     def off(self):
         self.motor.release()             # Release motor
@@ -172,20 +176,7 @@ class Controller:
     @base1.setter
     def base1(self, value):
         self._base1 = value
-        self.base1_set = 1
-        print('base1 set')
-        # self.set_base = 1
-        # if (value > self._base2) and (self.base2 != 0):
-        #     self._base1 = self._base2
-        #     self._base2 = value
-        #     self.base2_set = 1
-        #     self.base1_set = 1
-        #     self.coordinate = -self.coordinate
-        #     # print('####### BASE2 SET: \t{}\t ######'.format(value))
-        # else:
-        #     self._base1 = value
-        #     self.base1_set = 1
-        #     # print('####### BASE1 SET: \t{}\t ######'.format(value))
+        self.base1_set = True
 
     @property
     def base2(self):
@@ -194,23 +185,11 @@ class Controller:
     @base2.setter
     def base2(self, value):
         self._base2 = value
-        if value < self.base1:
-            self._base1 = value
+        if (value < self._base1):
             self._base2 = self._base1
-        self.base2_set = 1
-        print('base2 set')
-        # self.set_base = 2
-        # if (value < self.base1):# and (self.base1 != 0):
-        #     self._base2 = self._base1
-        #     self._base1 = value
-        #     self.base1_set = 1
-        #     self.base2_set = 1
-        #     self.coordinate = -self.coordinate
-        #     # print('####### BASE1 SET: \t{}\t ######'.format(value))
-        # else:
-        #     self._base2 = value
-        #     self.base2_set = 1
-        #     # print('####### BASE2 SET: \t{}\t ######'.format(value))
+            self._base1 = value
+        self.base2_set = True
+
 
     def get_data(self):
         # Print message
@@ -244,6 +223,8 @@ class Controller:
         coord = self.coordinate
         braking = self.braking
 
+        # out_of_breaking = True
+
         # Update time
         self.t_prev = self.t
         self.t = time.time() - self.starttime
@@ -260,40 +241,52 @@ class Controller:
             if self.mode == STOP:
                 dstep = self.calc_dstep(speed_to=0)
 
+                if self.is_braking and (self.speed == 0):
+                    self.direction = - self.direction
+                    self.is_braking = 0
+                    self.mode = COURSING
+
             elif self.mode == COURSING:
                 #   In this mode road will be coursing between two bases
 
                 #   Consider braking into bases points
-                if (self.base1_set == 1) and (self.base2_set == 1):
-                    if (self.coordinate < self.base1) or (self.coordinate > self.base2):
+                if self.base1_set and self.base2_set:
+                    distance = self.base2 - self.base1
+
+                    if not self.was_in_zone and ((self.coordinate < self.base1) or (self.coordinate > self.base2)):
                         dstep = self.calc_dstep(speed_to=self.est_speed)
                     else:
+                        self.was_in_zone = True
+
                         if self.direction == -1:
                             dist_to_base = coord - self.base1
                         else:
                             dist_to_base = self.base2 - coord
 
-                        braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
-                        if dist_to_base <= braking_dist:
-                            self.is_braking = 1
-                            self.est_speed = 0
-                            dstep = self.calc_dstep(speed_to=0)
+                        if not self.is_braking:
+                            braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
+                            if dist_to_base <= braking_dist:
+                                self.is_braking = 1
+                                self.est_speed = 0
+                                self.mode = 0
+                                dstep = self.calc_dstep(speed_to=0)
 
-                            # FIXME: seems strange, I should change direction when JUST stopped
-                            if dist_to_base < abs(dstep):
-                                dstep = dist_to_base * self.direction
-                                self.direction = -self.direction
-                                self.change_direction = 1 if self.change_direction == 0 else 0
+                                # # FIXME: seems strange, I should change direction when JUST stopped
+                                # if out_of_breaking and (dist_to_base < abs(dstep)):
+                                #     out_of_breaking = False
+                                #     dstep = dist_to_base * self.direction
+                                #     self.direction = -self.direction
+                                #     self.change_direction = 1 if self.change_direction == 0 else 0
+                                # else:
+                                #     dstep = 0
                             else:
-                                pass
+                                self.is_braking = 0
+                                dstep = self.calc_dstep(speed_to=self.est_speed)
                         else:
-                            self.is_braking = 0
-                            dstep = self.calc_dstep(speed_to=self.est_speed)
+                            dstep = 0
                 else:
                     dstep = self.calc_dstep(speed_to=self.est_speed)
 
-            # elif self.mode == BUTTONS:
-            #     dstep = self.calc_dstep(speed_to=self.est_speed)
             else:
                 dstep = 0
 

@@ -21,7 +21,7 @@ def main():
     global_.mbee_thread = None
 
     ## Variables.
-    global_.motor = 1
+    global_.motor = 0
     global_.lock = threading.Lock()
     global_.hostData = HTRData()
     global_.roadData = RTHData()

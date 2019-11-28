@@ -70,16 +70,23 @@ LEFT = 15
 STOP = 13
 RIGHT = 14
 
+def _check_bit(value, bit):
+    return True if not (value & (1 << bit)) else False
+
 class ControlThread(QThread):
     def __init__(self, window=None):
         QThread.__init__(self)
         self.alive = True
         self.controller = Controller()
 
+        self.t = self.t_prev = 0
+
         self.finished.connect(self.controller.off)
 
     def run(self):
         while self.alive and self.controller.status:
+            self.t = time.time()
+
             for i in range(1, 3+1):
                 encValue = self.controller.getEncoderValue(i)
                 self.controller.setIndicator(i, round(encValue/10))
@@ -101,14 +108,14 @@ class ControlThread(QThread):
             # Stop.
             stop_flag = 0
             global_.mutex.tryLock(timeout=10)
-            if not (value & (1 << STOP)):
+            if _check_bit(value, STOP):
                 global_.hostData.mode = 0
                 stop_flag = 1
             # if global_.hostData.mode == 2:
-            if not (value & (1 << LEFT)):
+            if _check_bit(value, LEFT):
                 global_.hostData.direction = -1
                 global_.hostData.mode = 1
-            elif not (value & (1 << RIGHT)):
+            elif _check_bit(value, RIGHT):
                 global_.hostData.direction = 1
                 global_.hostData.mode = 1
             global_.mutex.unlock()
@@ -120,27 +127,28 @@ class ControlThread(QThread):
 
             # Set base.
             global_.specialData.end_points_reset = False
-            # global_.hostData.set_base = 0
+            global_.hostData.set_base = 0
             global_.mutex.tryLock(timeout=10)
-            if not (value & (1 << BASE)):
+            if _check_bit(value, BASE):
+                if (self.t - self.t_prev > 2):
+                    self.t_prev = self.t
+                    if not global_.roadData.base1_set:
+                        global_.hostData.set_base = 1
+                    elif not global_.roadData.base2_set:
+                        global_.hostData.set_base = 2
+                print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
+
                 if stop_flag: # Reset base points when STOP and BASE buttons pressed.
                     global_.hostData.mode = 0
                     global_.hostData.direction = 0
                     global_.hostData.set_base = 0
                     global_.specialData.end_points_reset = True
-
-                # global_.hostData.set_base = 1
-                if global_.hostData.set_base == 1:
-                    global_.hostData.set_base = 2
-                else:
-                    global_.hostData.set_base = 1
-                print(global_.hostData.set_base)
             global_.mutex.unlock()
 
             # Reset hard stop.
             global_.mutex.tryLock(timeout=10)
             global_.specialData.HARD_STOP = False
-            if not (value & (1 << HOME)):
+            if _check_bit(value, HOME):
                 if stop_flag:
                     global_.specialData.HARD_STOP = True
 

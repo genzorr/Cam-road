@@ -21,7 +21,6 @@ class HTRData(QObject):
         self.direction = 0
         self.set_base = 0
 
-        self.size = 4 * 6
 
     @property  # Acceleration value property
     def acceleration(self):
@@ -76,14 +75,17 @@ class RTHData(QObject):
 
         self.mode = 0
         self._coordinate = 0.0
+
         self._RSSI = 0.0
         self._voltage = 0.0
         self._current = 0.0
         self._temperature = 0.0
         self.base1 = 0.0
         self.base2 = 0.0
+        self.base1_set = False
+        self.base2_set = False
 
-        self.size = 4 * 8
+        self.direction = 0
 
     @property  # Coordinate value property
     def coordinate(self):
@@ -163,8 +165,6 @@ class HBData(QObject):
         self.accelerometer_stop = False
         self.HARD_STOP = False
         self.lock_buttons = False
-
-        self.size = 4 * 1 + 10
 
         self.color_red = QColor(255, 0, 0).name()
         self.color_green = QColor(0, 255, 0).name()

@@ -12,10 +12,6 @@ class HTRData():
         self.direction = 0
         self.set_base = 0
 
-        # self.crc = 0
-        # Size of package without descriptors and type
-        self.size = 4 * 7
-
 
 #----------------------------------------------------------------------------------------------#
 #   Keeps 'road-to-host' data
@@ -25,16 +21,17 @@ class RTHData():
 
         self.mode = 0
         self.coordinate = 0.0
+
         self.RSSI = 0.0
         self.voltage = 0.0
         self.current = 0.0
         self.temperature = 0.0
         self.base1 = 0.0
         self.base2 = 0.0
+        self.base1_set = False
+        self.base2_set = False
 
-        # self.crc = 0
-        # Size of package without descriptors and type
-        self.size = 4 * 9
+        self.direction = 0
 
 #----------------------------------------------------------------------------------------------#
 #   Keeps host's buttons data
@@ -52,10 +49,6 @@ class HBData():
         self.accelerometer_stop = False
         self.HARD_STOP = False
         self.lock_buttons = False
-
-        # self.crc = 0
-        # Size of package without descriptors and type
-        self.size = 4 * 1 + 10
 
 #----------------------------------------------------------------------------------------------#
 class Mbee_data:
