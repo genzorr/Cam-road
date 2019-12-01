@@ -145,13 +145,6 @@ class ControlThread(QThread):
                     global_.specialData.end_points_reset = True
             global_.mutex.unlock()
 
-            # Reset hard stop.
-            global_.mutex.tryLock(timeout=10)
-            global_.specialData.HARD_STOP = False
-            if _check_bit(value, HOME):
-                if stop_flag:
-                    global_.specialData.HARD_STOP = True
-
             time.sleep(0.2)
 
     def off(self):

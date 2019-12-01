@@ -54,10 +54,11 @@ class Motor_thread(threading.Thread):
             if global_.motor and self.controller.t % 10 == 0:
                 indicate(self.controller.motor.readV(), self.portex)
 
-            if global_.motor:
-                self.controller.motor.dstep = self.controller.control()
-            else:
-                value = self.controller.control()
+            self.controller.update()
+            try:
+                self.controller.motor.dstep = self.controller.dstep
+            # else:
+            #     value = self.controller.control()
 
         self.off()
 

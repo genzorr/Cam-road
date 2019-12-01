@@ -9,5 +9,3 @@ global killer
 global hostData
 global roadData
 global specialData
-
-global dev

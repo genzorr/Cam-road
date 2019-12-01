@@ -4,8 +4,10 @@ sys.path.append('../../fortune-controls/Lib')
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from x4motor import X4Motor
 
+from queue import LifoQueue
+
 # sudo ./modbus -r -d /dev/ttySAC3 -b 115200 -f 3 -s 2 -a 0 -n 20
-#-------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------#
 #   Settings
 config = {'id': 1,\
         'Mode': 'Angle',\
@@ -24,15 +26,43 @@ config = {'id': 1,\
 
 #----------------------------------------------------------------------------------------------#
 STOP = 0
-COURSING = 1
-BUTTONS = 2
+COURSE = 1
+COURSE_BASES = 2
+EMERGENCY = 5
 
-DEAD_ZONE = 1
 
-class Controller:
+class FSM:
+    def __init__(self, init_state):
+        self.stack = LifoQueue()
+
+    def update(self):
+        currentStateFunction = self.getCurrentState()
+        if currentStateFunction is not None:
+            currentStateFunction()
+
+    def popState(self):
+        self.stack.get_nowait()
+
+    def pushState(self, state):
+        if (self.getCurrentState() != state):
+            self.stack.put(state)
+
+    def changeState(state):
+        with global_.lock:
+            self.stack.get_nowait()
+            if (self.getCurrentState() != state):
+                self.stack.put(state)
+
+
+    def getCurrentState(self):
+        lenght = self.stack.qsize()
+        return self.stack[length - 1] if (lenght > 0) else None
+
+
+class Controller(FSM):
     def __init__(self):
-        # FIXME: MOTOR
-        if global_.motor:
+        super(FSM, self).__init__(self.stop)
+        try:
             print("Motor connection...")
             self.client = ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
                                        bytesize = 8, parity = 'N', baudrate= 115200,
@@ -48,11 +78,10 @@ class Controller:
             #   Print all registers
             registers = self.motor.readAllRO()
             print(registers)
-        else:
-            self.motor = None
+        # else:
+        #     self.motor = None
 
         self.starttime = time.time()
-        # self.data = ''
 
         self.t = 0.0
         self.t_prev = 0.0
@@ -63,12 +92,16 @@ class Controller:
         self.AB_choose = 0
         self._est_speed = 0.0
         self._HARD_STOP = 0
-        self.direction_changed = 0
+        self.SOFT_STOP = 0
 
+        self.dstep = 0
         self.coordinate = 0
 
-        self._mode = 0
-        self.direction = 1
+        self.direction_changed = 0
+
+
+        self.mode = 0
+        self.direction = 0
         self.change_direction = 0
         self.is_braking = 0
 
@@ -77,13 +110,13 @@ class Controller:
         self.base1_set = False
         self.base2_set = False
 
-        self.was_in_zone = False
-
 
     def off(self):
-        self.motor.release()             # Release motor
-        self.client.close()
+        try:
+            self.motor.release()    # Release motor
+            self.client.close()
 
+    #---------- PROPERTIES ----------#
     @property
     def HARD_STOP(self):
         return self._HARD_STOP
@@ -94,20 +127,6 @@ class Controller:
         if value == 1:
             self._speed = 0
             self._est_speed = 0
-
-    @property
-    def mode(self):
-        return self._mode
-
-    @mode.setter
-    def mode(self, value):
-        # if value == 0:
-        #     if self._mode == 1:
-        #         self.AB_choose = self.direction
-        # elif value == 1:
-        #     if self._mode == 0:
-        #         self.AB_choose = -1
-        self._mode = value
 
     @property
     def accel(self):
@@ -189,7 +208,7 @@ class Controller:
             self._base2 = self._base1
             self._base1 = value
         self.base2_set = True
-
+    #--------------------------------#
 
     def get_data(self):
         # Print message
@@ -217,6 +236,50 @@ class Controller:
         return l
 
 
+    def stop(self):
+        if self.direction != 0:
+            self.HARD_STOP = 0
+            self.SOFT_STOP = 0
+            self.changeState(self.course)
+
+        self.dstep = self.calc_dstep(speed_to=0)
+        self.coordinate += self.dstep
+            # if (self.base1_set and self.base2_set):
+            #     self.stack.pushState(self.course_bases)
+            # else:
+            #     self.stack.pushState(self.course)
+
+    def stop_transitial(self):
+        if (self.HARD_STOP or self.SOFT_STOP):
+            self.changeState(self.stop)
+
+        if (self.speed == 0):
+            self.direction = - self.direction
+            self.changeState(self.course)
+
+        self.dstep = self.calc_dstep(speed_to=0)
+        self.coordinate += self.dstep
+
+
+    def course(self):
+        if (self.HARD_STOP or self.SOFT_STOP):
+            self.changeState(self.stop)
+
+        if (self.base1_set and self.base2_set):
+            if self.direction == -1:
+                dist_to_base = coord - self.base1
+            else:
+                dist_to_base = self.base2 - coord
+
+            braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
+            if dist_to_base <= braking_dist:
+                self.changeState(self.stop_transitial)
+        else:
+            self.dstep = self.calc_dstep(speed_to=self.est_speed)
+
+        self.coordinate += self.dstep
+
+
     """ Returns motor dstep value """
     def control(self):
         speed = self.speed
@@ -230,10 +293,6 @@ class Controller:
         self.t = time.time() - self.starttime
 
         if self.HARD_STOP == 1:
-            # No moving if hard stop is enabled
-            # if (self.speed == 0):
-            #     self.mode = 0
-            #     self.HARD_STOP = 0
             pass
         elif self.mode == STOP and self.speed == 0:
             pass
@@ -293,45 +352,3 @@ class Controller:
             self.coordinate += dstep
             return dstep
         return 0
-
-
-        # old function
-    def get_package(self):
-        try:
-            if self.data != '':
-                start = self.data.find('255')
-                end = self.data.find('254', start+3, len(self.data))
-
-                if (end != -1) and (start != -1):
-                    self.data = self.data[start+3:end]
-                else:
-                    return
-
-                temp = self.data.split(' ')
-                est_speed, self.accel, self.braking, self.mode, direction, self.set_base = \
-                float(temp[0]), float(temp[1]), float(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])
-
-                if not self.is_braking:
-                    self.est_speed = est_speed
-
-                if self.mode > 2:
-                    self.mode = 0
-                self.accel = 3
-                self.braking = 3
-
-                # direction field: -1 if moving left, +1 if right, 0 if stop
-                if self.mode == BUTTONS:
-                    self.direction = direction
-
-                if self.set_base == 1 and not self.base1_set:
-                    self.base1 = self.coordinate
-                elif self.set_base == 2 and not self.base2_set:
-                    self.base2 = self.coordinate
-
-                self.data = ''
-
-        except ValueError:
-            print('error')
-        except IndexError:
-            print('error')
-        return
