@@ -8,6 +8,7 @@ from PyQt5.QtCore import pyqtSlot
 
 button_reg = 3
 indicator_reg = 4
+battery_reg = 7
 
 ENC_MAX = 100
 ENC_MIN = 0
@@ -133,3 +134,13 @@ class Controller:
         builder.add_16bit_int(VAL[count])
         payload = builder.to_registers()[0]
         self.client.write_register(indicator_reg + (4-indicator), payload, unit=self.id)
+
+
+    def getBatteryLevel(self):
+        result,success = self.saferead(battery_reg, 1, unit=self.id)
+        if not success:
+            return -1
+        decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
+                                                     byteorder=Endian.Big,
+                                                     wordorder=Endian.Little)
+        return decoder.decode_16bit_int()

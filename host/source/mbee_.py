@@ -8,27 +8,31 @@ from PyQt5.QtCore import QThread, QMutex
 from mbee import serialstar
 from lib.data_classes import *
 
-TX_ADDR = '0002'
+TX_ADDR = '0001'
 
 
 def frame_81_received(package):
     data = decrypt_package(package['DATA'])
-    print('here')
     if isinstance(data, RTHData):
         global_.mutex.tryLock(timeout=10)
         global_.roadData = data
         update_road_to_host()
+        global_.mbeeThread.RSSI = package['RSSI']
         global_.mutex.unlock()
     # print("Received 81-frame.")
     # print(package)
     pass
 
 def frame_83_received(package):
+    # if (global_.mbeeThread.self_test == 1):
+    #     global_.mbeeThread.self_test = 0
     # print("Received 83-frame.")
     # print(package)
     pass
 
 def frame_87_received(package):
+    if (global_.mbeeThread.self_test == 1):
+        global_.mbeeThread.self_test = 0
     # print("Received 87-frame.")
     # print(package)
     pass
@@ -54,14 +58,13 @@ def frame_8B_received(package):
     pass
 
 def frame_8C_received(package):
+    if (global_.mbeeThread.self_test == 1):
+        global_.mbeeThread.self_test = 0
     # print("Received 8C-frame.")
     # print(package)
     pass
 
 def frame_8F_received(package):
-    # if (package['SOURCE_ADDRESS_HEX'] == TX_ADDR):
-    #     rssi = package['RSSI']
-    #     global_.roadData.RSSI = rssi
     # print("Received 8F-frame.")
     # print(package)
     pass
@@ -73,25 +76,37 @@ def frame_97_received(package):
 
 
 def update_road_to_host():
-    global_.roadData.RSSI_signal.emit(global_.roadData.RSSI)
-    global_.hostData.mode = global_.roadData.mode
-    global_.hostData.direction = global_.roadData.direction
+    # global_.roadData.RSSI_signal.emit(global_.roadData.RSSI)
+    # global_.hostData.mode = global_.roadData.mode
+    # global_.hostData.direction = global_.roadData.direction
     pass
 
 
 #----------------------------------------------------------------------------------------------#
 #   A thread used to operate with MBee.
 class MbeeThread(QThread):
+    RSSI_signal = pyqtSignal(int)
+
     def __init__(self, port='/dev/ttySAC4', baudrate=19200):
         QThread.__init__(self)
         self.alive = True
+
+        self.self_test = 0
+        self.test_local = 1
+        self.test_remote = 1
+
         self.t = 0
         self.t_prev = 0
+        self.RSSI = 0
 
         # subprocess.call('./radio_off.sh')
         # subprocess.call('./radio_on.sh')
 
-        self.dev = serialstar.SerialStar(port, baudrate, 0.4)
+        try:
+            self.dev = serialstar.SerialStar(port, baudrate, 0.4)
+        except BaseException:
+            self.dev = None
+            self.alive = False
 
         #  Callback-functions registering.
         self.dev.callback_registring("81", frame_81_received)
@@ -106,6 +121,10 @@ class MbeeThread(QThread):
         self.dev.callback_registring("97", frame_97_received)
 
     def run(self):
+        self.run_self_test()
+        if (self.test_local == 0) or (self.test_remote == 0):
+            self.alive = False
+
         while self.alive:
             # Receive
             frame = self.dev.run()
@@ -144,7 +163,40 @@ class MbeeThread(QThread):
         if self.dev:
             self.dev.ser.close()
             self.dev = None
-        pass
+
+
+    def run_self_test(self):
+        # Test 1: remote
+        self.self_test = 1
+        test_time = time.time()
+
+        while ((time.time() - test_time) < 5):
+            self.dev.send_tx_request('00', TX_ADDR, '0001', '10')
+            frame = self.dev.run()
+
+            if self.self_test == 0:
+                break
+
+        if (self.self_test == 1):
+            print('# No remote module.')
+            self.test_remote = 0
+
+        # Test 2: local
+        self.self_test = 1
+        test_time = time.time()
+
+        while (time.time() - test_time) < 5:
+            self.dev.send_immidiate_apply_local_at('01', 'MY')
+            frame = self.dev.run()
+
+            if self.self_test == 0:
+                break
+
+        if (self.self_test == 1):
+            print('# No module.')
+            self.test_local = 0
+
+
 
 def decrypt_package(package):
     try:
@@ -169,15 +221,14 @@ def decrypt_package(package):
 
             package.mode = hex_to_int(data[0:8])
             package.coordinate = hex_to_float(data[8:16])
-            package.RSSI = hex_to_float(data[16:24])
-            package.voltage = hex_to_float(data[24:32])
-            package.current = hex_to_float(data[32:40])
-            package.temperature = hex_to_float(data[40:48])
-            package.base1 = hex_to_float(data[48:56])
-            package.base2 = hex_to_float(data[56:64])
-            package.base1_set = hex_to_bool(data[64:66])
-            package.base2_set = hex_to_bool(data[66:68])
-            package.direction = hex_to_int(data[68:76])
+            package.voltage = hex_to_float(data[16:24])
+            package.current = hex_to_float(data[24:32])
+            package.temperature = hex_to_float(data[32:40])
+            package.base1 = hex_to_float(data[40:48])
+            package.base2 = hex_to_float(data[48:56])
+            package.base1_set = hex_to_bool(data[56:58])
+            package.base2_set = hex_to_bool(data[58:60])
+            package.direction = hex_to_int(data[60:68])
 
         elif package_type == 3:
             package = HBData()
@@ -227,7 +278,6 @@ def encrypt_package(package):
     elif package.type == 2:
         data += int_to_hex(package.mode)
         data += float_to_hex(package.coordinate)
-        data += float_to_hex(package.RSSI)
         data += float_to_hex(package.voltage)
         data += float_to_hex(package.current)
         data += float_to_hex(package.temperature)

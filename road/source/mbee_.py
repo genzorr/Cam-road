@@ -5,62 +5,64 @@ import binascii
 from mbee import serialstar
 from lib.data_classes import *
 
-TX_ADDR = '0001'
+TX_ADDR = '0002'
 
 def frame_81_received(package):
     data = decrypt_package(package['DATA'])
     if isinstance(data, HTRData):
-        # print(time.time())
-        with global_.lock:
-            global_.hostData = data
-            global_.roadData.RSSI = package['RSSI']
-            update_host_to_road()
-        # print(global_.hostData.mode)
+        global_.lock.acquire(blocking=True, timeout=1)
+        global_.hostData = data
+        update_host_to_road()
+        global_.lock.release()
     if isinstance(data, HBData):
-        with global_.lock:
-            global_.specialData = data
-            update_special()
+        global_.lock.acquire(blocking=True, timeout=1)
+        global_.specialData = data
+        update_special()
+        global_.lock.release()
     # print("Received 81-frame.")
     # print(package)
     pass
 
 def frame_83_received(package):
-    print("Received 83-frame.")
+    # print("Received 83-frame.")
     # print(package)
     pass
 
 def frame_87_received(package):
-    print("Received 87-frame.")
+    if (global_.mbee_thread.self_test == 1):
+        global_.mbee_thread.self_test = 0
+    # print("Received 87-frame.")
     # print(package)
     pass
 
 def frame_88_received(package):
-    print("Received 88-frame.")
+    # print("Received 88-frame.")
     # print(package)
     pass
 
 def frame_89_received(package):
-    print("Received 89-frame.")
+    # print("Received 89-frame.")
     # print(package)
     pass
 
 def frame_8A_received(package):
-    print("Received 8A-frame.")
+    # print("Received 8A-frame.")
     # print(package)
     pass
 
 def frame_8B_received(package):
-    print("Received 8B-frame.")
+    # print("Received 8B-frame.")
     # print(package)
     pass
 
 def frame_8C_received(package):
-    print("Received 8C-frame.")
+    if (global_.mbee_thread.self_test == 1):
+        global_.mbee_thread.self_test = 0
+    # print("Received 8C-frame.")
     # print(package)
     pass
 
 def frame_8F_received(package):
-    print(time.time())
     # data = decrypt_package(package['DATA'])
     # if isinstance(data, HTRData):
     #     # print(time.time())
@@ -71,37 +73,55 @@ def frame_8F_received(package):
     # if isinstance(data, HBData):
     #     # with global_.lock:
     #     global_.specialData = data
+    # print("Received 8F-frame.")
     pass
 
 
 def frame_97_received(package):
-    pass
     # print("Received 97-frame.")
     # print(package)
+    pass
 
 
 def update_host_to_road():
     global_.motor_thread.controller.accel = global_.hostData.acceleration
     global_.motor_thread.controller.braking = global_.hostData.braking
-    est_speed = global_.hostData.velocity
-    direction = global_.hostData.direction
+    global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
 
-    if direction != global_.motor_thread.controller.direction:
-        global_.motor_thread.controller.direction_changed = 1
+    # TODO::::::
+    # if global_.hostData.direction:
+    #     global_.motor_thread.controller.reverse = 1
+    # if (global_.motor_thread.controller.speed == 0):
 
-    if global_.motor_thread.controller.direction_changed != 0:
-        if (global_.motor_thread.controller.speed == 0):
-            global_.motor_thread.controller.direction_changed = 0
-            global_.motor_thread.controller.mode = 1 if direction != 0 else 0
-            global_.motor_thread.controller.direction = direction
-        else:
-            global_.motor_thread.controller.mode = 0
+    if (global_.hostData.mode == 0):
+        if (global_.motor_thread.controller.mode != 0):
+            global_.motor_thread.controller.soft_stop = 1
             global_.motor_thread.controller.est_speed = 0
-    else:
-        global_.motor_thread.controller.direction = direction
-        global_.motor_thread.controller.mode = global_.hostData.mode
-        if not global_.motor_thread.controller.is_braking:
-            global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
+    elif (global_.hostData.mode == 1):
+        global_.motor_thread.controller.reverse = 1
+        global_.motor_thread.controller.est_speed = 0
+        # global_.motor_thread.controller.direction = global_.hostData.direction
+    elif (global_.hostData.mode == 2):
+        global_.motor_thread.controller.direction = global_.hostData.direction
+
+
+
+    # if direction != global_.motor_thread.controller.direction:
+    #     global_.motor_thread.controller.direction_changed = 1
+
+    # if global_.motor_thread.controller.direction_changed != 0:
+    #     if (global_.motor_thread.controller.speed == 0):
+    #         global_.motor_thread.controller.direction_changed = 0
+    #         global_.motor_thread.controller.mode = 1 if direction != 0 else 0
+    #         global_.motor_thread.controller.direction = direction
+    #     else:
+    #         global_.motor_thread.controller.mode = 0
+    #         global_.motor_thread.controller.est_speed = 0
+    # else:
+    #     global_.motor_thread.controller.direction = direction
+    #     global_.motor_thread.controller.mode = global_.hostData.mode
+    #     if not global_.motor_thread.controller.is_braking:
+    #         global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
 
 
     if global_.hostData.set_base == 1 and not global_.roadData.base1_set:
@@ -146,10 +166,19 @@ class Mbee_thread(threading.Thread):
         self.name = 'MBee'
         self.mbee_data = Mbee_data()
 
+        self.self_test = 0
+        self.test_local = 1
+        self.test_remote = 1
+
         self.t = 0
         self.t_prev = 0
 
-        self.dev = serialstar.SerialStar(port, baudrate, 0.4)
+        try:
+            self.dev = serialstar.SerialStar(port, baudrate, 0.4)
+        except BaseException:
+            self.dev = None
+            self.alive = False
+
 
         #  Callback-functions registering.
         self.dev.callback_registring("81", frame_81_received)
@@ -164,20 +193,26 @@ class Mbee_thread(threading.Thread):
         self.dev.callback_registring("97", frame_97_received)
 
     def run(self):
+        self.run_self_test()
+        if (self.test_local == 0) or (self.test_remote == 0):
+            self.alive = False
+        else:
+            print('# Tests passed.')
+
         while self.alive:
             # Receive
             frame = self.dev.run()
 
             # Transmit
             package = None
-            with global_.lock:
-                update_road_to_host()
-                package = global_.roadData
-
+            global_.lock.acquire(blocking=True, timeout=1)
+            update_road_to_host()
+            package = global_.roadData
+            global_.lock.release()
 
             if package is not None:
                 package = encrypt_package(package)
-                self.dev.send_tx_request('01', TX_ADDR, package, '11')
+                self.dev.send_tx_request('00', TX_ADDR, package, '10')
 
             # Flush dev buffers
             self.t = time.time()
@@ -187,6 +222,8 @@ class Mbee_thread(threading.Thread):
                 self.dev.ser.reset_input_buffer()
                 self.dev.ser.reset_output_buffer()
 
+            # print(global_.motor_thread.controller.direction)
+
         self.off()
 
     def off(self):
@@ -194,6 +231,41 @@ class Mbee_thread(threading.Thread):
             self.dev.ser.close()
             self.dev = None
         print('############  Mbee closed  ################')
+
+
+    def run_self_test(self):
+        # Test 1: remote
+        self.self_test = 1
+        test_time = time.time()
+
+        while ((time.time() - test_time) < 5):
+            self.dev.send_tx_request('00', TX_ADDR, '0001', '10')
+            frame = self.dev.run()
+
+            if self.self_test == 0:
+                self.test_remote = 1
+                break
+
+        if (self.self_test == 1):
+            print('# No remote module.')
+            self.test_remote = 0
+
+        # Test 2: local
+        self.self_test = 1
+        test_time = time.time()
+
+        while (time.time() - test_time) < 5:
+            self.dev.send_immidiate_apply_local_at('01', 'MY')
+            frame = self.dev.run()
+
+            if self.self_test == 0:
+                self.test_local = 1
+                break
+
+        if (self.self_test == 1):
+            print('# No module.')
+            self.test_local = 0
+
 
 
 def decrypt_package(package):
@@ -219,15 +291,14 @@ def decrypt_package(package):
 
             package.mode = hex_to_int(data[0:8])
             package.coordinate = hex_to_float(data[8:16])
-            package.RSSI = hex_to_float(data[16:24])
-            package.voltage = hex_to_float(data[24:32])
-            package.current = hex_to_float(data[32:40])
-            package.temperature = hex_to_float(data[40:48])
-            package.base1 = hex_to_float(data[48:56])
-            package.base2 = hex_to_float(data[56:64])
-            package.base1_set = hex_to_bool(data[64:66])
-            package.base2_set = hex_to_bool(data[66:68])
-            package.direction = hex_to_int(data[68:76])
+            package.voltage = hex_to_float(data[16:24])
+            package.current = hex_to_float(data[24:32])
+            package.temperature = hex_to_float(data[32:40])
+            package.base1 = hex_to_float(data[40:48])
+            package.base2 = hex_to_float(data[48:56])
+            package.base1_set = hex_to_bool(data[56:58])
+            package.base2_set = hex_to_bool(data[58:60])
+            package.direction = hex_to_int(data[60:68])
 
         elif package_type == 3:
             package = HBData()
@@ -277,7 +348,6 @@ def encrypt_package(package):
     elif package.type == 2:
         data += int_to_hex(package.mode)
         data += float_to_hex(package.coordinate)
-        data += float_to_hex(package.RSSI)
         data += float_to_hex(package.voltage)
         data += float_to_hex(package.current)
         data += float_to_hex(package.temperature)

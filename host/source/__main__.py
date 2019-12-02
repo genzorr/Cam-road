@@ -60,6 +60,10 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
 
+    global_.mbeeThread = MbeeThread()
+    global_.mbeeThread.start()
+    THREADS.append(global_.mbeeThread)
+
     global_.watcher = WatcherThread(window=window)
     global_.watcher.start()
     THREADS.append(global_.watcher)
@@ -67,9 +71,5 @@ if __name__ == "__main__":
     global_.controlThread = ControlThread()
     global_.controlThread.start()
     THREADS.append(global_.controlThread)
-
-    global_.mbeeThread = MbeeThread()
-    global_.mbeeThread.start()
-    THREADS.append(global_.mbeeThread)
 
     sys.exit(app.exec_())

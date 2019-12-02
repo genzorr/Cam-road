@@ -4,8 +4,6 @@ sys.path.append('../../fortune-controls/Lib')
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from x4motor import X4Motor
 
-from queue import LifoQueue
-
 # sudo ./modbus -r -d /dev/ttySAC3 -b 115200 -f 3 -s 2 -a 0 -n 20
 #----------------------------------------------------------------------------------------------#
 #   Settings
@@ -33,7 +31,9 @@ EMERGENCY = 5
 
 class FSM:
     def __init__(self, init_state):
-        self.stack = LifoQueue()
+        self.stack = []
+        self.stack.append(init_state)
+        self.len = 1
 
     def update(self):
         currentStateFunction = self.getCurrentState()
@@ -41,27 +41,35 @@ class FSM:
             currentStateFunction()
 
     def popState(self):
-        self.stack.get_nowait()
+        self.stack.pop()
+        self.len -= 1
 
     def pushState(self, state):
         if (self.getCurrentState() != state):
             self.stack.put(state)
+            self.len += 1
 
-    def changeState(state):
-        with global_.lock:
-            self.stack.get_nowait()
-            if (self.getCurrentState() != state):
-                self.stack.put(state)
-
+    def changeState(self, state):
+        global_.lock.acquire(blocking=True, timeout=1)
+        self.stack.pop()
+        self.len -= 1
+        if ((self.len == 0) or (self.getCurrentState() != state)):
+            self.stack.append(state)
+            self.len += 1
+        global_.lock.release()
 
     def getCurrentState(self):
-        lenght = self.stack.qsize()
-        return self.stack[length - 1] if (lenght > 0) else None
+        global_.lock.acquire(blocking=True, timeout=1)
+        state = self.stack[self.len - 1]
+        global_.lock.release()
+
+        return state
 
 
 class Controller(FSM):
     def __init__(self):
-        super(FSM, self).__init__(self.stop)
+        super().__init__(self.stop)
+
         try:
             print("Motor connection...")
             self.client = ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
@@ -78,8 +86,9 @@ class Controller(FSM):
             #   Print all registers
             registers = self.motor.readAllRO()
             print(registers)
-        # else:
-        #     self.motor = None
+
+        except BaseException:
+            self.motor = None
 
         self.starttime = time.time()
 
@@ -92,18 +101,15 @@ class Controller(FSM):
         self.AB_choose = 0
         self._est_speed = 0.0
         self._HARD_STOP = 0
-        self.SOFT_STOP = 0
+        self.soft_stop = 0
+        self.reverse = 0
+        self.stopped = 0
 
         self.dstep = 0
         self.coordinate = 0
 
-        self.direction_changed = 0
-
-
         self.mode = 0
-        self.direction = 0
-        self.change_direction = 0
-        self.is_braking = 0
+        self.direction = 1
 
         self._base1 = 0.0
         self._base2 = 0.0
@@ -112,7 +118,7 @@ class Controller(FSM):
 
 
     def off(self):
-        try:
+        if self.motor:
             self.motor.release()    # Release motor
             self.client.close()
 
@@ -237,9 +243,19 @@ class Controller(FSM):
 
 
     def stop(self):
-        if self.direction != 0:
-            self.HARD_STOP = 0
-            self.SOFT_STOP = 0
+        self.mode = 0
+        self.soft_stop = 0
+
+        if self.HARD_STOP:
+            self.dstep = 0
+
+        if (self.speed == 0) and not self.stopped:
+            self.direction = 0
+            self.stopped = 1
+
+        if (self.speed == 0) and (self.direction != 0):
+            # self.HARD_STOP = 0
+            self.stopped = 0
             self.changeState(self.course)
 
         self.dstep = self.calc_dstep(speed_to=0)
@@ -250,7 +266,9 @@ class Controller(FSM):
             #     self.stack.pushState(self.course)
 
     def stop_transitial(self):
-        if (self.HARD_STOP or self.SOFT_STOP):
+        self.mode = 1
+        self.reverse = 0
+        if (self.HARD_STOP or self.soft_stop):
             self.changeState(self.stop)
 
         if (self.speed == 0):
@@ -262,8 +280,13 @@ class Controller(FSM):
 
 
     def course(self):
-        if (self.HARD_STOP or self.SOFT_STOP):
+        self.mode = 2
+        if (self.HARD_STOP or self.soft_stop):
+            # self.direction = 0
             self.changeState(self.stop)
+
+        if self.reverse:
+            self.changeState(self.stop_transitial)
 
         if (self.base1_set and self.base2_set):
             if self.direction == -1:
@@ -274,81 +297,84 @@ class Controller(FSM):
             braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
             if dist_to_base <= braking_dist:
                 self.changeState(self.stop_transitial)
+            else:
+                self.dstep = self.calc_dstep(speed_to=self.est_speed)
         else:
             self.dstep = self.calc_dstep(speed_to=self.est_speed)
+
 
         self.coordinate += self.dstep
 
 
-    """ Returns motor dstep value """
-    def control(self):
-        speed = self.speed
-        coord = self.coordinate
-        braking = self.braking
+    # """ Returns motor dstep value """
+    # def control(self):
+    #     speed = self.speed
+    #     coord = self.coordinate
+    #     braking = self.braking
 
-        # out_of_breaking = True
+    #     # out_of_breaking = True
 
-        # Update time
-        self.t_prev = self.t
-        self.t = time.time() - self.starttime
+    #     # Update time
+    #     self.t_prev = self.t
+    #     self.t = time.time() - self.starttime
 
-        if self.HARD_STOP == 1:
-            pass
-        elif self.mode == STOP and self.speed == 0:
-            pass
-        else:
-            if self.mode == STOP:
-                dstep = self.calc_dstep(speed_to=0)
+    #     if self.HARD_STOP == 1:
+    #         pass
+    #     elif self.mode == STOP and self.speed == 0:
+    #         pass
+    #     else:
+    #         if self.mode == STOP:
+    #             dstep = self.calc_dstep(speed_to=0)
 
-                if self.is_braking and (self.speed == 0):
-                    self.direction = - self.direction
-                    self.is_braking = 0
-                    self.mode = COURSING
+    #             if self.is_braking and (self.speed == 0):
+    #                 self.direction = - self.direction
+    #                 self.is_braking = 0
+    #                 self.mode = COURSING
 
-            elif self.mode == COURSING:
-                #   In this mode road will be coursing between two bases
+    #         elif self.mode == COURSING:
+    #             #   In this mode road will be coursing between two bases
 
-                #   Consider braking into bases points
-                if self.base1_set and self.base2_set:
-                    distance = self.base2 - self.base1
+    #             #   Consider braking into bases points
+    #             if self.base1_set and self.base2_set:
+    #                 distance = self.base2 - self.base1
 
-                    if not self.was_in_zone and ((self.coordinate < self.base1) or (self.coordinate > self.base2)):
-                        dstep = self.calc_dstep(speed_to=self.est_speed)
-                    else:
-                        self.was_in_zone = True
+    #                 if not self.was_in_zone and ((self.coordinate < self.base1) or (self.coordinate > self.base2)):
+    #                     dstep = self.calc_dstep(speed_to=self.est_speed)
+    #                 else:
+    #                     self.was_in_zone = True
 
-                        if self.direction == -1:
-                            dist_to_base = coord - self.base1
-                        else:
-                            dist_to_base = self.base2 - coord
+    #                     if self.direction == -1:
+    #                         dist_to_base = coord - self.base1
+    #                     else:
+    #                         dist_to_base = self.base2 - coord
 
-                        if not self.is_braking:
-                            braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
-                            if dist_to_base <= braking_dist:
-                                self.is_braking = 1
-                                self.est_speed = 0
-                                self.mode = 0
-                                dstep = self.calc_dstep(speed_to=0)
+    #                     if not self.is_braking:
+    #                         braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
+    #                         if dist_to_base <= braking_dist:
+    #                             self.is_braking = 1
+    #                             self.est_speed = 0
+    #                             self.mode = 0
+    #                             dstep = self.calc_dstep(speed_to=0)
 
-                                # # FIXME: seems strange, I should change direction when JUST stopped
-                                # if out_of_breaking and (dist_to_base < abs(dstep)):
-                                #     out_of_breaking = False
-                                #     dstep = dist_to_base * self.direction
-                                #     self.direction = -self.direction
-                                #     self.change_direction = 1 if self.change_direction == 0 else 0
-                                # else:
-                                #     dstep = 0
-                            else:
-                                self.is_braking = 0
-                                dstep = self.calc_dstep(speed_to=self.est_speed)
-                        else:
-                            dstep = 0
-                else:
-                    dstep = self.calc_dstep(speed_to=self.est_speed)
+    #                             # # FIXME: seems strange, I should change direction when JUST stopped
+    #                             # if out_of_breaking and (dist_to_base < abs(dstep)):
+    #                             #     out_of_breaking = False
+    #                             #     dstep = dist_to_base * self.direction
+    #                             #     self.direction = -self.direction
+    #                             #     self.change_direction = 1 if self.change_direction == 0 else 0
+    #                             # else:
+    #                             #     dstep = 0
+    #                         else:
+    #                             self.is_braking = 0
+    #                             dstep = self.calc_dstep(speed_to=self.est_speed)
+    #                     else:
+    #                         dstep = 0
+    #             else:
+    #                 dstep = self.calc_dstep(speed_to=self.est_speed)
 
-            else:
-                dstep = 0
+    #         else:
+    #             dstep = 0
 
-            self.coordinate += dstep
-            return dstep
-        return 0
+    #         self.coordinate += dstep
+    #         return dstep
+    #     return 0

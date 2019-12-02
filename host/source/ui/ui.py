@@ -113,11 +113,11 @@ class MainWindow(QMainWindow):
             global_.killer.kill()
             sys.exit()
 
-        if event.key() == Qt.Key_1:
-            global_.hostData.mode = 1
+        # if event.key() == Qt.Key_1:
+        #     global_.hostData.mode = 1
 
-        if event.key() == Qt.Key_2:
-            global_.hostData.mode = 2
+        # if event.key() == Qt.Key_2:
+        #     global_.hostData.mode = 2
 
         # if event.key() == Qt.Key_A:
         #     global_.hostData.direction = -1

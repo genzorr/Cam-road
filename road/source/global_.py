@@ -5,9 +5,7 @@ global roadData
 global specialData
 
 global motor_thread
+
 global writer
 global watcher
-
 global mbee_thread
-
-global motor    # Used to on/off motor

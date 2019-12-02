@@ -17,24 +17,21 @@ def handler(signal, frame):
 #-------------------------------------------------------------------------------------#
 def main():
     global THREADS
-    global_.mbee_thread_write = None
-    global_.mbee_thread = None
 
     ## Variables.
-    global_.motor = 0
     global_.lock = threading.Lock()
     global_.hostData = HTRData()
     global_.roadData = RTHData()
     global_.specialData = HBData()
 
     ## Threads.
-    global_.writer = Writer()
-    global_.writer.start()
-    THREADS.append(global_.writer)
-
     global_.motor_thread = Motor_thread()
     global_.motor_thread.start()
     THREADS.append(global_.motor_thread)
+
+    global_.writer = Writer()
+    global_.writer.start()
+    THREADS.append(global_.writer)
 
     global_.mbee_thread = Mbee_thread()
     global_.mbee_thread.start()

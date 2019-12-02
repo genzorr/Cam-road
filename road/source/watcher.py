@@ -16,21 +16,24 @@ class Writer(threading.Thread):
         super().__init__()
         self.alive = True
         self.name = 'Writer'
-        self._out = out
-
-    @property
-    def out(self):
-        return self._out
-
-    @out.setter
-    def out(self, string):
-        self._out = string
+        self.out = out
 
     def run(self):
+        stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}'
+        data = None
         while self.alive:
-            sys.stdout.write(self._out)
+            # Get data for printing.
+            global_.lock.acquire(blocking=True, timeout=1)
+            data = global_.motor_thread.controller.get_data()
+            global_.lock.release()
+
+            if (data == None):
+                data = (0,0,0,0,0,0,'',0)
+
+            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\n'#+str(self.usound.read())+'\n'
+            sys.stdout.write(self.out)
             sys.stdout.flush()
-            time.sleep(0.2)
+            time.sleep(0.05)
         self.off()
 
     def off(self):
@@ -45,28 +48,31 @@ class Motor_thread(threading.Thread):
         self.name = 'Motor'
         self.controller = Controller()
         #   Indicator initialization
-        if global_.motor:
+        try:
             self.portex = indicator_init()
-
+            print('indicator init')
+        except BaseException:
+            self.portex = None
 
     def run(self):
         while self.alive:
-            if global_.motor and self.controller.t % 10 == 0:
+            if self.portex and self.controller.t % 10 == 0:
                 indicate(self.controller.motor.readV(), self.portex)
 
+            self.controller.t_prev = self.controller.t
+            self.controller.t = time.time() - self.controller.starttime
             self.controller.update()
-            try:
+
+            if self.controller.motor:
                 self.controller.motor.dstep = self.controller.dstep
-            # else:
-            #     value = self.controller.control()
 
         self.off()
 
 
     def off(self):
-        if global_.motor:
+        if self.portex:
             indicator_off(self.portex)
-            self.controller.off()
+        self.controller.off()
         print('############  Motor released  #############')
 
 #-------------------------------------------------------------------------------------#
@@ -79,16 +85,18 @@ class Watcher(threading.Thread):
         self.accel = Accelerometer()
         self.accel.ctrl()
 
-        self.usound = USound()
+        # self.usound = USound()
+        self.usound = None
 
     def run(self):
-        stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}'
-
         while self.alive:
             # Usound.
-            # print(self.usound.read())
-            if (self.usound.read() < 100):
-                global_.motor_thread.controller.HARD_STOP = 1
+            if self.usound:
+                usound = self.usound.read()
+                if (usound < 300):
+                    global_.motor_thread.controller.soft_stop = 1
+                    if (usound < 70):
+                        global_.motor_thread.controller.HARD_STOP = 1
 
             if global_.motor_thread.alive:
                 # Check accelerometer data.
@@ -98,15 +106,6 @@ class Watcher(threading.Thread):
                     global_.motor_thread.controller.HARD_STOP = 1
                     print('got')
                     print(x," ", y," ", z)
-
-                # Get data for printing.
-                with global_.lock:
-                    data = global_.motor_thread.controller.get_data()
-                    if (data == None):
-                        data = (0,0,0,0,0,0,'',0)
-
-                    if global_.writer.alive:
-                        global_.writer.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\n'#+str(self.usound.read())+'\n'
 
         self.off()
 

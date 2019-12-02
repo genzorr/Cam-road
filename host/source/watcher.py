@@ -17,7 +17,7 @@ class WatcherThread(QThread):
         self.alive = True
 
         if window:
-            global_.roadData.RSSI_signal.connect(window.ui.RSSI.display)
+            global_.mbeeThread.RSSI_signal.connect(window.ui.RSSI.display)
 
         #   Signals to slots connection
         if window.workWidget:
@@ -50,12 +50,14 @@ class WatcherThread(QThread):
 
     def run(self):
         while self.alive:
+            global_.mbeeThread.RSSI_signal.emit(global_.mbeeThread.RSSI)
+            print(global_.hostData.mode, global_.hostData.direction)
             # print(global_.hostData.mode)
             # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
             # print('{}\t{}\t{}'.format(global_.hostData.acceleration,
             #                         global_.hostData.braking,
             #                         global_.hostData.velocity))
-            time.sleep(2)
+            time.sleep(1)
 
     def off(self):
         pass
@@ -91,6 +93,10 @@ class ControlThread(QThread):
                 encValue = self.controller.getEncoderValue(i)
                 self.controller.setIndicator(i, round(encValue/10))
 
+            if (self.t % 10):
+                # TODO: add to screen
+                self.controller.getBatteryLevel()
+
             #  Encoders.
             global_.mutex.tryLock(timeout=10)
             global_.hostData.acceleration = self.controller.encoders[1]
@@ -111,19 +117,29 @@ class ControlThread(QThread):
             if _check_bit(value, STOP):
                 global_.hostData.mode = 0
                 stop_flag = 1
-            # if global_.hostData.mode == 2:
             if _check_bit(value, LEFT):
-                global_.hostData.direction = -1
-                global_.hostData.mode = 1
+                if (global_.roadData.mode == 0):
+                    global_.hostData.direction = -1
+                    global_.hostData.mode = 2
+                elif (global_.roadData.mode == 2):
+                    if (global_.roadData.direction != -1):
+                        global_.hostData.mode = 1
+                        global_.hostData.direction = -1
             elif _check_bit(value, RIGHT):
-                global_.hostData.direction = 1
-                global_.hostData.mode = 1
+                if (global_.roadData.mode == 0):
+                    global_.hostData.direction = 1
+                    global_.hostData.mode = 2
+                elif (global_.roadData.mode == 2):
+                    if (global_.roadData.direction != 1):
+                        global_.hostData.mode = 1
+                        glboal_.hostData.direction = 1
+
             global_.mutex.unlock()
 
             if stop_flag:
-                # global_.hostData.direction = 0
-                self.controller.setEncoderValue(1, 0)
-                self.controller.setIndicator(1, 0)
+                global_.hostData.direction = 0
+                # self.controller.setEncoderValue(1, 0)
+                # self.controller.setIndicator(1, 0)
 
             # Set base.
             global_.specialData.end_points_reset = False
@@ -144,6 +160,15 @@ class ControlThread(QThread):
                     global_.hostData.set_base = 0
                     global_.specialData.end_points_reset = True
             global_.mutex.unlock()
+
+            # Reset hard stop.
+            global_.mutex.tryLock(timeout=10)
+            global_.specialData.HARD_STOP = False
+            if not (value & (1 << HOME)):
+                if stop_flag:
+                    global_.specialData.HARD_STOP = True
+                    print('reset')
+
 
             time.sleep(0.2)
 
