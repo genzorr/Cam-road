@@ -86,42 +86,31 @@ def frame_97_received(package):
 def update_host_to_road():
     global_.motor_thread.controller.accel = global_.hostData.acceleration
     global_.motor_thread.controller.braking = global_.hostData.braking
-
-    # TODO::::::
-    # if global_.hostData.direction:
-    #     global_.motor_thread.controller.reverse = 1
-    # if (global_.motor_thread.controller.speed == 0):
+    # global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
 
     if (global_.hostData.mode == 0):
+        global_.motor_thread.controller.est_speed = 0
         if (global_.motor_thread.controller.mode != 0):
             global_.motor_thread.controller.soft_stop = 1
-            global_.motor_thread.controller.est_speed = 0
     elif (global_.hostData.mode == 1):
-        global_.motor_thread.controller.reverse = 1
-        global_.motor_thread.controller.est_speed = 0
+        if (global_.motor_thread.controller.mode == 2):
+            print('here')
+            global_.motor_thread.controller.reverse = 1
+            global_.motor_thread.controller.est_speed = 0
+        # if (global_.motor_thread.controller.speed == 0):
+        #     global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
         # global_.motor_thread.controller.direction = global_.hostData.direction
     elif (global_.hostData.mode == 2):
-        global_.motor_thread.controller.direction = global_.hostData.direction
-
-    if not global_.motor_thread.controller.soft_stop:
         global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
+        if (global_.motor_thread.controller.mode == 0):
+            if (global_.motor_thread.controller.stopped == 1):
+                global_.motor_thread.controller.direction = global_.hostData.direction
+            else:
+                global_.motor_thread.controller.reverse = 1
+                global_.motor_thread.controller.est_speed = 0
 
-    # if direction != global_.motor_thread.controller.direction:
-    #     global_.motor_thread.controller.direction_changed = 1
-
-    # if global_.motor_thread.controller.direction_changed != 0:
-    #     if (global_.motor_thread.controller.speed == 0):
-    #         global_.motor_thread.controller.direction_changed = 0
-    #         global_.motor_thread.controller.mode = 1 if direction != 0 else 0
-    #         global_.motor_thread.controller.direction = direction
-    #     else:
-    #         global_.motor_thread.controller.mode = 0
-    #         global_.motor_thread.controller.est_speed = 0
-    # else:
-    #     global_.motor_thread.controller.direction = direction
-    #     global_.motor_thread.controller.mode = global_.hostData.mode
-    #     if not global_.motor_thread.controller.is_braking:
-    #         global_.motor_thread.controller.est_speed = est_speed * global_.VELO_MAX / 100
+    # if (global_.motor_thread.controller.mode == 2):
+    #     global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
 
 
     if global_.hostData.set_base == 1 and not global_.roadData.base1_set:

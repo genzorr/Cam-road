@@ -17,7 +17,7 @@ class HTRData(QObject):
         self._braking = 0.0
         self._velocity = 0.0
         self.mode = 0
-        self.direction = 1
+        self.direction = 0
         self.set_base = 0
 
 
@@ -82,7 +82,7 @@ class RTHData(QObject):
         self.base1_set = False
         self.base2_set = False
 
-        self.direction = 0
+        self.direction = -1
 
     @property  # Coordinate value property
     def coordinate(self):

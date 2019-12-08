@@ -109,7 +109,7 @@ class Controller(FSM):
         self.coordinate = 0
 
         self.mode = 0
-        self.direction = 1
+        self.direction = 0
 
         self._base1 = 0.0
         self._base2 = 0.0
@@ -249,18 +249,17 @@ class Controller(FSM):
             self.dstep = 0
 
         if (self.speed == 0) and not self.stopped:
-            print('here')
             self.direction = 0
             self.stopped = 1
 
-        if (self.speed == 0) and (self.direction != 0):
+        self.dstep = self.calc_dstep(speed_to=0)
+        self.coordinate += self.dstep
+
+        if ((self.stopped) and (self.direction != 0)):
             # self.HARD_STOP = 0
             self.stopped = 0
             self.soft_stop = 0
             self.changeState(self.course)
-
-        self.dstep = self.calc_dstep(speed_to=0)
-        self.coordinate += self.dstep
             # if (self.base1_set and self.base2_set):
             #     self.stack.pushState(self.course_bases)
             # else:
@@ -268,26 +267,24 @@ class Controller(FSM):
 
     def stop_transitial(self):
         self.mode = 1
-        self.reverse = 0
-        if (self.HARD_STOP or self.soft_stop):
-            self.changeState(self.stop)
-
-        if (self.speed == 0):
-            self.direction = - self.direction
-            self.changeState(self.course)
+        self.est_speed = 0
 
         self.dstep = self.calc_dstep(speed_to=0)
         self.coordinate += self.dstep
 
+        if (self.HARD_STOP or self.soft_stop):
+            self.reverse = 0
+            self.changeState(self.stop)
+
+        if (self.speed == 0.0):
+            self.direction = - self.direction
+            self.reverse = 0
+            self.changeState(self.course)
+
 
     def course(self):
         self.mode = 2
-        if (self.HARD_STOP or self.soft_stop):
-            # self.direction = 0
-            self.changeState(self.stop)
-
-        if self.reverse:
-            self.changeState(self.stop_transitial)
+        self.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
 
         if (self.base1_set and self.base2_set):
             if self.direction == -1:
@@ -298,6 +295,7 @@ class Controller(FSM):
             braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
             if dist_to_base <= braking_dist:
                 self.changeState(self.stop_transitial)
+                return
             else:
                 self.dstep = self.calc_dstep(speed_to=self.est_speed)
         else:
@@ -305,6 +303,12 @@ class Controller(FSM):
 
 
         self.coordinate += self.dstep
+
+        if (self.HARD_STOP or self.soft_stop):
+            self.changeState(self.stop)
+
+        if self.reverse:
+            self.changeState(self.stop_transitial)
 
 
     # """ Returns motor dstep value """

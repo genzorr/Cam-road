@@ -16,7 +16,6 @@ def frame_81_received(package):
     if isinstance(data, RTHData):
         global_.mutex.tryLock(timeout=10)
         global_.roadData = data
-        update_road_to_host()
         global_.mbeeThread.RSSI = package['RSSI']
         global_.mutex.unlock()
     # print("Received 81-frame.")
@@ -74,14 +73,6 @@ def frame_97_received(package):
     # print(package)
     pass
 
-
-def update_road_to_host():
-    # global_.roadData.RSSI_signal.emit(global_.roadData.RSSI)
-    # global_.hostData.mode = global_.roadData.mode
-    # global_.hostData.direction = global_.roadData.direction
-    pass
-
-
 #----------------------------------------------------------------------------------------------#
 #   A thread used to operate with MBee.
 class MbeeThread(QThread):
@@ -89,11 +80,15 @@ class MbeeThread(QThread):
 
     def __init__(self, port='/dev/ttySAC4', baudrate=19200):
         QThread.__init__(self)
+
         self.alive = True
 
         self.self_test = 0
         self.test_local = 1
         self.test_remote = 1
+
+        self.direction_changed = False
+        self.reverse = False
 
         self.t = 0
         self.t_prev = 0
@@ -120,6 +115,24 @@ class MbeeThread(QThread):
         self.dev.callback_registring("8F", frame_8F_received)
         self.dev.callback_registring("97", frame_97_received)
 
+
+    def update_road_to_host(self):
+        # if (global_.hostData.mode == 1):
+        #     if ((global_.roadData.mode == 1) and not self.reverse):
+        #         self.direction_changed = False
+        #         self.reverse = True
+        #     elif ((global_.roadData.mode != 1) and self.reverse):
+        #         self.direction_changed = True
+        #         self.reverse = False
+        #         # global_.hostData.direction = global_.roadData.direction
+        #         print('here')
+
+        # global_.roadData.RSSI_signal.emit(global_.roadData.RSSI)
+        # global_.hostData.mode = global_.roadData.mode
+        # global_.hostData.direction = global_.roadData.direction
+        pass
+
+
     def run(self):
         self.run_self_test()
         if (self.test_local == 0) or (self.test_remote == 0):
@@ -128,6 +141,9 @@ class MbeeThread(QThread):
         while self.alive:
             # Receive
             frame = self.dev.run()
+            global_.mutex.tryLock(timeout=10)
+            self.update_road_to_host()
+            global_.mutex.unlock()
 
             # Transmit
             package = None

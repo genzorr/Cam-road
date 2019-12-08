@@ -87,6 +87,7 @@ class ControlThread(QThread):
 
         self.base_t = 0
         self.menu_t = 0
+        self.reset_t = 0
         self.menu = 1
 
         self.finished.connect(self.controller.off)
@@ -130,25 +131,47 @@ class ControlThread(QThread):
 
             # Stop.
             stop_flag = 0
+            t = time.time()
+            if (t - self.reset_t > 0.5):
+                global_.hostData.mode = -1
+                self.reset_t = t
+
             global_.mutex.tryLock(timeout=10)
             if _check_bit(value, STOP):
                 stop_flag = 1
-            if _check_bit(value, LEFT):
+            # if _check_bit(value, LEFT):
+            #     if (global_.roadData.mode == 0):
+            #         global_.hostData.direction = -1
+            #         global_.hostData.mode = 2
+            #     elif (global_.roadData.mode == 2):
+            #         if (global_.roadData.direction != -1):
+            #             global_.hostData.mode = 1
+            #             global_.hostData.direction = -1
+            # elif _check_bit(value, RIGHT):
+            #     if (global_.roadData.mode == 0):
+            #         global_.hostData.direction = 1
+            #         global_.hostData.mode = 2
+            #     elif (global_.roadData.mode == 2):
+            #         if (global_.roadData.direction != 1):
+            #             global_.hostData.mode = 1
+            #             global_.hostData.direction = 1
+
+            elif _check_bit(value, LEFT) and (global_.hostData.velocity != 0):
                 if (global_.roadData.mode == 0):
                     global_.hostData.direction = -1
                     global_.hostData.mode = 2
-                elif (global_.roadData.mode == 2):
-                    if (global_.roadData.direction != -1):
-                        global_.hostData.mode = 1
-                        global_.hostData.direction = -1
-            elif _check_bit(value, RIGHT):
+
+                if (global_.roadData.direction == 1):
+                    global_.hostData.mode = 1
+
+            elif _check_bit(value, RIGHT) and (global_.hostData.velocity != 0):
                 if (global_.roadData.mode == 0):
                     global_.hostData.direction = 1
                     global_.hostData.mode = 2
-                elif (global_.roadData.mode == 2):
-                    if (global_.roadData.direction != 1):
-                        global_.hostData.mode = 1
-                        glboal_.hostData.direction = 1
+
+                if (global_.roadData.direction == -1):
+                    global_.hostData.mode = 1
+
 
             global_.mutex.unlock()
 
@@ -195,7 +218,7 @@ class ControlThread(QThread):
                     self.changeMenu()
 
 
-            # time.sleep(0.1)
+            # time.sleep(0.2)
 
     def off(self):
         self.controller.off()
