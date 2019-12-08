@@ -165,8 +165,8 @@ class Controller(FSM):
                 self.AB_choose = -1
             elif value > self.speed:
                 self.AB_choose = 1
-            # else:
-            #     self.AB_choose = 0
+            else:
+                self.AB_choose = 0
 
     @property
     def speed(self):
@@ -176,20 +176,20 @@ class Controller(FSM):
     def speed(self, value):
         if value is not None:
             if self.AB_choose > 0:
-                if value < self.est_speed:
-                    self._speed = value
-                else:
-                    self._speed = self.est_speed
-                    self.AB_choose = 0
-                # self._speed = min(value, self.est_speed)
+                # if value < self.est_speed:
+                #     self._speed = value
+                # else:
+                #     self._speed = self.est_speed
+                #     self.AB_choose = 0
+                self._speed = min(value, self.est_speed)
 
             elif self.AB_choose < 0:
-                if value > self.est_speed:
-                    self._speed = value
-                else:
-                    self._speed = self.est_speed
-                    self.AB_choose = 0
-                # self._speed = max(value, self.est_speed)
+                # if value > self.est_speed:
+                #     self._speed = value
+                # else:
+                #     self._speed = self.est_speed
+                #     self.AB_choose = 0
+                self._speed = max(value, self.est_speed)
 
             else:
                 pass
@@ -224,7 +224,7 @@ class Controller(FSM):
             tmp = "-"
         else:
             tmp = " "
-        return (self.t, self.speed, self.base1, self.base2, self.mode, self.coordinate, tmp)
+        return (self.t, self.speed, self.est_speed, self.base1, self.base2, self.mode, self.coordinate, tmp)
 
 
     """ Updates speed by given acceleration """
@@ -244,18 +244,19 @@ class Controller(FSM):
 
     def stop(self):
         self.mode = 0
-        self.soft_stop = 0
 
         if self.HARD_STOP:
             self.dstep = 0
 
         if (self.speed == 0) and not self.stopped:
+            print('here')
             self.direction = 0
             self.stopped = 1
 
         if (self.speed == 0) and (self.direction != 0):
             # self.HARD_STOP = 0
             self.stopped = 0
+            self.soft_stop = 0
             self.changeState(self.course)
 
         self.dstep = self.calc_dstep(speed_to=0)

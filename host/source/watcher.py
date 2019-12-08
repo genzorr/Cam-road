@@ -76,14 +76,31 @@ def _check_bit(value, bit):
     return True if not (value & (1 << bit)) else False
 
 class ControlThread(QThread):
-    def __init__(self, window=None):
+    changeMenu_sig = pyqtSignal(int)
+
+    def __init__(self, window):
         QThread.__init__(self)
         self.alive = True
         self.controller = Controller()
 
-        self.t = self.t_prev = 0
+        self.changeMenu_sig.connect(window.changeMenu)
+
+        self.base_t = 0
+        self.menu_t = 0
+        self.menu = 1
 
         self.finished.connect(self.controller.off)
+
+
+    def changeMenu(self):
+        if self.menu == 3:
+            self.menu = 1
+        elif self.menu == 1:
+            self.menu = 2
+        elif self.menu == 2:
+            self.menu = 3
+        self.changeMenu_sig.emit(self.menu)
+
 
     def run(self):
         while self.alive and self.controller.status:
@@ -115,7 +132,6 @@ class ControlThread(QThread):
             stop_flag = 0
             global_.mutex.tryLock(timeout=10)
             if _check_bit(value, STOP):
-                global_.hostData.mode = 0
                 stop_flag = 1
             if _check_bit(value, LEFT):
                 if (global_.roadData.mode == 0):
@@ -137,6 +153,7 @@ class ControlThread(QThread):
             global_.mutex.unlock()
 
             if stop_flag:
+                global_.hostData.mode = 0
                 global_.hostData.direction = 0
                 # self.controller.setEncoderValue(1, 0)
                 # self.controller.setIndicator(1, 0)
@@ -146,8 +163,9 @@ class ControlThread(QThread):
             global_.hostData.set_base = 0
             global_.mutex.tryLock(timeout=10)
             if _check_bit(value, BASE):
-                if (self.t - self.t_prev > 2):
-                    self.t_prev = self.t
+                t = time.time()
+                if (t - self.base_t > 2):
+                    self.base_t = t
                     if not global_.roadData.base1_set:
                         global_.hostData.set_base = 1
                     elif not global_.roadData.base2_set:
@@ -164,13 +182,20 @@ class ControlThread(QThread):
             # Reset hard stop.
             global_.mutex.tryLock(timeout=10)
             global_.specialData.HARD_STOP = False
-            if not (value & (1 << HOME)):
+            if _check_bit(value, HOME):
                 if stop_flag:
                     global_.specialData.HARD_STOP = True
                     print('reset')
 
+            # Menu
+            if _check_bit(value, MENU):
+                t = time.time()
+                if (t - self.menu_t > 0.5):
+                    self.menu_t = t
+                    self.changeMenu()
 
-            time.sleep(0.2)
+
+            # time.sleep(0.1)
 
     def off(self):
         self.controller.off()

@@ -86,7 +86,6 @@ def frame_97_received(package):
 def update_host_to_road():
     global_.motor_thread.controller.accel = global_.hostData.acceleration
     global_.motor_thread.controller.braking = global_.hostData.braking
-    global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
 
     # TODO::::::
     # if global_.hostData.direction:
@@ -104,7 +103,8 @@ def update_host_to_road():
     elif (global_.hostData.mode == 2):
         global_.motor_thread.controller.direction = global_.hostData.direction
 
-
+    if not global_.motor_thread.controller.soft_stop:
+        global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
 
     # if direction != global_.motor_thread.controller.direction:
     #     global_.motor_thread.controller.direction_changed = 1

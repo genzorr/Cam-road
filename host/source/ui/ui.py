@@ -75,9 +75,24 @@ class MainWindow(QMainWindow):
         self.telemetryWidget.hide()
 
         #   Signals
-        self.ui.workButton.clicked.connect(self.buttonClicked)
-        self.ui.settingsButton.clicked.connect(self.buttonClicked)
-        self.ui.telemetryButton.clicked.connect(self.buttonClicked)
+        # self.ui.workButton.clicked.connect(self.buttonClicked)
+        # self.ui.settingsButton.clicked.connect(self.buttonClicked)
+        # self.ui.telemetryButton.clicked.connect(self.buttonClicked)
+
+    def changeMenu(self, num):
+        self.workWidget.hide()
+        self.settingsWidget.hide()
+        self.telemetryWidget.hide()
+
+        if num == 1:
+            self.workWidget.show()
+        elif num == 2:
+            self.settingsWidget.show()
+        elif num == 3:
+            self.telemetryWidget.show()
+        else:
+            print('# Invalid menu value')
+            pass
 
 
     def buttonClicked(self):
@@ -97,6 +112,7 @@ class MainWindow(QMainWindow):
             self.workWidget.hide()
             self.settingsWidget.hide()
             self.telemetryWidget.show()
+
 
     def keyPressEvent(self, event):
         super(MainWindow, self).keyPressEvent(event)

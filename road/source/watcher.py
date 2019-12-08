@@ -19,7 +19,7 @@ class Writer(threading.Thread):
         self.out = out
 
     def run(self):
-        stringData = 't:\t{:.2f}\tv:\t{:.2f}\tB1:\t{:.2f}\tB2:\t{:.2f}\tmode:\t{}\tL:\t{:.3f}\t\t{:s}'
+        stringData = 't:\t{:3.2f}\tv:\t{:2.1f} | {:2.1f}\tB1:\t{:3.1f}\tB2:\t{:3.1f}\tmode:\t{}\tL:\t{:3.3f}\t\t{:s}'
         data = None
         while self.alive:
             # Get data for printing.
@@ -28,9 +28,9 @@ class Writer(threading.Thread):
             global_.lock.release()
 
             if (data == None):
-                data = (0,0,0,0,0,0,'',0)
+                data = (0,0,0,0,0,0,0,'',0)
 
-            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\n'#+str(self.usound.read())+'\n'
+            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\t'+str(global_.motor_thread.controller.AB_choose)+'\n'
             sys.stdout.write(self.out)
             sys.stdout.flush()
             time.sleep(0.05)

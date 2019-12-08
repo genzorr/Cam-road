@@ -68,7 +68,7 @@ if __name__ == "__main__":
     global_.watcher.start()
     THREADS.append(global_.watcher)
 
-    global_.controlThread = ControlThread()
+    global_.controlThread = ControlThread(window=window)
     global_.controlThread.start()
     THREADS.append(global_.controlThread)
 
