@@ -1,4 +1,5 @@
 global mutex
+global flag
 
 global watcher
 global controlThread

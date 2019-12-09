@@ -52,6 +52,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     global_.mutex = QMutex()
+    global_.flag = True
 
     global_.hostData = HTRData()
     global_.roadData = RTHData()

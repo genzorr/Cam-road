@@ -244,6 +244,7 @@ class Controller(FSM):
 
     def stop(self):
         self.mode = 0
+        self.est_speed = 0
 
         if self.HARD_STOP:
             self.dstep = 0
@@ -288,11 +289,11 @@ class Controller(FSM):
 
         if (self.base1_set and self.base2_set):
             if self.direction == -1:
-                dist_to_base = coord - self.base1
+                dist_to_base = self.coordinate - self.base1
             else:
-                dist_to_base = self.base2 - coord
+                dist_to_base = self.base2 - self.coordinate
 
-            braking_dist = speed * speed / (2 * braking) if braking != 0 else 0
+            braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
             if dist_to_base <= braking_dist:
                 self.changeState(self.stop_transitial)
                 return

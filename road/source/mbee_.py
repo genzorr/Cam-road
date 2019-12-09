@@ -7,6 +7,11 @@ from lib.data_classes import *
 
 TX_ADDR = '0002'
 
+ACCEL_MAX = 20
+BRAKING_MAX = 20
+
+
+
 def frame_81_received(package):
     data = decrypt_package(package['DATA'])
     if isinstance(data, HTRData):
@@ -84,8 +89,8 @@ def frame_97_received(package):
 
 
 def update_host_to_road():
-    global_.motor_thread.controller.accel = global_.hostData.acceleration
-    global_.motor_thread.controller.braking = global_.hostData.braking
+    global_.motor_thread.controller.accel = global_.hostData.acceleration * ACCEL_MAX / 100
+    global_.motor_thread.controller.braking = global_.hostData.braking * BRAKING_MAX / 100
     # global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
 
     if (global_.hostData.mode == 0):
@@ -163,30 +168,35 @@ class Mbee_thread(threading.Thread):
         self.t_prev = 0
 
         try:
-            self.dev = serialstar.SerialStar(port, baudrate, 0.4)
-        except BaseException:
+            self.dev = serialstar.SerialStar(port, baudrate)
+        except BaseException as exc:
+            print('## MBee init failed:', exc)
             self.dev = None
             self.alive = False
 
 
-        #  Callback-functions registering.
-        self.dev.callback_registring("81", frame_81_received)
-        self.dev.callback_registring("83", frame_83_received)
-        self.dev.callback_registring("87", frame_87_received)
-        self.dev.callback_registring("88", frame_88_received)
-        self.dev.callback_registring("89", frame_89_received)
-        self.dev.callback_registring("8A", frame_8A_received)
-        self.dev.callback_registring("8B", frame_8B_received)
-        self.dev.callback_registring("8C", frame_8C_received)
-        self.dev.callback_registring("8F", frame_8F_received)
-        self.dev.callback_registring("97", frame_97_received)
+        if self.dev:
+            #  Callback-functions registering.
+            self.dev.callback_registring("81", frame_81_received)
+            self.dev.callback_registring("83", frame_83_received)
+            self.dev.callback_registring("87", frame_87_received)
+            self.dev.callback_registring("88", frame_88_received)
+            self.dev.callback_registring("89", frame_89_received)
+            self.dev.callback_registring("8A", frame_8A_received)
+            self.dev.callback_registring("8B", frame_8B_received)
+            self.dev.callback_registring("8C", frame_8C_received)
+            self.dev.callback_registring("8F", frame_8F_received)
+            self.dev.callback_registring("97", frame_97_received)
+
 
     def run(self):
-        self.run_self_test()
-        if (self.test_local == 0) or (self.test_remote == 0):
-            self.alive = False
-        else:
-            print('# Tests passed.')
+        if self.dev:
+            self.run_self_test()
+
+            if (self.test_local == 0) or (self.test_remote == 0):
+                self.alive = False
+            else:
+                print('# Tests passed.')
 
         while self.alive:
             # Receive

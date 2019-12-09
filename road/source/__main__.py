@@ -26,20 +26,21 @@ def main():
 
     ## Threads.
     global_.motor_thread = Motor_thread()
-    global_.motor_thread.start()
     THREADS.append(global_.motor_thread)
 
     global_.writer = Writer()
-    global_.writer.start()
     THREADS.append(global_.writer)
 
     global_.mbee_thread = Mbee_thread()
-    global_.mbee_thread.start()
     THREADS.append(global_.mbee_thread)
 
     global_.watcher = Watcher()
-    global_.watcher.start()
     THREADS.append(global_.watcher)
+
+    global_.watcher.start()
+    global_.writer.start()
+    global_.mbee_thread.start()
+    global_.motor_thread.start()
 
     for t in THREADS:
         while True:

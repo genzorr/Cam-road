@@ -1,5 +1,6 @@
 import smbus2 as smbus
 from .lsm6ds3_const import *
+import time
 
 WHO_AM_I_ANSWER = 0x69
 WHO_AM_I_REG = 0xF

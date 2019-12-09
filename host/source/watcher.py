@@ -5,8 +5,6 @@ from lib.data_classes import *
 from lib.data_parser import *
 from lib.controls import *
 
-ACCEL_MAX = 20
-BRAKE_MAX = 20
 ENC_MAX = 100
 
 #----------------------------------------------------------------------------------------------#
@@ -92,6 +90,12 @@ class ControlThread(QThread):
 
         self.finished.connect(self.controller.off)
 
+        global_.hostData.acceleration_signal.emit(0)
+        global_.hostData.braking_signal.emit(0)
+        global_.hostData.velocity_signal.emit(0)
+        for i in range(1, 3+1):
+            encValue = self.controller.setEncoderValue(i, 0)
+
 
     def changeMenu(self):
         if self.menu == 3:
@@ -115,20 +119,17 @@ class ControlThread(QThread):
                 # TODO: add to screen
                 self.controller.getBatteryLevel()
 
+            (dummy, value) = self.controller.getButtonValue(0)
+
+            #------------------------------------------------------------------#
+            global_.mutex.tryLock(timeout=5)
+
             #  Encoders.
-            global_.mutex.tryLock(timeout=10)
             global_.hostData.acceleration = self.controller.encoders[1]
             global_.hostData.braking    = self.controller.encoders[2]
             global_.hostData.velocity   = self.controller.encoders[0]
-            global_.mutex.unlock()
-
-            global_.hostData.acceleration_signal.emit(self.controller.encoders[1])
-            global_.hostData.braking_signal.emit(self.controller.encoders[2])
-            global_.hostData.velocity_signal.emit(self.controller.encoders[0])
 
             ##  Buttons.
-            (dummy, value) = self.controller.getButtonValue(0)
-
             # Stop.
             stop_flag = 0
             t = time.time()
@@ -136,25 +137,9 @@ class ControlThread(QThread):
                 global_.hostData.mode = -1
                 self.reset_t = t
 
-            global_.mutex.tryLock(timeout=10)
             if _check_bit(value, STOP):
                 stop_flag = 1
-            # if _check_bit(value, LEFT):
-            #     if (global_.roadData.mode == 0):
-            #         global_.hostData.direction = -1
-            #         global_.hostData.mode = 2
-            #     elif (global_.roadData.mode == 2):
-            #         if (global_.roadData.direction != -1):
-            #             global_.hostData.mode = 1
-            #             global_.hostData.direction = -1
-            # elif _check_bit(value, RIGHT):
-            #     if (global_.roadData.mode == 0):
-            #         global_.hostData.direction = 1
-            #         global_.hostData.mode = 2
-            #     elif (global_.roadData.mode == 2):
-            #         if (global_.roadData.direction != 1):
-            #             global_.hostData.mode = 1
-            #             global_.hostData.direction = 1
+                global_.hostData.mode = 0
 
             elif _check_bit(value, LEFT) and (global_.hostData.velocity != 0):
                 if (global_.roadData.mode == 0):
@@ -172,19 +157,9 @@ class ControlThread(QThread):
                 if (global_.roadData.direction == -1):
                     global_.hostData.mode = 1
 
-
-            global_.mutex.unlock()
-
-            if stop_flag:
-                global_.hostData.mode = 0
-                global_.hostData.direction = 0
-                # self.controller.setEncoderValue(1, 0)
-                # self.controller.setIndicator(1, 0)
-
             # Set base.
             global_.specialData.end_points_reset = False
             global_.hostData.set_base = 0
-            global_.mutex.tryLock(timeout=10)
             if _check_bit(value, BASE):
                 t = time.time()
                 if (t - self.base_t > 2):
@@ -200,15 +175,17 @@ class ControlThread(QThread):
                     global_.hostData.direction = 0
                     global_.hostData.set_base = 0
                     global_.specialData.end_points_reset = True
-            global_.mutex.unlock()
 
             # Reset hard stop.
-            global_.mutex.tryLock(timeout=10)
             global_.specialData.HARD_STOP = False
             if _check_bit(value, HOME):
                 if stop_flag:
                     global_.specialData.HARD_STOP = True
                     print('reset')
+
+            global_.mutex.unlock()
+            global_.mbeeThread.transmit()
+            #------------------------------------------------------------------#
 
             # Menu
             if _check_bit(value, MENU):
@@ -217,8 +194,6 @@ class ControlThread(QThread):
                     self.menu_t = t
                     self.changeMenu()
 
-
-            # time.sleep(0.2)
 
     def off(self):
         self.controller.off()

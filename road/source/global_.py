@@ -1,11 +1,10 @@
-VELO_MAX = 50
+VELO_MAX = 40
 global lock
 global hostData
 global roadData
 global specialData
 
-global motor_thread
-
-global writer
 global watcher
+global writer
 global mbee_thread
+global motor_thread

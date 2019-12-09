@@ -14,7 +14,7 @@ TX_ADDR = '0001'
 def frame_81_received(package):
     data = decrypt_package(package['DATA'])
     if isinstance(data, RTHData):
-        global_.mutex.tryLock(timeout=10)
+        global_.mutex.tryLock(timeout=5)
         global_.roadData = data
         global_.mbeeThread.RSSI = package['RSSI']
         global_.mutex.unlock()
@@ -105,15 +105,15 @@ class MbeeThread(QThread):
 
         #  Callback-functions registering.
         self.dev.callback_registring("81", frame_81_received)
-        self.dev.callback_registring("83", frame_83_received)
+        # self.dev.callback_registring("83", frame_83_received)
         self.dev.callback_registring("87", frame_87_received)
-        self.dev.callback_registring("88", frame_88_received)
-        self.dev.callback_registring("89", frame_89_received)
-        self.dev.callback_registring("8A", frame_8A_received)
-        self.dev.callback_registring("8B", frame_8B_received)
+        # self.dev.callback_registring("88", frame_88_received)
+        # self.dev.callback_registring("89", frame_89_received)
+        # self.dev.callback_registring("8A", frame_8A_received)
+        # self.dev.callback_registring("8B", frame_8B_received)
         self.dev.callback_registring("8C", frame_8C_received)
-        self.dev.callback_registring("8F", frame_8F_received)
-        self.dev.callback_registring("97", frame_97_received)
+        # self.dev.callback_registring("8F", frame_8F_received)
+        # self.dev.callback_registring("97", frame_97_received)
 
 
     def update_road_to_host(self):
@@ -141,29 +141,6 @@ class MbeeThread(QThread):
         while self.alive:
             # Receive
             frame = self.dev.run()
-            global_.mutex.tryLock(timeout=10)
-            self.update_road_to_host()
-            global_.mutex.unlock()
-
-            # Transmit
-            package = None
-            global_.mutex.tryLock(timeout=10)
-            package = global_.hostData
-            global_.mutex.unlock()
-
-            if package is not None:
-                package = encrypt_package(package)
-                self.dev.send_tx_request('00', TX_ADDR, package, '11')
-
-            package = None
-            global_.mutex.tryLock(timeout=10)
-            package = global_.specialData
-            global_.mutex.unlock()
-
-            if package is not None:
-                package = encrypt_package(package)
-                self.dev.send_tx_request('00', TX_ADDR, package, '11')
-
 
             # Flush dev buffers
             self.t = time.time()
@@ -179,6 +156,24 @@ class MbeeThread(QThread):
         if self.dev:
             self.dev.ser.close()
             self.dev = None
+
+
+    def transmit(self):
+        global_.mutex.tryLock(timeout=5)
+        global_.flag = False
+        package_host = None
+        package_special = None
+        package_host = global_.hostData
+        package_special = global_.specialData
+        global_.flag = True
+        global_.mutex.unlock()
+
+        if package_host is not None:
+            package_host = encrypt_package(package_host)
+            self.dev.send_tx_request('00', TX_ADDR, package_host, '10')
+        if package_special is not None:
+            package_special = encrypt_package(package_special)
+            self.dev.send_tx_request('00', TX_ADDR, package_special, '10')
 
 
     def run_self_test(self):

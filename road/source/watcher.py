@@ -2,7 +2,6 @@ import sys, time, threading, serial
 # from mbee import serialstar
 from lib.data_classes import *
 from lib.motor_controller import *
-from lib.data_parser import *
 from lib.lsm6ds3 import *
 from lib.indicator import *
 from lib.usound import *
@@ -30,7 +29,7 @@ class Writer(threading.Thread):
             if (data == None):
                 data = (0,0,0,0,0,0,0,'',0)
 
-            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\t'+str(global_.motor_thread.controller.AB_choose)+'\n'
+            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\t'+str(global_.motor_thread.controller.AB_choose)+'\t' + str(global_.watcher.usound.read()) + '\n'
             sys.stdout.write(self.out)
             sys.stdout.flush()
             time.sleep(0.05)
@@ -51,13 +50,14 @@ class Motor_thread(threading.Thread):
         try:
             self.portex = indicator_init()
             print('indicator init')
-        except BaseException:
+        except BaseException as exc:
+            print('## Indicator init failed:', exc)
             self.portex = None
 
     def run(self):
         while self.alive:
             if self.portex and self.controller.t % 10 == 0:
-                indicate(self.controller.motor.readV(), self.portex)
+                indicate(self.controller.motor.readV()*10, self.portex)
 
             self.controller.t_prev = self.controller.t
             self.controller.t = time.time() - self.controller.starttime
@@ -85,14 +85,19 @@ class Watcher(threading.Thread):
         self.accel = Accelerometer()
         self.accel.ctrl()
 
-        # self.usound = USound()
-        self.usound = None
+        try:
+            self.usound = USound()
+            print('## USound init ok')
+        except BaseException as exc:
+            print('## USound init error:', exc)
+            self.usound = None
 
     def run(self):
         while self.alive:
             # Usound.
             if self.usound:
                 usound = self.usound.read()
+                # print(usound)
                 if (usound < 300):
                     global_.motor_thread.controller.soft_stop = 1
                     if (usound < 70):
@@ -101,7 +106,7 @@ class Watcher(threading.Thread):
             if global_.motor_thread.alive:
                 # Check accelerometer data.
                 [x, y, z] = self.accel.getdata()
-                thr = 5
+                thr = 12
                 if (x > thr) or (z > thr):
                     global_.motor_thread.controller.HARD_STOP = 1
                     print('got')
