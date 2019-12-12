@@ -7,10 +7,6 @@ from lib.data_classes import *
 
 TX_ADDR = '0002'
 
-ACCEL_MAX = 20
-BRAKING_MAX = 20
-
-
 
 def frame_81_received(package):
     data = decrypt_package(package['DATA'])
@@ -89,22 +85,20 @@ def frame_97_received(package):
 
 
 def update_host_to_road():
-    global_.motor_thread.controller.accel = global_.hostData.acceleration * ACCEL_MAX / 100
-    global_.motor_thread.controller.braking = global_.hostData.braking * BRAKING_MAX / 100
-    # global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
+    global_.motor_thread.controller.accel = global_.hostData.acceleration * global_.ACCEL_MAX / 100
+    global_.motor_thread.controller.braking = global_.hostData.braking * global_.BRAKING_MAX / 100
 
+    #  Move to stop mode.
     if (global_.hostData.mode == 0):
         global_.motor_thread.controller.est_speed = 0
         if (global_.motor_thread.controller.mode != 0):
             global_.motor_thread.controller.soft_stop = 1
+    #  Move to reverse mode.
     elif (global_.hostData.mode == 1):
         if (global_.motor_thread.controller.mode == 2):
-            print('here')
             global_.motor_thread.controller.reverse = 1
-            global_.motor_thread.controller.est_speed = 0
-        # if (global_.motor_thread.controller.speed == 0):
-        #     global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
-        # global_.motor_thread.controller.direction = global_.hostData.direction
+            # global_.motor_thread.controller.est_speed = 0     # CHANGED
+    #  Move to coursing mode.
     elif (global_.hostData.mode == 2):
         global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
         if (global_.motor_thread.controller.mode == 0):
@@ -114,10 +108,7 @@ def update_host_to_road():
                 global_.motor_thread.controller.reverse = 1
                 global_.motor_thread.controller.est_speed = 0
 
-    # if (global_.motor_thread.controller.mode == 2):
-    #     global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
-
-
+    #  Set base points.
     if global_.hostData.set_base == 1 and not global_.roadData.base1_set:
         global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
         global_.roadData.base1_set = True
