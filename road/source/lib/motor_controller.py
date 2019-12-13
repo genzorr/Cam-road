@@ -24,9 +24,7 @@ config = {'id': 1,\
 
 #----------------------------------------------------------------------------------------------#
 STOP = 0
-COURSE = 1
-COURSE_BASES = 2
-EMERGENCY = 5
+REVERSE = 1
 
 
 class FSM:
@@ -104,6 +102,10 @@ class Controller(FSM):
         self.soft_stop = 0
         self.reverse = 0
         self.stopped = 0
+
+        self.end_points = True
+        self.end_points_stop = True
+        self.end_points_reverse = False
 
         self.dstep = 0
         self.coordinate = 0
@@ -240,7 +242,6 @@ class Controller(FSM):
         self.dstep = (self.speed + speed_new) / 2 * dt * self.direction        # CHANGED
         self.speed = speed_new                                                 # CHANGED
         self.coordinate += self.dstep
-        return l
 
 
     def stop(self):
@@ -285,15 +286,12 @@ class Controller(FSM):
         self.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
 
         #  Bases are set.
-        if (self.base1_set and self.base2_set):
-            #----------------------------------------------------------------
-            #   NEW CODE
-            #----------------------------------------------------------------
+        if self.end_points and (self.base1_set and self.base2_set):
             #  Check here that we are in base area and go here if not.
             out_left = (self.coordinate < self.base1)
             out_right = (self.coordinate > self.base2)
 
-            if out_left:    #  We are in the left from the 1st base.
+            if out_left:    # We are in the left from the 1st base.
                 if (self.direction == -1):
                     self.reverse = 1
                     self.changeState(self.stop_transitial)
@@ -302,7 +300,7 @@ class Controller(FSM):
                 #  Direction = +1
                 self.update_coordinate(speed_to=self.est_speed)
 
-            elif out_right: #  We are in the right from the 2nd base.
+            elif out_right: # We are in the right from the 2nd base.
                 if (self.direction == 1):
                     self.reverse = 1
                     self.changeState(self.stop_transitial)
@@ -310,11 +308,8 @@ class Controller(FSM):
 
                 #  Direction = -1
                 self.update_coordinate(speed_to=self.est_speed)
-            #----------------------------------------------------------------
-            #   NEW CODE
-            #----------------------------------------------------------------
 
-            elif (not out_left) and (not out_right):
+            elif (not out_left) and (not out_right):    # We are in area
                 if self.direction == -1:
                     dist_to_base = self.coordinate - self.base1
                 else:
@@ -324,7 +319,10 @@ class Controller(FSM):
                 braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
 
                 if (dist_to_base <= braking_dist):
-                    self.changeState(self.stop_transitial)
+                    if self.end_points_stop:
+                        self.changeState(self.stop)
+                    elif self.end_points_reverse:
+                        self.changeState(self.stop_transitial)
                     return
 
                 #  Update speed as usual if we do not need to break.
