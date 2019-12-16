@@ -38,14 +38,22 @@ class QSettingsWidget(QQWidget):
         self.color_red = QColor(255, 0, 0).name()
         self.color_green = QColor(0, 255, 0).name()
 
+        self.buttons = [self.ui.EnableEndPoints, self.ui.EndPointsStop, self.ui.EndPointsReverse,\
+                        self.ui.SoundStop, self.ui.SwapDirection, self.ui.StopAccelerometer]
+
     def setChecked(self):
         sender = self.sender()
 
         if sender == self.ui.EndPointsStop:
-            self.ui.EndPointsReverse.setChecked(False)
+            if sender.isDown():
+                self.ui.EndPointsReverse.setChecked(True)
+            else:
+                self.ui.EndPointsReverse.setChecked(False)
         elif sender == self.ui.EndPointsReverse:
-            self.ui.EndPointsStop.setChecked(False)
-
+            if sender.isDown():
+                self.ui.EndPointsStop.setChecked(True)
+            else:
+                self.ui.EndPointsStop.setChecked(False)
 #----------------------------------------------------------------------------------------------#
 
 class QTelemetryWidget(QQWidget):
@@ -62,7 +70,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_Watcher()
         self.ui.setupUi(self)
         self.setWindowTitle('Watcher')
-        self.showFullScreen()
+        # self.showFullScreen()
 
         self.keyPressed.connect(self.on_key)
 

@@ -29,7 +29,7 @@ class Writer(threading.Thread):
             if (data == None):
                 data = (0,0,0,0,0,0,0,'',0)
 
-            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\t'+str(global_.motor_thread.controller.AB_choose)+'\t' + str(global_.watcher.usound.read()) + '\n'
+            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\t'+str(global_.motor_thread.controller.AB_choose)+'\n'# + str(global_.watcher.usound.read()) + '\n'
             sys.stdout.write(self.out)
             sys.stdout.flush()
             time.sleep(0.05)
@@ -65,6 +65,7 @@ class Motor_thread(threading.Thread):
 
             if self.controller.motor:
                 self.controller.motor.dstep = self.controller.dstep
+            time.sleep(0.02)
 
         self.off()
 
@@ -86,7 +87,8 @@ class Watcher(threading.Thread):
         self.accel.ctrl()
 
         try:
-            self.usound = USound()
+            self.usound = None
+            # self.usound = USound()
             print('## USound init ok')
         except BaseException as exc:
             print('## USound init error:', exc)
@@ -111,6 +113,8 @@ class Watcher(threading.Thread):
                     global_.motor_thread.controller.HARD_STOP = 1
                     print('got')
                     print(x," ", y," ", z)
+
+            time.sleep(0.02)
 
         self.off()
 

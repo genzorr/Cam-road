@@ -161,12 +161,17 @@ class HBData(QObject):
 
     @pyqtSlot(bool)
     def lock_buttons_(self, value):
-        sender = self.sender()
-        if value:
-            color, self.lock_buttons = self.color_green, True
-        else:
-            color, self.lock_buttons = self.color_red, False
-        self.set_color(sender, color)
+        pass
+        # sender = self.sender()
+        # if value:
+        #     color, self.lock_buttons = self.color_green, True
+        #     # for button in global_.window.settingsWidget.buttons:
+        #     #     button.setCheckable(False)
+        # else:
+        #     color, self.lock_buttons = self.color_red, False
+        #     # for button in global_.window.settingsWidget.buttons:
+        #     #     button.setCheckable(True)
+        # self.set_color(sender, color)
 
     @pyqtSlot(bool)
     def enable_end_points_(self, value):
@@ -177,6 +182,7 @@ class HBData(QObject):
             else:
                 color, self.end_points = self.color_red, False
             self.set_color(sender, color)
+
 
     @pyqtSlot(bool)
     def end_points_stop_(self, value):
@@ -227,3 +233,5 @@ class HBData(QObject):
             else:
                 color, self.accelerometer_stop = self.color_red, False
             self.set_color(sender, color)
+        else:
+            print(self.sender().isCheckable())

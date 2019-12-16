@@ -2,8 +2,8 @@ from .portex import PortExpander
 
 #-------------------------------------------------------------------------------------#
 #   Settings
-V_MAX = 25.2
-V_MIN = 19.2
+V_MAX = 4.2
+V_MIN = 3.3
 
 LED10   = (1 << 8)
 LED9    = (1 << 9)
@@ -45,7 +45,15 @@ def indicator_init():
 
 #   Indicates by given voltage
 def indicate(v, portex):
-    value = round((v - V_MIN) / (V_MAX - V_MIN) * 10)
+    print(v)
+    for i in [4,6,8]:
+        value = (v/i - V_MIN) / (V_MAX - V_MIN)
+        #print("indicate " + str(i) + " : " + str(value))
+        if (value>0) and (value<1):
+            break
+        value = 0
+
+    value = round(value*10) + 1
     if (value >= len(BAT) - 1):
         value = len(BAT) - 1
     elif value < 0:
@@ -54,4 +62,5 @@ def indicate(v, portex):
     #portex.setword(BAT[round(value)])
 
 def indicator_off(portex):
-    indicate(V_MIN, portex)
+    #indicate(V_MIN, portex)
+    pass

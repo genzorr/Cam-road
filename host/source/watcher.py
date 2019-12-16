@@ -4,6 +4,7 @@ from mbee import serialstar
 from lib.data_classes import *
 from lib.data_parser import *
 from lib.controls import *
+import logging
 
 ENC_MAX = 100
 
@@ -37,8 +38,8 @@ class WatcherThread(QThread):
             window.settingsWidget.ui.EndPointsStop.pressed.connect(window.settingsWidget.setChecked)
             window.settingsWidget.ui.EndPointsReverse.pressed.connect(window.settingsWidget.setChecked)
 
-            window.settingsWidget.ui.EnableEndPoints.toggled.emit(False)
-            window.settingsWidget.ui.EndPointsStop.toggled.emit(False)
+            window.settingsWidget.ui.EnableEndPoints.toggled.emit(True)
+            window.settingsWidget.ui.EndPointsStop.toggled.emit(True)
             window.settingsWidget.ui.EndPointsReverse.toggled.emit(False)
             window.settingsWidget.ui.SoundStop.toggled.emit(False)
             window.settingsWidget.ui.SwapDirection.toggled.emit(False)
@@ -48,14 +49,17 @@ class WatcherThread(QThread):
 
     def run(self):
         while self.alive:
+            t = time.time()
+
             global_.mbeeThread.RSSI_signal.emit(global_.mbeeThread.RSSI)
-            print(global_.hostData.mode, global_.hostData.direction)
+            # print(global_.hostData.mode, global_.hostData.direction)
             # print(global_.hostData.mode)
             # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
             # print('{}\t{}\t{}'.format(global_.hostData.acceleration,
             #                         global_.hostData.braking,
             #                         global_.hostData.velocity))
-            time.sleep(1)
+            # print('Watcher', t - time.time())
+            time.sleep(0.05)
 
     def off(self):
         pass
@@ -109,7 +113,9 @@ class ControlThread(QThread):
 
     def run(self):
         while self.alive and self.controller.status:
+            time.sleep(0.05)
             self.t = time.time()
+            t = time.time()
 
             for i in range(1, 3+1):
                 encValue = self.controller.getEncoderValue(i)
@@ -133,15 +139,20 @@ class ControlThread(QThread):
             # Stop.
             stop_flag = 0
             t = time.time()
-            if (t - self.reset_t > 0.5):
-                global_.hostData.mode = -1
-                self.reset_t = t
+            # if (t - self.reset_t > 1):
+            #     global_.hostData.mode = -1
+            #     self.reset_t = t
+
+            if not global_.specialData.swap_direction:
+                self.left, self.right = LEFT, RIGHT
+            else:
+                self.left, self.right = RIGHT, LEFT
 
             if _check_bit(value, STOP):
                 stop_flag = 1
                 global_.hostData.mode = 0
 
-            elif _check_bit(value, LEFT) and (global_.hostData.velocity != 0):
+            elif _check_bit(value, self.left) and (global_.hostData.velocity != 0):
                 if (global_.roadData.mode == 0):
                     global_.hostData.direction = -1
                     global_.hostData.mode = 2
@@ -149,7 +160,7 @@ class ControlThread(QThread):
                 if (global_.roadData.direction == 1):
                     global_.hostData.mode = 1
 
-            elif _check_bit(value, RIGHT) and (global_.hostData.velocity != 0):
+            elif _check_bit(value, self.right) and (global_.hostData.velocity != 0):
                 if (global_.roadData.mode == 0):
                     global_.hostData.direction = 1
                     global_.hostData.mode = 2
@@ -159,8 +170,9 @@ class ControlThread(QThread):
 
             # Set base.
             global_.specialData.end_points_reset = False
-            global_.hostData.set_base = 0
+            # global_.hostData.set_base = 0
             if _check_bit(value, BASE):
+                logging.info("Base pressed")
                 t = time.time()
                 if (t - self.base_t > 2):
                     self.base_t = t
@@ -171,6 +183,7 @@ class ControlThread(QThread):
                 print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
 
                 if stop_flag: # Reset base points when STOP and BASE buttons pressed.
+                    logging.info("Reset end points")
                     global_.hostData.mode = 0
                     global_.hostData.direction = 0
                     global_.hostData.set_base = 0
@@ -184,7 +197,13 @@ class ControlThread(QThread):
                     print('reset')
 
             global_.mutex.unlock()
-            global_.mbeeThread.transmit()
+
+            # global_.mutex.tryLock(timeout=5)
+            # # t = time.time()
+            # global_.mbeeThread.transmit()
+            # # print(time.time() - t)
+            # global_.hostData.mode = -1
+            # global_.mutex.unlock()
             #------------------------------------------------------------------#
 
             # Menu
@@ -194,32 +213,7 @@ class ControlThread(QThread):
                     self.menu_t = t
                     self.changeMenu()
 
+            # print('Control', t - time.time())
 
     def off(self):
         self.controller.off()
-
-
-#----------------------------------------------------------------------------------------------#
-# /dev/ttySAC4!!
-def serial_init(port='/dev/ttySAC4', speed=19200):
-    try:
-        dev = serial.Serial(
-        port=port,
-        baudrate=speed,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_ONE,
-        bytesize=serial.EIGHTBITS,
-        timeout=0.2
-    )
-    except serial.serialutil.SerialException:
-        print('Could not open port')
-        dev = None
-
-    return dev
-
-def serial_recv(dev, size):
-    string = dev.read(size).decode()
-    return string
-
-def serial_send(dev, string):
-    dev.write(string.encode('utf-8'))

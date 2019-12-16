@@ -9,17 +9,17 @@ from x4motor import X4Motor
 #   Settings
 config = {'id': 1,\
         'Mode': 'Angle',\
-        'PWM_Limit' : 300,\
+        'PWM_Limit' : 900,\
         'PWM_inc_limit' : 2,\
         'I_limit': 5.0,\
         'V_min': 12.0,\
-        'Angle_PID_P' : 100,\
+        'Angle_PID_P' : 50,\
         'Angle_PID_I' : 1,\
         'Speed_PID_P' : 100,\
         'Speed_PID_I' : 100,\
         'StepsPerMM': 210,\
         'TimeOut' : 1000,\
-        'TempShutDown' : 75,\
+        'TempShutDown' : 100,\
         'Reverse': 0}           #   210 - 1step = 0.01m
 
 #----------------------------------------------------------------------------------------------#

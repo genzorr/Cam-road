@@ -1,6 +1,8 @@
 global mutex
 global flag
 
+global window
+
 global watcher
 global controlThread
 global mbeeThread

@@ -2,8 +2,10 @@ import sys, os, struct, time
 import threading
 import global_
 import binascii
-from mbee import serialstar
+# from mbee import serialstar
+import serialstar
 from lib.data_classes import *
+import logging
 
 TX_ADDR = '0002'
 
@@ -13,9 +15,11 @@ def frame_81_received(package):
     if isinstance(data, HTRData):
         global_.lock.acquire(blocking=True, timeout=1)
         global_.hostData = data
+        print('HTR data ' + str(data.__dict__))
         update_host_to_road()
         global_.lock.release()
     if isinstance(data, HBData):
+        print('HB data ' + str(data.__dict__))
         global_.lock.acquire(blocking=True, timeout=1)
         global_.specialData = data
         update_special()
@@ -142,10 +146,13 @@ def update_special():
     if global_.specialData.HARD_STOP:
         global_.motor_thread.controller.HARD_STOP = 0
 
+    global_.motor_thread.controller.end_points = global_.specialData.end_points
+    global_.motor_thread.controller.end_points_stop = global_.specialData.end_points_stop
+    global_.motor_thread.controller.end_points_reverse = global_.specialData.end_points_reverse
 
 
 class Mbee_thread(threading.Thread):
-    def __init__(self, port='/dev/ttyS2', baudrate=19200):
+    def __init__(self, port='/dev/ttyS2', baudrate=230400):
         super().__init__()
         self.alive = True
         self.name = 'MBee'
@@ -159,7 +166,7 @@ class Mbee_thread(threading.Thread):
         self.t_prev = 0
 
         try:
-            self.dev = serialstar.SerialStar(port, baudrate)
+            self.dev = serialstar.SerialStar(port, baudrate, 0.1)
         except BaseException as exc:
             print('## MBee init failed:', exc)
             self.dev = None
@@ -191,6 +198,7 @@ class Mbee_thread(threading.Thread):
 
         while self.alive:
             # Receive
+            #time.sleep(0.01)
             frame = self.dev.run()
 
             # Transmit
@@ -202,15 +210,15 @@ class Mbee_thread(threading.Thread):
 
             if package is not None:
                 package = encrypt_package(package)
-                self.dev.send_tx_request('00', TX_ADDR, package, '10')
+                self.dev.send_tx_request('00', TX_ADDR, package, '11')
 
             # Flush dev buffers
             self.t = time.time()
-            if ((self.t - self.t_prev) > 5):
-                self.t_prev = self.t
-                self.dev.ser.flush()
-                self.dev.ser.reset_input_buffer()
-                self.dev.ser.reset_output_buffer()
+            #if ((self.t - self.t_prev) > 3):
+            #    self.t_prev = self.t
+            #    self.dev.ser.flush()
+            #    self.dev.ser.reset_input_buffer()
+            #    self.dev.ser.reset_output_buffer()
 
             # print(global_.motor_thread.controller.direction)
 
@@ -304,7 +312,8 @@ def decrypt_package(package):
             package.accelerometer_stop = hex_to_bool(data[14:16])
             package.HARD_STOP = hex_to_bool(data[16:18])
             package.lock_buttons = hex_to_bool(data[18:20])
-
+            
+            
         else:
             print('error: no such package')
             return None

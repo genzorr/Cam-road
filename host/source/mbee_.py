@@ -4,9 +4,12 @@ import binascii
 import global_
 import threading
 from PyQt5.QtCore import QThread, QMutex
-
-from mbee import serialstar
+import logging
+# from mbee import serialstar
+import serialstar
 from lib.data_classes import *
+
+import logging
 
 TX_ADDR = '0001'
 
@@ -17,6 +20,7 @@ def frame_81_received(package):
         global_.mutex.tryLock(timeout=5)
         global_.roadData = data
         global_.mbeeThread.RSSI = package['RSSI']
+        # global_.mbeeThread.update_road_to_host()
         global_.mutex.unlock()
     # print("Received 81-frame.")
     # print(package)
@@ -78,7 +82,7 @@ def frame_97_received(package):
 class MbeeThread(QThread):
     RSSI_signal = pyqtSignal(int)
 
-    def __init__(self, port='/dev/ttySAC4', baudrate=19200):
+    def __init__(self, port='/dev/ttySAC4', baudrate=230400):
         QThread.__init__(self)
 
         self.alive = True
@@ -117,6 +121,14 @@ class MbeeThread(QThread):
 
 
     def update_road_to_host(self):
+        if (global_.roadData.mode == global_.hostData.mode):
+            # if (global_.roadData.mode == 1) and (global_.roadData.direction == global_.hostData.direction):
+            #     global_.hostData.mode = -1
+            #     return
+            # else:
+            #     return
+            global_.hostData.mode = -1
+
         # if (global_.hostData.mode == 1):
         #     if ((global_.roadData.mode == 1) and not self.reverse):
         #         self.direction_changed = False
@@ -139,17 +151,28 @@ class MbeeThread(QThread):
             self.alive = False
 
         while self.alive:
+            t = time.time()
+
             # Receive
-            frame = self.dev.run()
+            global_.mutex.tryLock(timeout=2)
+            self.dev.run()
+            self.transmit()
+            self.dev.run()
+            global_.mutex.unlock()
+
+            self.transmit()
+            global_.hostData.mode = -1
 
             # Flush dev buffers
             self.t = time.time()
-            if ((self.t - self.t_prev) > 5):
+            if ((self.t - self.t_prev) > 3):
                 self.t_prev = self.t
                 self.dev.ser.flush()
-                self.dev.ser.reset_input_buffer()
-                self.dev.ser.reset_output_buffer()
+            #     self.dev.ser.reset_input_buffer()
+            #     self.dev.ser.reset_output_buffer()
 
+            # print('MBee', t - time.time())
+            time.sleep(0.01)
         self.off()
 
     def off(self):
@@ -169,11 +192,10 @@ class MbeeThread(QThread):
         global_.mutex.unlock()
 
         if package_host is not None:
-            package_host = encrypt_package(package_host)
-            self.dev.send_tx_request('00', TX_ADDR, package_host, '10')
+            self.dev.send_tx_request('00', TX_ADDR, encrypt_package(package_host), '11')
         if package_special is not None:
-            package_special = encrypt_package(package_special)
-            self.dev.send_tx_request('00', TX_ADDR, package_special, '10')
+            self.dev.send_tx_request('00', TX_ADDR, encrypt_package(package_special), '11')
+
 
 
     def run_self_test(self):
@@ -189,7 +211,7 @@ class MbeeThread(QThread):
                 break
 
         if (self.self_test == 1):
-            print('# No remote module.')
+            logging.warning('# No remote module.')
             self.test_remote = 0
 
         # Test 2: local
@@ -204,7 +226,7 @@ class MbeeThread(QThread):
                 break
 
         if (self.self_test == 1):
-            print('# No module.')
+            logging.warning('# No module.')
             self.test_local = 0
 
 
@@ -257,17 +279,17 @@ def decrypt_package(package):
             package.lock_buttons = hex_to_bool(data[18:20])
 
         else:
-            print('error: no such package')
+            logging.warning('error: no such package')
             return None
 
         return package
 
     except ValueError or IndexError:
-        print('error')
+        logging.warning('error')
         return None
     except struct.error as exc:
-        print(data)
-        print(exc)
+        logging.warning(data)
+        logging.warning(exc)
         return None
 
 
@@ -278,7 +300,9 @@ def encrypt_package(package):
     data = str()
     data += int_to_hex(package.type)
 
+
     if package.type == 1:
+        logging.info("Encrypt pack type 1 : \n" + str(package.__dict__))
         data += float_to_hex(package.acceleration)
         data += float_to_hex(package.braking)
         data += float_to_hex(package.velocity)
@@ -287,6 +311,7 @@ def encrypt_package(package):
         data += int_to_hex(package.set_base)
 
     elif package.type == 2:
+        logging.info("Encrypt pack type 2")
         data += int_to_hex(package.mode)
         data += float_to_hex(package.coordinate)
         data += float_to_hex(package.voltage)
@@ -299,6 +324,7 @@ def encrypt_package(package):
         data += int_to_hex(package.direction)
 
     elif package.type == 3:
+        logging.info("Encrypt pack type 3 : \n" + str(package.__dict__))
         data += bool_to_hex(package.soft_stop)
         data += bool_to_hex(package.end_points_reset)
         data += bool_to_hex(package.end_points)
