@@ -9,8 +9,6 @@ import logging
 import serialstar
 from lib.data_classes import *
 
-import logging
-
 TX_ADDR = '0001'
 
 
@@ -157,7 +155,6 @@ class MbeeThread(QThread):
             global_.mutex.tryLock(timeout=2)
             self.dev.run()
             self.transmit()
-            self.dev.run()
             global_.mutex.unlock()
 
             self.transmit()
@@ -299,7 +296,6 @@ def encrypt_package(package):
 
     data = str()
     data += int_to_hex(package.type)
-
 
     if package.type == 1:
         logging.info("Encrypt pack type 1 : \n" + str(package.__dict__))
