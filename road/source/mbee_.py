@@ -1,8 +1,9 @@
 import struct, time
 import threading
-import global_
 import binascii
 import logging
+import global_
+from global_ import get_logger
 
 import serialstar
 from lib.data_classes import *
@@ -16,20 +17,20 @@ def update_host_to_road():
     global_.motor_thread.controller.braking = global_.hostData.braking * global_.BRAKING_MAX / 100
 
     #  Move to stop mode.
-    if (global_.hostData.mode == 0):
+    if global_.hostData.mode == 0:
         global_.motor_thread.controller.est_speed = 0
-        if (global_.motor_thread.controller.mode != 0):
+        if global_.motor_thread.controller.mode != 0:
             global_.motor_thread.controller.soft_stop = 1
     #  Move to reverse mode.
-    elif (global_.hostData.mode == 1):
-        if (global_.motor_thread.controller.mode == 2):
+    elif global_.hostData.mode == 1:
+        if global_.motor_thread.controller.mode == 2:
             global_.motor_thread.controller.reverse = 1
             # global_.motor_thread.controller.est_speed = 0     # CHANGED
     #  Move to coursing mode.
-    elif (global_.hostData.mode == 2):
+    elif global_.hostData.mode == 2:
         global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
-        if (global_.motor_thread.controller.mode == 0):
-            if (global_.motor_thread.controller.stopped == 1):
+        if global_.motor_thread.controller.mode == 0:
+            if global_.motor_thread.controller.stopped == 1:
                 global_.motor_thread.controller.direction = global_.hostData.direction
             else:
                 global_.motor_thread.controller.reverse = 1
@@ -91,7 +92,7 @@ class MBeeThread(threading.Thread):
         try:
             self.dev = serialstar.SerialStar(port, baudrate, 0.1)
         except BaseException as exc:
-            self.logger.warning('# MBee is not initialized:', exc)
+            self.logger.warning('# MBee init failed')
             self.dev = None
             self.alive = False
             return

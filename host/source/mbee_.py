@@ -32,7 +32,7 @@ class MbeeThread(QThread):
         except BaseException:
             self.dev = None
             self.alive = False
-            self.logger.warning('# MBee is not initialised')
+            self.logger.warning('# MBee init failed')
             return
 
         self.logger.info('# MBee OK')

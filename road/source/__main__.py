@@ -3,7 +3,7 @@ import threading, signal
 
 import global_
 from watcher import *
-from mbee_ import Mbee_thread
+from mbee_ import MBeeThread
 from lib.data_classes import *
 
 THREADS = []

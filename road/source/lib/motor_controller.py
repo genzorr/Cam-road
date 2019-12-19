@@ -1,6 +1,9 @@
-import time, global_
+import time
 import sys
 sys.path.append('../../fortune-controls/Lib')
+
+import global_
+from global_ import get_logger
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from x4motor import X4Motor
 
@@ -43,7 +46,7 @@ class FSM:
         self.len -= 1
 
     def pushState(self, state):
-        if (self.getCurrentState() != state):
+        if self.getCurrentState() != state:
             self.stack.put(state)
             self.len += 1
 
@@ -51,7 +54,7 @@ class FSM:
         global_.lock.acquire(blocking=True, timeout=1)
         self.stack.pop()
         self.len -= 1
-        if ((self.len == 0) or (self.getCurrentState() != state)):
+        if (self.len == 0) or (self.getCurrentState() != state):
             self.stack.append(state)
             self.len += 1
         global_.lock.release()
@@ -67,26 +70,33 @@ class FSM:
 class Controller(FSM):
     def __init__(self):
         super().__init__(self.stop)
+        self.logger = get_logger('Control')
 
         try:
-            print("Motor connection...")
             self.client = ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
                                        bytesize = 8, parity = 'N', baudrate= 115200,
                                        timeout = 0.8, strict=False )
 
             #   Try to connect to modbus client
             client_status = self.client.connect()
+            if client_status:
+                self.logger.info('# Controller OK')
+            else:
+                self.logger.warning('# Controller is not initialized')
+                self.motor = None
+                self.client = None
+                return
 
             #   Motor initialization
-            self.motor = X4Motor(self.client, settings = config)
-            print("OK") if client_status and self.motor else print("Failed")
+            self.motor = X4Motor(self.client, settings=config)
 
             #   Print all registers
-            registers = self.motor.readAllRO()
-            print(registers)
+            # registers = self.motor.readAllRO()
+            # print(registers)
 
         except BaseException:
             self.motor = None
+            return
 
         self.starttime = time.time()
 
@@ -226,10 +236,8 @@ class Controller(FSM):
             tmp = "-"
         else:
             tmp = " "
-        return (self.t, self.speed, self.est_speed, self.base1, self.base2, self.mode, self.coordinate, tmp)
+        return (self.t, self.speed, self.est_speed, self.base1, self.base2, self.mode, self.coordinate, tmp, self.HARD_STOP)
 
-
-    """ Updates speed by given acceleration """
     def update_coordinate(self, speed_to):
         dt = self.t - self.t_prev
         if self.AB_choose == 0:
@@ -239,8 +247,8 @@ class Controller(FSM):
         else:
             speed_new = max(self.speed - self.braking * dt, speed_to)
 
-        self.dstep = (self.speed + speed_new) / 2 * dt * self.direction        # CHANGED
-        self.speed = speed_new                                                 # CHANGED
+        self.dstep = (self.speed + speed_new) / 2 * dt * self.direction
+        self.speed = speed_new
         self.coordinate += self.dstep
 
 

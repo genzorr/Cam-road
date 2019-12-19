@@ -14,8 +14,11 @@ global motor_thread
 
 import sys
 import logging
+import coloredlogs
 
-FORMATTER = logging.Formatter("%(asctime)s — %(name)-7s — %(levelname)s — %(filename)-12s:%(lineno)3d — %(message)s")
+format = "%(asctime)s — %(name)-7s — %(levelname)-7s — %(filename)-12s:%(lineno)3d — %(message)s"
+# FORMATTER = logging.Formatter(format)
+FORMATTER = coloredlogs.ColoredFormatter(format)
 
 def get_console_handler():
     console_handler = logging.StreamHandler(sys.stdout)

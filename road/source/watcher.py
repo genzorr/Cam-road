@@ -18,26 +18,30 @@ class Writer(threading.Thread):
         self.name = 'Writer'
         self.out = out
 
+        self.logger = get_logger('Writer')
+
     def run(self):
         stringData = 't:\t{:3.2f}\tv:\t{:2.1f} | {:2.1f}\tB1:\t{:3.1f}\tB2:\t{:3.1f}\tmode:\t{}\tL:\t{:3.3f}\t\t{:s}'
         data = None
         while self.alive:
             # Get data for printing.
-            global_.lock.acquire(blocking=True, timeout=1)
-            data = global_.motor_thread.controller.get_data()
-            global_.lock.release()
+            if global_.motor_thread.controller:
+                global_.lock.acquire(blocking=True, timeout=1)
+                data = global_.motor_thread.controller.get_data()
+                global_.lock.release()
 
             if data is None:
-                data = (0, 0, 0, 0, 0, 0, 0, '', 0)
+                data = (0, 0, 0, 0, 0, 0, 0, '', 0, 0)
 
-            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\n'
-            sys.stdout.write(self.out)
-            sys.stdout.flush()
-            time.sleep(0.05)
+            self.out = stringData.format(*data)+'\n'
+            # sys.stdout.write(self.out)
+            # sys.stdout.flush()
+            self.logger.debug(self.out)
+            time.sleep(0.2)
         self.off()
 
     def off(self):
-        print('############  Writer stopped  #############')
+        self.logger.info('############  Writer stopped  #############')
 
 #-------------------------------------------------------------------------------------#
 class MotorThread(threading.Thread):
@@ -45,14 +49,22 @@ class MotorThread(threading.Thread):
         super().__init__()
         self.alive = True
         self.name = 'Motor'
+        self.logger = get_logger('Motor')
+
         self.controller = Controller()
+        if self.controller.client is None:
+            self.alive = False
+            self.controller = None
+
         #   Indicator initialization
         try:
             self.portex = indicator_init()
-            print('indicator init')
         except BaseException as exc:
-            print('## Indicator init failed:', exc)
+            self.logger.warning('# Indicator init failed')
             self.portex = None
+            return
+
+        self.logger.info('# Indicator OK')
 
     def run(self):
         while self.alive:
@@ -69,34 +81,40 @@ class MotorThread(threading.Thread):
 
         self.off()
 
-
     def off(self):
         if self.portex:
             indicator_off(self.portex)
-        self.controller.off()
-        print('############  Motor released  #############')
+        if self.controller:
+            self.controller.off()
+        self.logger.info('############  Motor released  #############')
 
 #-------------------------------------------------------------------------------------#
-""" Used to control all operations """
 class Watcher(threading.Thread):
     def __init__(self):
         super().__init__()
         self.alive = True
         self.name = 'Watcher'
-        self.accel = Accelerometer()
-        self.accel.ctrl()
+
+        self.logger = get_logger('Watcher')
+
+        try:
+            self.accel = Accelerometer()
+            self.accel.ctrl()
+            self.logger.info('# Accelerometer OK')
+        except BaseException:
+            self.accel = None
+            self.logger.warning('# Accelerometer init failed')
 
         try:
             self.usound = None
             # self.usound = USound()
-            print('## USound init ok')
+            self.logger.info('# USound OK')
         except BaseException as exc:
-            print('## USound init error:', exc)
+            self.logger.warning('# USound init failed')
             self.usound = None
 
     def run(self):
         while self.alive:
-            # Usound.
             if self.usound:
                 usound = self.usound.read()
                 # print(usound)
@@ -111,12 +129,11 @@ class Watcher(threading.Thread):
                 thr = 12
                 if (x > thr) or (z > thr):
                     global_.motor_thread.controller.HARD_STOP = 1
-                    print('got')
-                    print(x," ", y," ", z)
+                    self.logger.info('got ', x, ' ', y, ' ', z)
 
             time.sleep(0.02)
 
         self.off()
 
     def off(self):
-        print('############  Watcher stopped  ############')
+        self.logger.info('############  Watcher stopped  ############')

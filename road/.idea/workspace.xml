@@ -1,24 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/source/global_.py" line="30" />
+    <bookmark url="file://$PROJECT_DIR$/source/global_.py" line="33" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c8957dda-8430-4e27-ac9c-603ebcd4ee73" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/road.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../host/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../host/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../host/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/__main__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/global_.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/global_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/lib/controls.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/lib/controls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/mbee_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/watcher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/__main__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/global_.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/global_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/data_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/lib/data_classes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/mbee_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/watcher.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/Watcher.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/dictionaries/michael.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/.idea/Watcher.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/.idea/dictionaries/michael.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/open_host_files.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/run.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/__main__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/global_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/lib/controls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/lib/data_classes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/lib/data_parser.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/mbee_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/radio_off.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/radio_on.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/serialstar.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/settingswidget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/settingswidget.ui" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/telemetrywidget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/telemetrywidget.ui" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/ui.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/ui_to_py.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/window.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/window.ui" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/workwidget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/workwidget.ui" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/watcher.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/road.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_road_files.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/__main__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/global_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/data_classes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/data_parser.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/indicator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/lsm6ds3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/lsm6ds3_const.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/motor_controller.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/portex.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/usound.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/serialstar.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/watcher.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -27,12 +70,12 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/source/__main__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
+            <state relative-caret-position="153">
+              <caret line="9" selection-start-line="9" selection-end-line="9" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -40,11 +83,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/source/global_.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="10" column="13" lean-forward="true" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+            <state relative-caret-position="237">
+              <caret line="18" column="51" selection-start-line="18" selection-start-column="51" selection-end-line="18" selection-end-column="51" />
               <folding>
                 <element signature="e#180#190#0" expanded="true" />
               </folding>
@@ -55,10 +98,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/source/mbee_.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-973">
-              <caret line="198" column="29" selection-start-line="198" selection-start-column="29" selection-end-line="198" selection-end-column="29" />
+            <state relative-caret-position="357">
+              <caret line="99" column="24" selection-start-line="99" selection-start-column="20" selection-end-line="99" selection-end-column="24" />
               <folding>
-                <element signature="e#0#28#0" expanded="true" />
+                <element signature="e#0#19#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -67,8 +110,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/source/watcher.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" column="30" selection-start-line="3" selection-start-column="30" selection-end-line="3" selection-end-column="30" />
+            <state relative-caret-position="408">
+              <caret line="33" column="53" selection-start-line="33" selection-start-column="53" selection-end-line="33" selection-end-column="53" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/source/lib/motor_controller.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="238" column="123" selection-start-line="238" selection-start-column="123" selection-end-line="238" selection-end-column="123" />
             </state>
           </provider>
         </entry>
@@ -76,7 +128,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/source/lib/data_classes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="778">
+            <state relative-caret-position="441">
               <caret line="54" selection-start-line="54" selection-end-line="54" />
             </state>
           </provider>
@@ -95,11 +147,12 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/source/__main__.py" />
-        <option value="$PROJECT_DIR$/source/global_.py" />
-        <option value="$PROJECT_DIR$/source/watcher.py" />
         <option value="$PROJECT_DIR$/source/lib/data_classes.py" />
+        <option value="$PROJECT_DIR$/source/__main__.py" />
+        <option value="$PROJECT_DIR$/source/watcher.py" />
+        <option value="$PROJECT_DIR$/source/lib/motor_controller.py" />
         <option value="$PROJECT_DIR$/source/mbee_.py" />
+        <option value="$PROJECT_DIR$/source/global_.py" />
       </list>
     </option>
   </component>
@@ -152,6 +205,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunDashboard">
@@ -208,7 +262,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-25" width="1680" height="1075" extended-state="6" />
+    <frame x="0" y="-25" width="1680" height="1075" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
@@ -220,7 +274,7 @@
       <window_info anchor="bottom" id="Message" order="3" />
       <window_info anchor="bottom" id="Find" order="4" weight="0.32939914" />
       <window_info anchor="bottom" id="Version Control" order="5" />
-      <window_info active="true" anchor="bottom" id="Run" order="6" visible="true" weight="0.3299285" />
+      <window_info active="true" anchor="bottom" id="Run" order="6" visible="true" weight="0.3291536" />
       <window_info anchor="bottom" id="Debug" order="7" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="9" weight="0.4" />
@@ -231,46 +285,53 @@
     </layout>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/source/global_.py">
+    <entry file="file://$PROJECT_DIR$/source/__main__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="13" lean-forward="true" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+        <state relative-caret-position="153">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
           <folding>
-            <element signature="e#180#190#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/source/lib/data_classes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="778">
+        <state relative-caret-position="441">
           <caret line="54" selection-start-line="54" selection-end-line="54" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/source/watcher.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="30" selection-start-line="3" selection-start-column="30" selection-end-line="3" selection-end-column="30" />
+        <state relative-caret-position="408">
+          <caret line="33" column="53" selection-start-line="33" selection-start-column="53" selection-end-line="33" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/lib/motor_controller.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="238" column="123" selection-start-line="238" selection-start-column="123" selection-end-line="238" selection-end-column="123" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/source/mbee_.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-973">
-          <caret line="198" column="29" selection-start-line="198" selection-start-column="29" selection-end-line="198" selection-end-column="29" />
+        <state relative-caret-position="357">
+          <caret line="99" column="24" selection-start-line="99" selection-start-column="20" selection-end-line="99" selection-end-column="24" />
           <folding>
-            <element signature="e#0#28#0" expanded="true" />
+            <element signature="e#0#19#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/source/__main__.py">
+    <entry file="file://$PROJECT_DIR$/source/global_.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
+        <state relative-caret-position="237">
+          <caret line="18" column="51" selection-start-line="18" selection-start-column="51" selection-end-line="18" selection-end-column="51" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#180#190#0" expanded="true" />
           </folding>
         </state>
       </provider>

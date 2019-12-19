@@ -94,7 +94,7 @@ class ControlThread(QThread):
 
         self.controller = Controller()
         if not self.controller.status:
-            self.logger.warning('# Controller is not initialised')
+            self.logger.warning('# Controller init failed')
             return
         else:
             self.logger.info('# Controller OK')
