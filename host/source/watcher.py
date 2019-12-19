@@ -1,10 +1,14 @@
-import time, global_
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, QMutex
-from mbee import serialstar
+import time
+from PyQt5.QtCore import QThread, pyqtSignal
+import logging
+
+import global_
+from global_ import get_logger
+
+import serialstar
 from lib.data_classes import *
 from lib.data_parser import *
 from lib.controls import *
-import logging
 
 ENC_MAX = 100
 
@@ -14,6 +18,7 @@ class WatcherThread(QThread):
     def __init__(self, window=None):
         QThread.__init__(self)
         self.alive = True
+        self.logger = get_logger('Watcher')
 
         if window:
             global_.mbeeThread.RSSI_signal.connect(window.ui.RSSI.display)
@@ -52,6 +57,8 @@ class WatcherThread(QThread):
             t = time.time()
 
             global_.mbeeThread.RSSI_signal.emit(global_.mbeeThread.RSSI)
+            # self.logger.info('')
+
             # print(global_.hostData.mode, global_.hostData.direction)
             # print(global_.hostData.mode)
             # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
@@ -66,7 +73,7 @@ class WatcherThread(QThread):
 
 
 #----------------------------------------------------------------------------------------------#
-#   A thread used to communitate with remote control.
+#   A thread used to communicate with remote control.
 MENU = 3
 HOME = 0
 BASE = 1
@@ -83,7 +90,14 @@ class ControlThread(QThread):
     def __init__(self, window):
         QThread.__init__(self)
         self.alive = True
+        self.logger = get_logger('Control')
+
         self.controller = Controller()
+        if not self.controller.status:
+            self.logger.warning('# Controller is not initialised')
+            return
+        else:
+            self.logger.info('# Controller OK')
 
         self.changeMenu_sig.connect(window.changeMenu)
 
@@ -98,7 +112,7 @@ class ControlThread(QThread):
         global_.hostData.braking_signal.emit(0)
         global_.hostData.velocity_signal.emit(0)
         for i in range(1, 3+1):
-            encValue = self.controller.setEncoderValue(i, 0)
+            self.controller.setEncoderValue(i, 0)
 
 
     def changeMenu(self):
@@ -132,8 +146,8 @@ class ControlThread(QThread):
 
             #  Encoders.
             global_.hostData.acceleration = self.controller.encoders[1]
-            global_.hostData.braking    = self.controller.encoders[2]
-            global_.hostData.velocity   = self.controller.encoders[0]
+            global_.hostData.braking  = self.controller.encoders[2]
+            global_.hostData.velocity = self.controller.encoders[0]
 
             ##  Buttons.
             # Stop.
@@ -153,28 +167,28 @@ class ControlThread(QThread):
                 global_.hostData.mode = 0
 
             elif _check_bit(value, self.left) and (global_.hostData.velocity != 0):
-                if (global_.roadData.mode == 0):
+                if global_.roadData.mode == 0:
                     global_.hostData.direction = -1
                     global_.hostData.mode = 2
 
-                if (global_.roadData.direction == 1):
+                if global_.roadData.direction == 1:
                     global_.hostData.mode = 1
 
             elif _check_bit(value, self.right) and (global_.hostData.velocity != 0):
-                if (global_.roadData.mode == 0):
+                if global_.roadData.mode == 0:
                     global_.hostData.direction = 1
                     global_.hostData.mode = 2
 
-                if (global_.roadData.direction == -1):
+                if global_.roadData.direction == -1:
                     global_.hostData.mode = 1
 
             # Set base.
             global_.specialData.end_points_reset = False
             # global_.hostData.set_base = 0
             if _check_bit(value, BASE):
-                logging.info("Base pressed")
+                self.logger.info('Base pressed')
                 t = time.time()
-                if (t - self.base_t > 2):
+                if (t - self.base_t) > 2:
                     self.base_t = t
                     if not global_.roadData.base1_set:
                         global_.hostData.set_base = 1
@@ -183,7 +197,7 @@ class ControlThread(QThread):
                 print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
 
                 if stop_flag: # Reset base points when STOP and BASE buttons pressed.
-                    logging.info("Reset end points")
+                    self.logger.info('Reset end points')
                     global_.hostData.mode = 0
                     global_.hostData.direction = 0
                     global_.hostData.set_base = 0
@@ -194,7 +208,7 @@ class ControlThread(QThread):
             if _check_bit(value, HOME):
                 if stop_flag:
                     global_.specialData.HARD_STOP = True
-                    print('reset')
+                    self.logger.info('Hard stop reset')
 
             global_.mutex.unlock()
 
@@ -209,7 +223,7 @@ class ControlThread(QThread):
             # Menu
             if _check_bit(value, MENU):
                 t = time.time()
-                if (t - self.menu_t > 0.5):
+                if (t - self.menu_t) > 0.5:
                     self.menu_t = t
                     self.changeMenu()
 

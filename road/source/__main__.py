@@ -25,13 +25,13 @@ def main():
     global_.specialData = HBData()
 
     ## Threads.
-    global_.motor_thread = Motor_thread()
+    global_.motor_thread = MotorThread()
     THREADS.append(global_.motor_thread)
 
     global_.writer = Writer()
     THREADS.append(global_.writer)
 
-    global_.mbee_thread = Mbee_thread()
+    global_.mbee_thread = MBeeThread()
     THREADS.append(global_.mbee_thread)
 
     global_.watcher = Watcher()

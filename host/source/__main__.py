@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys, signal, os, subprocess
-
+import sys, signal, os, time
 import logging, logging.handlers
 
 from PyQt5.QtWidgets import QApplication
@@ -11,13 +10,15 @@ from watcher import *
 from mbee_ import *
 from ui.ui import MainWindow
 
+import global_
+
 os.environ['DISPLAY'] = ':0'
 
 def configure_logging(level=logging.INFO):
     format = ' '.join([
         '%(asctime)s',
         '%(filename)s:%(lineno)d',
-        # '%(threadName)s',
+        '%(threadName)s',
         '%(levelname)s',
         '%(message)s'
     ])
@@ -65,8 +66,6 @@ class Killer:
         for thread in THREADS:
             thread.alive = False
             thread.off()
-        subprocess.call('./radio_off.sh')
-        print('radio off')
 
         print('exiting..')
         time.sleep(1)
@@ -74,7 +73,8 @@ class Killer:
 
 
 if __name__ == "__main__":
-    configure_logging()
+    # configure_logging()
+
     global_.killer = Killer()
     app = QApplication(sys.argv)
 

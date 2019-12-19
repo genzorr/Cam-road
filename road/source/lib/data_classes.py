@@ -22,7 +22,6 @@ class RTHData():
         self.mode = 0
         self.coordinate = 0.0
 
-        self.RSSI = 0.0
         self.voltage = 0.0
         self.current = 0.0
         self.temperature = 0.0
@@ -53,7 +52,6 @@ class HBData():
 #----------------------------------------------------------------------------------------------#
 class Mbee_data:
     def __init__(self):
-        self.RSSI = 0
         self.voltage = 0
         self.current = 0
         self.temperature = 0

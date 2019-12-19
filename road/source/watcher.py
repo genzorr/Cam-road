@@ -1,15 +1,16 @@
-import sys, time, threading, serial
-# from mbee import serialstar
+import sys, time, threading
+
+import global_
+from global_ import get_logger
+
 from lib.data_classes import *
 from lib.motor_controller import *
 from lib.lsm6ds3 import *
 from lib.indicator import *
 from lib.usound import *
 
-import global_
 
 #-------------------------------------------------------------------------------------#
-
 class Writer(threading.Thread):
     def __init__(self, out=''):
         super().__init__()
@@ -26,10 +27,10 @@ class Writer(threading.Thread):
             data = global_.motor_thread.controller.get_data()
             global_.lock.release()
 
-            if (data == None):
-                data = (0,0,0,0,0,0,0,'',0)
+            if data is None:
+                data = (0, 0, 0, 0, 0, 0, 0, '', 0)
 
-            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\t'+str(global_.motor_thread.controller.AB_choose)+'\n'# + str(global_.watcher.usound.read()) + '\n'
+            self.out = stringData.format(*data)+'\t'+str(global_.motor_thread.controller.HARD_STOP)+'\n'
             sys.stdout.write(self.out)
             sys.stdout.flush()
             time.sleep(0.05)
@@ -39,8 +40,7 @@ class Writer(threading.Thread):
         print('############  Writer stopped  #############')
 
 #-------------------------------------------------------------------------------------#
-""" Used to control the motor by Motor_controller class """
-class Motor_thread(threading.Thread):
+class MotorThread(threading.Thread):
     def __init__(self):
         super().__init__()
         self.alive = True

@@ -42,27 +42,34 @@ VAL = [VAL0, VAL10, VAL20, VAL30, VAL40, VAL50, VAL60, VAL70, VAL80, VAL90, VAL1
 
 class Controller:
     def __init__(self):
-        self.client = ModbusClient(method = "rtu", port="/dev/ttySAC3", stopbits = 1,
-                                   bytesize = 8, parity = 'N', baudrate= 115200,
-                                   timeout = 0.8, strict=False)
+        try:
+            self.client = ModbusClient(method = "rtu", port="/dev/ttySAC3", stopbits = 1,
+                                       bytesize = 8, parity = 'N', baudrate= 115200,
+                                       timeout = 0.8, strict=False)
+        except BaseException:
+            self.client = None
+            self.status = False
+            return
+
+
         self.id = 2
         self.encoders = [0, 0, 0]
         self.buttons = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         # Try to connect to modbus client.
         self.status = self.client.connect()
-        print("Modbus client init OK.") if self.status else print("Modbus init failed.")
 
         self.off()
 
     def off(self):
-        self.setEncoderValue(1, 0)
-        self.setEncoderValue(2, 0)
-        self.setEncoderValue(3, 0)
+        if self.status:
+            self.setEncoderValue(1, 0)
+            self.setEncoderValue(2, 0)
+            self.setEncoderValue(3, 0)
 
-        self.setIndicator(1, 0)
-        self.setIndicator(2, 0)
-        self.setIndicator(3, 0)
+            self.setIndicator(1, 0)
+            self.setIndicator(2, 0)
+            self.setIndicator(3, 0)
 
     def saferead(self, addr, count, unit, retry = 3):
         if not self.status:

@@ -22,6 +22,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="QThread" />
+          <option value="global_" />
         </list>
       </option>
     </inspection_tool>
