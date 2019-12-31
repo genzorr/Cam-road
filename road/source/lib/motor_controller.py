@@ -85,10 +85,15 @@ class Controller(FSM):
                 self.logger.warning('# Controller is not initialized')
                 self.motor = None
                 self.client = None
-                return
 
             #   Motor initialization
             self.motor = X4Motor(self.client, settings=config)
+            if self.motor:
+                self.logger.info('# Motor OK')
+            else:
+                self.logger.warning('# Motor is not initialized')
+                self.motor = None
+                self.client = None
 
             #   Print all registers
             # registers = self.motor.readAllRO()
@@ -96,7 +101,6 @@ class Controller(FSM):
 
         except BaseException:
             self.motor = None
-            return
 
         self.starttime = time.time()
 

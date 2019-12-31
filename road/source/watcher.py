@@ -33,10 +33,8 @@ class Writer(threading.Thread):
             if data is None:
                 data = (0, 0, 0, 0, 0, 0, 0, '', 0, 0)
 
-            self.out = stringData.format(*data)+'\n'
-            # sys.stdout.write(self.out)
-            # sys.stdout.flush()
-            self.logger.debug(self.out)
+            self.out = stringData.format(*data)
+            self.logger.info(self.out)
             time.sleep(0.2)
         self.off()
 

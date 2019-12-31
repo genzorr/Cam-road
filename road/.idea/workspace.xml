@@ -5,63 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c8957dda-8430-4e27-ac9c-603ebcd4ee73" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../.idea/Watcher.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/dictionaries/michael.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/Watcher.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/dictionaries/michael.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/open_host_files.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/run.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/__main__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/global_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/lib/controls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/lib/data_classes.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/lib/data_parser.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/mbee_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/radio_off.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/radio_on.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/serialstar.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/settingswidget.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/settingswidget.ui" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/telemetrywidget.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/telemetrywidget.ui" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/ui.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/ui_to_py.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/window.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/window.ui" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/workwidget.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/workwidget.ui" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/watcher.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/road.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_road_files.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/__main__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/global_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/data_classes.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/data_parser.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/indicator.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/lsm6ds3.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/lsm6ds3_const.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/motor_controller.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/portex.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/usound.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/serialstar.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/watcher.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../host/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -86,7 +32,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/source/global_.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="237">
+            <state relative-caret-position="306">
               <caret line="18" column="51" selection-start-line="18" selection-start-column="51" selection-end-line="18" selection-end-column="51" />
               <folding>
                 <element signature="e#180#190#0" expanded="true" />
@@ -167,7 +113,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7" fullScreen="true">
+  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
     <option name="y" value="-25" />
     <option name="width" value="1680" />
     <option name="height" value="1075" />
@@ -262,7 +208,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-25" width="1680" height="1075" extended-state="7" />
+    <frame x="0" y="-25" width="1680" height="1075" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
@@ -274,7 +220,7 @@
       <window_info anchor="bottom" id="Message" order="3" />
       <window_info anchor="bottom" id="Find" order="4" weight="0.32939914" />
       <window_info anchor="bottom" id="Version Control" order="5" />
-      <window_info active="true" anchor="bottom" id="Run" order="6" visible="true" weight="0.3291536" />
+      <window_info anchor="bottom" id="Run" order="6" weight="0.3291536" />
       <window_info anchor="bottom" id="Debug" order="7" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="9" weight="0.4" />
@@ -328,7 +274,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/source/global_.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
+        <state relative-caret-position="306">
           <caret line="18" column="51" selection-start-line="18" selection-start-column="51" selection-end-line="18" selection-end-column="51" />
           <folding>
             <element signature="e#180#190#0" expanded="true" />

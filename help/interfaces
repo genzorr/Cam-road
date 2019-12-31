@@ -1,0 +1,39 @@
+#/etc/network/interfaces
+#Please use DietPi-Config to modify network settings.
+
+# Local
+auto lo
+iface lo inet loopback
+
+# Ethernet
+auto eth0
+iface eth0 inet static
+address 10.42.0.90
+gateway 10.42.0.1
+netmask 255.255.255.0
+dns-nameservers 8.8.8.8 8.8.4.4
+
+#address 192.168.0.100
+#netmask 255.255.255.0
+#gateway 192.168.0.1
+#dns-nameservers 8.8.8.8 8.8.4.4
+
+# Wifi
+#allow-hotplug wlan0
+#iface wlan0 inet dhcp
+##address 192.168.0.100
+##netmask 255.255.255.0
+##gateway 192.168.0.1
+##wireless-essid FuzonWifi
+##wireless-key abcde12345
+##wireless-mode Managed
+##wireless-power off
+#wpa-ssid Opteh
+#wpa-psk password
+##wpa-conf /boot/network/wpa_supplicant.conf
+##dns-nameservers 8.8.8.8 8.8.4.4
+
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+wpa-ssid TP-Link_F852
+wpa-psk Ktjybl_19#65$

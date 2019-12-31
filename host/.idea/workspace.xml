@@ -2,63 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5d60daf0-dedf-46eb-8aa0-fbb079f7c4e3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../.idea/Watcher.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/dictionaries/michael.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Watcher.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/michael.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_host_files.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/__main__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/global_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/controls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/data_classes.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/data_parser.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/radio_off.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/radio_on.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/serialstar.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/settingswidget.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/settingswidget.ui" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/telemetrywidget.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/telemetrywidget.ui" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/ui.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/ui_to_py.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/window.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/window.ui" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/workwidget.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/ui/workwidget.ui" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/watcher.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/.idea/road.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/open_road_files.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/__main__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/global_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/lib/data_classes.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/lib/data_parser.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/lib/indicator.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/lib/lsm6ds3.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/lib/lsm6ds3_const.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/lib/motor_controller.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/lib/portex.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/lib/usound.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/mbee_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/serialstar.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/watcher.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../road/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../road/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -174,7 +120,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7" fullScreen="true">
+  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
     <option name="y" value="-25" />
     <option name="width" value="1680" />
     <option name="height" value="1075" />
@@ -270,7 +216,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-25" width="1680" height="1075" extended-state="7" />
+    <frame x="0" y="-25" width="1680" height="1075" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12597951" />
@@ -278,7 +224,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3285568" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3408393" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3408393" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39940536" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />

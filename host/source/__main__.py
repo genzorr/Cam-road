@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys, signal, os, time
 import logging, logging.handlers
+from rfoo.utils import rconsole
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QMutex
@@ -74,6 +75,7 @@ class Killer:
 
 if __name__ == "__main__":
     # configure_logging()
+    rconsole.spawn_server()
 
     global_.killer = Killer()
     app = QApplication(sys.argv)
