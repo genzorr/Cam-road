@@ -30,13 +30,13 @@ class QWorkWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_Form(), title=None, layout=None):
         super(QWorkWidget, self).__init__(parent=parent, my_ui=my_ui, title=title, layout=layout)
 
+        self.ui.Base1.setCheckable(False)
+        self.ui.Base2.setCheckable(False)
 #----------------------------------------------------------------------------------------------#
 
 class QSettingsWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_SForm(), title=None, layout=None):
         QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
-        self.color_red = QColor(255, 0, 0).name()
-        self.color_green = QColor(0, 255, 0).name()
 
         self.buttons = [self.ui.EnableEndPoints, self.ui.EndPointsStop, self.ui.EndPointsReverse,\
                         self.ui.SoundStop, self.ui.SwapDirection, self.ui.StopAccelerometer]
@@ -64,15 +64,19 @@ class QTelemetryWidget(QQWidget):
 
 class MainWindow(QMainWindow):
     keyPressed = pyqtSignal(QEvent)
+    base1 = pyqtSignal(bool)
+    base2 = pyqtSignal(bool)
 
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_Watcher()
         self.ui.setupUi(self)
         self.setWindowTitle('Watcher')
-        # self.showFullScreen()
+        self.showFullScreen()
 
         self.keyPressed.connect(self.on_key)
+        self.base1.connect(global_.specialData.base1_)
+        self.base2.connect(global_.specialData.base2_)
 
         self.workWidget = QWorkWidget(layout=self.ui.layoutidontwant)
         self.settingsWidget = QSettingsWidget(layout=self.ui.layoutidontwant)
@@ -86,6 +90,7 @@ class MainWindow(QMainWindow):
         # self.ui.workButton.clicked.connect(self.buttonClicked)
         # self.ui.settingsButton.clicked.connect(self.buttonClicked)
         # self.ui.telemetryButton.clicked.connect(self.buttonClicked)
+        self.settingsWidget.ui.Shutdown.clicked.connect(self.buttonClicked)
 
     def changeMenu(self, num):
         self.workWidget.hide()
@@ -120,6 +125,10 @@ class MainWindow(QMainWindow):
             self.workWidget.hide()
             self.settingsWidget.hide()
             self.telemetryWidget.show()
+
+        if sender == self.settingsWidget.ui.Shutdown:
+            global_.killer.kill()
+            sys.exit()
 
 
     def keyPressEvent(self, event):

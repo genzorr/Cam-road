@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import sys, signal, os, time
 import logging, logging.handlers
-from rfoo.utils import rconsole
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QMutex
@@ -75,7 +74,6 @@ class Killer:
 
 if __name__ == "__main__":
     # configure_logging()
-    rconsole.spawn_server()
 
     global_.killer = Killer()
     app = QApplication(sys.argv)
@@ -94,11 +92,11 @@ if __name__ == "__main__":
     global_.mbeeThread.start()
     THREADS.append(global_.mbeeThread)
 
-    global_.watcher = WatcherThread(window=global_.window)
+    global_.watcher = WatcherThread()
     global_.watcher.start()
     THREADS.append(global_.watcher)
 
-    global_.controlThread = ControlThread(window=global_.window)
+    global_.controlThread = ControlThread()
     global_.controlThread.start()
     THREADS.append(global_.controlThread)
 

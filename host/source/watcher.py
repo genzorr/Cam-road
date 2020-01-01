@@ -15,48 +15,65 @@ ENC_MAX = 100
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting/throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
-    def __init__(self, window=None):
+    coordinate_value_sig = pyqtSignal(float)
+
+    def __init__(self):
         QThread.__init__(self)
         self.alive = True
         self.logger = get_logger('Watcher')
 
-        if window:
-            global_.mbeeThread.RSSI_signal.connect(window.ui.RSSI.display)
+        if global_.window:
+            global_.mbeeThread.RSSI_signal.connect(global_.window.ui.RSSI.display)
+            self.coordinate_value_sig.connect(global_.window.workWidget.ui.Coordinate.setValue)
 
         #   Signals to slots connection
-        if window.workWidget:
-            global_.hostData.acceleration_signal.connect(window.workWidget.ui.Acceleration.setValue)
-            global_.hostData.braking_signal.connect(window.workWidget.ui.Braking.setValue)
-            global_.hostData.velocity_signal.connect(window.workWidget.ui.Velocity.setValue)
-            global_.roadData.coordinate_signal.connect(window.workWidget.ui.Coordinate.setValue)
+        if global_.window.workWidget:
+            global_.hostData.acceleration_signal.connect(global_.window.workWidget.ui.Acceleration.setValue)
+            global_.hostData.braking_signal.connect(global_.window.workWidget.ui.Braking.setValue)
+            global_.hostData.velocity_signal.connect(global_.window.workWidget.ui.Velocity.setValue)
+            global_.roadData.coordinate_signal.connect(global_.window.workWidget.ui.Coordinate.setValue)
 
-        if window.settingsWidget:
-            window.settingsWidget.ui.EnableEndPoints.toggled.connect(global_.specialData.enable_end_points_)
-            window.settingsWidget.ui.EndPointsStop.toggled.connect(global_.specialData.end_points_stop_)
-            window.settingsWidget.ui.EndPointsReverse.toggled.connect(global_.specialData.end_points_reverse_)
-            window.settingsWidget.ui.SoundStop.toggled.connect(global_.specialData.sound_stop_)
-            window.settingsWidget.ui.SwapDirection.toggled.connect(global_.specialData.swap_direction_)
-            window.settingsWidget.ui.StopAccelerometer.toggled.connect(global_.specialData.stop_accelerometer_)
-            window.settingsWidget.ui.LockButtons.toggled.connect(global_.specialData.lock_buttons_)
+        if global_.window.settingsWidget:
+            global_.window.settingsWidget.ui.EnableEndPoints.toggled.connect(global_.specialData.enable_end_points_)
+            global_.window.settingsWidget.ui.EndPointsStop.toggled.connect(global_.specialData.end_points_stop_)
+            global_.window.settingsWidget.ui.EndPointsReverse.toggled.connect(global_.specialData.end_points_reverse_)
+            global_.window.settingsWidget.ui.SoundStop.toggled.connect(global_.specialData.sound_stop_)
+            global_.window.settingsWidget.ui.SwapDirection.toggled.connect(global_.specialData.swap_direction_)
+            global_.window.settingsWidget.ui.StopAccelerometer.toggled.connect(global_.specialData.stop_accelerometer_)
+            global_.window.settingsWidget.ui.LockButtons.toggled.connect(global_.specialData.lock_buttons_)
 
             '''Stop-reverse end points behavior'''
-            window.settingsWidget.ui.EndPointsStop.pressed.connect(window.settingsWidget.setChecked)
-            window.settingsWidget.ui.EndPointsReverse.pressed.connect(window.settingsWidget.setChecked)
+            global_.window.settingsWidget.ui.EndPointsStop.pressed.connect(global_.window.settingsWidget.setChecked)
+            global_.window.settingsWidget.ui.EndPointsReverse.pressed.connect(global_.window.settingsWidget.setChecked)
 
-            window.settingsWidget.ui.EnableEndPoints.toggled.emit(True)
-            window.settingsWidget.ui.EndPointsStop.toggled.emit(True)
-            window.settingsWidget.ui.EndPointsReverse.toggled.emit(False)
-            window.settingsWidget.ui.SoundStop.toggled.emit(False)
-            window.settingsWidget.ui.SwapDirection.toggled.emit(False)
-            window.settingsWidget.ui.StopAccelerometer.toggled.emit(False)
-            window.settingsWidget.ui.LockButtons.toggled.emit(False)
-
+            global_.window.settingsWidget.ui.EnableEndPoints.toggled.emit(True)
+            global_.window.settingsWidget.ui.EndPointsStop.toggled.emit(True)
+            global_.window.settingsWidget.ui.EndPointsReverse.toggled.emit(False)
+            global_.window.settingsWidget.ui.SoundStop.toggled.emit(False)
+            global_.window.settingsWidget.ui.SwapDirection.toggled.emit(False)
+            global_.window.settingsWidget.ui.StopAccelerometer.toggled.emit(False)
+            global_.window.settingsWidget.ui.LockButtons.toggled.emit(False)
 
     def run(self):
         while self.alive:
             t = time.time()
 
             global_.mbeeThread.RSSI_signal.emit(global_.mbeeThread.RSSI)
+
+            global_.window.base1.emit(global_.roadData.base1_set)
+            global_.window.base2.emit(global_.roadData.base2_set)
+
+            if (global_.roadData.base1_set and global_.roadData.base2_set):
+                length = (global_.roadData.base2 - global_.roadData.base1)
+                value = (global_.roadData.coordinate - global_.roadData.base1) / length
+                if value > 1:
+                    value = 1
+                if value < 0:
+                    value = 0
+                self.coordinate_value_sig.emit(value * 100)
+            else:
+                self.coordinate_value_sig.emit(0)
+
             # self.logger.info('')
 
             # print(global_.hostData.mode, global_.hostData.direction)
@@ -87,7 +104,7 @@ def _check_bit(value, bit):
 class ControlThread(QThread):
     changeMenu_sig = pyqtSignal(int)
 
-    def __init__(self, window):
+    def __init__(self):
         QThread.__init__(self)
         self.alive = True
         self.logger = get_logger('Control')
@@ -99,7 +116,7 @@ class ControlThread(QThread):
         else:
             self.logger.info('# Controller OK')
 
-        self.changeMenu_sig.connect(window.changeMenu)
+        self.changeMenu_sig.connect(global_.window.changeMenu)
 
         self.base_t = 0
         self.menu_t = 0
@@ -186,7 +203,7 @@ class ControlThread(QThread):
             global_.specialData.end_points_reset = False
             # global_.hostData.set_base = 0
             if _check_bit(value, BASE):
-                self.logger.info('Base pressed')
+                self.logger.info('Base pressed {} {}'.format(global_.roadData.base1_set, global_.roadData.base2_set))
                 t = time.time()
                 if (t - self.base_t) > 2:
                     self.base_t = t
@@ -194,7 +211,7 @@ class ControlThread(QThread):
                         global_.hostData.set_base = 1
                     elif not global_.roadData.base2_set:
                         global_.hostData.set_base = 2
-                print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
+                # print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
 
                 if stop_flag: # Reset base points when STOP and BASE buttons pressed.
                     self.logger.info('Reset end points')

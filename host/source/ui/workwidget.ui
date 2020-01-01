@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>480</width>
-    <height>715</height>
+    <height>716</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,13 +54,16 @@
        </size>
       </property>
       <property name="value">
-       <number>50</number>
+       <number>0</number>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
+      </property>
+      <property name="format">
+       <string/>
       </property>
      </widget>
     </item>
@@ -110,13 +113,16 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="value">
-       <number>24</number>
+       <number>0</number>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
+      </property>
+      <property name="format">
+       <string/>
       </property>
      </widget>
     </item>
@@ -163,7 +169,10 @@
        </size>
       </property>
       <property name="value">
-       <number>50</number>
+       <number>0</number>
+      </property>
+      <property name="format">
+       <string/>
       </property>
      </widget>
     </item>
@@ -195,24 +204,54 @@
       </property>
      </widget>
     </item>
-    <item alignment="Qt::AlignHCenter">
-     <widget class="QProgressBar" name="Coordinate">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>400</width>
-        <height>70</height>
-       </size>
-      </property>
-      <property name="value">
-       <number>50</number>
-      </property>
-     </widget>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QToolButton" name="Base1">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="Coordinate">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="format">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="Base2">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

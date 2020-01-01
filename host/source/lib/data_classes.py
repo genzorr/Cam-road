@@ -235,3 +235,19 @@ class HBData(QObject):
             self.set_color(sender, color)
         else:
             print(self.sender().isCheckable())
+
+    @pyqtSlot(bool)
+    def base1_(self, value):
+        if value:
+            color = self.color_green
+        else:
+            color = self.color_red
+        self.set_color(global_.window.workWidget.ui.Base1, color)
+
+    @pyqtSlot(bool)
+    def base2_(self, value):
+        if value:
+            color = self.color_green
+        else:
+            color = self.color_red
+        self.set_color(global_.window.workWidget.ui.Base2, color)
