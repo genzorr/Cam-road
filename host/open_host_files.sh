@@ -4,3 +4,4 @@ rsub source/watcher.py
 rsub source/mbee_.py
 rsub source/lib/data_classes.py
 rsub source/lib/controls.py
+rsub source/ui/ui.py

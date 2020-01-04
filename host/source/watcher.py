@@ -34,14 +34,10 @@ class WatcherThread(QThread):
             global_.roadData.coordinate_signal.connect(global_.window.workWidget.ui.Coordinate.setValue)
 
         if global_.window.settingsWidget:
-            global_.window.settingsWidget.ui.EndPointsReverse.setCheckable(True)
             global_.window.settingsWidget.ui.EndPointsReverse.setAutoExclusive(True)
-            global_.window.settingsWidget.ui.EndPointsStop.setCheckable(True)
             global_.window.settingsWidget.ui.EndPointsStop.setAutoExclusive(True)
-            global_.window.settingsWidget.ui.SoundStop.setAutoExclusive(True)
 
-            print(global_.window.settingsWidget.ui.EndPointsReverse.autoExclusive())
-            print(global_.window.settingsWidget.ui.EndPointsStop.autoExclusive())
+            global_.window.settingsWidget.ui.EnableEndPoints.setFocusPolicy(False)
 
             # global_.window.settingsWidget.ui.EnableEndPoints.pressed.connect(global_.specialData.enable_end_points_pressed)
             # global_.window.settingsWidget.ui.EnableEndPoints.released.connect(global_.specialData.enable_end_points_released)

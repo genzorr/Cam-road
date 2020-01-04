@@ -155,6 +155,10 @@ class HBData(QObject):
         self.color_red = QColor(255, 0, 0).name()
         self.color_green = QColor(0, 255, 0).name()
 
+        self.slots = [  self.enable_end_points_, self.end_points_stop_, self.end_points_reverse_,\
+                        self.sound_stop_, self.swap_direction_, self.stop_accelerometer_]
+        self.last_states = []
+
     @staticmethod
     def color_button(button, color):
         button.setStyleSheet('QToolButton { background-color: %s}' % color)
@@ -163,10 +167,30 @@ class HBData(QObject):
         color = self.color_green if (state is True) else self.color_red
         button.setStyleSheet('QToolButton { background-color: %s}' % color)
 
+    def save_state(self, state):
+        self.sender().setChecked(not state)
+
     @pyqtSlot(bool)
     def lock_buttons_(self, value):
         self.lock_buttons = value
         self.set_color(self.sender(), value)
+
+        if value:
+            self.last_states = []
+            global_.window.settingsWidget.ui.EndPointsReverse.setAutoExclusive(False)
+            global_.window.settingsWidget.ui.EndPointsStop.setAutoExclusive(False)
+            for button in global_.window.settingsWidget.buttons:
+                self.last_states.append(button.isChecked())
+                button.setChecked(False)
+                button.setCheckable(False)
+
+        else:
+            global_.window.settingsWidget.ui.EndPointsReverse.setAutoExclusive(True)
+            global_.window.settingsWidget.ui.EndPointsStop.setAutoExclusive(True)
+            for (button, state) in zip(global_.window.settingsWidget.buttons, self.last_states):
+                button.setCheckable(True)
+                button.setChecked(state)
+
 
         # sender = self.sender()
         # if value:
@@ -211,6 +235,7 @@ class HBData(QObject):
 
     @pyqtSlot(bool)
     def stop_accelerometer_(self, value):
+        if not self.lock_buttons:
             self.accelerometer_stop = value
             self.set_color(self.sender(), value)
 
