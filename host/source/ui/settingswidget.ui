@@ -103,7 +103,7 @@
         <rect>
          <x>60</x>
          <y>15</y>
-         <width>400</width>
+         <width>181</width>
          <height>20</height>
         </rect>
        </property>
@@ -111,56 +111,34 @@
         <string>ОСТАНОВ В КОН. ТОЧКАХ</string>
        </property>
       </widget>
-      <widget class="QWidget" name="widget_9" native="true">
+      <widget class="QToolButton" name="EndPointsReverse">
        <property name="geometry">
         <rect>
-         <x>248</x>
-         <y>0</y>
-         <width>521</width>
-         <height>50</height>
+         <x>240</x>
+         <y>10</y>
+         <width>30</width>
+         <height>30</height>
         </rect>
        </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+       <property name="text">
+        <string/>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>50</height>
-        </size>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
-       <widget class="QToolButton" name="EndPointsReverse">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>30</width>
-          <height>30</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_9">
-        <property name="geometry">
-         <rect>
-          <x>60</x>
-          <y>15</y>
-          <width>400</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>РЕВЕРС В КОН. ТОЧКАХ</string>
-        </property>
-       </widget>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>15</y>
+         <width>181</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>РЕВЕРС В КОН. ТОЧКАХ</string>
+       </property>
       </widget>
      </widget>
     </item>

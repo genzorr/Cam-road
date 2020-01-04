@@ -41,19 +41,19 @@ class QSettingsWidget(QQWidget):
         self.buttons = [self.ui.EnableEndPoints, self.ui.EndPointsStop, self.ui.EndPointsReverse,\
                         self.ui.SoundStop, self.ui.SwapDirection, self.ui.StopAccelerometer]
 
-    def setChecked(self):
-        sender = self.sender()
+    # def setChecked(self):
+    #     sender = self.sender()
 
-        if sender == self.ui.EndPointsStop:
-            if sender.isDown():
-                self.ui.EndPointsReverse.setChecked(True)
-            else:
-                self.ui.EndPointsReverse.setChecked(False)
-        elif sender == self.ui.EndPointsReverse:
-            if sender.isDown():
-                self.ui.EndPointsStop.setChecked(True)
-            else:
-                self.ui.EndPointsStop.setChecked(False)
+    #     if sender == self.ui.EndPointsStop:
+    #         if sender.isDown():
+    #             self.ui.EndPointsReverse.setChecked(True)
+    #         else:
+    #             self.ui.EndPointsReverse.setChecked(False)
+    #     elif sender == self.ui.EndPointsReverse:
+    #         if sender.isDown():
+    #             self.ui.EndPointsStop.setChecked(True)
+    #         else:
+    #             self.ui.EndPointsStop.setChecked(False)
 #----------------------------------------------------------------------------------------------#
 
 class QTelemetryWidget(QQWidget):
@@ -63,7 +63,7 @@ class QTelemetryWidget(QQWidget):
 #----------------------------------------------------------------------------------------------#
 
 class MainWindow(QMainWindow):
-    keyPressed = pyqtSignal(QEvent)
+    # keyPressed = pyqtSignal(QEvent)
     base1 = pyqtSignal(bool)
     base2 = pyqtSignal(bool)
 
@@ -74,10 +74,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Watcher')
         self.showFullScreen()
 
-        self.keyPressed.connect(self.on_key)
-        self.base1.connect(global_.specialData.base1_)
-        self.base2.connect(global_.specialData.base2_)
-
         self.workWidget = QWorkWidget(layout=self.ui.layoutidontwant)
         self.settingsWidget = QSettingsWidget(layout=self.ui.layoutidontwant)
         self.telemetryWidget = QTelemetryWidget(layout=self.ui.layoutidontwant)
@@ -86,11 +82,16 @@ class MainWindow(QMainWindow):
         self.settingsWidget.hide()
         self.telemetryWidget.hide()
 
-        #   Signals
+        #   Signals to use menu buttons and shutdown button.
         # self.ui.workButton.clicked.connect(self.buttonClicked)
         # self.ui.settingsButton.clicked.connect(self.buttonClicked)
         # self.ui.telemetryButton.clicked.connect(self.buttonClicked)
         self.settingsWidget.ui.Shutdown.clicked.connect(self.buttonClicked)
+
+        # self.keyPressed.connect(self.on_key)
+        self.base1.connect(global_.specialData.base1_)
+        self.base2.connect(global_.specialData.base2_)
+
 
     def changeMenu(self, num):
         self.workWidget.hide()
@@ -131,45 +132,45 @@ class MainWindow(QMainWindow):
             sys.exit()
 
 
-    def keyPressEvent(self, event):
-        super(MainWindow, self).keyPressEvent(event)
-        self.keyPressed.emit(event)
+    # def keyPressEvent(self, event):
+    #     super(MainWindow, self).keyPressEvent(event)
+    #     self.keyPressed.emit(event)
 
-    def on_key(self, event):
-        # if event.key() == Qt.Key_BracketLeft:
-        #     self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 5)
+    # def on_key(self, event):
+    #     if event.key() == Qt.Key_BracketLeft:
+    #         self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 5)
 
-        # if event.key() == Qt.Key_BracketRight:
-        #     self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 5)
+    #     if event.key() == Qt.Key_BracketRight:
+    #         self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 5)
 
-        if event.key() == Qt.Key_Q:
-            global_.killer.kill()
-            sys.exit()
+    #     if event.key() == Qt.Key_Q:
+    #         global_.killer.kill()
+    #         sys.exit()
 
-        # if event.key() == Qt.Key_1:
-        #     global_.hostData.mode = 1
+    #     if event.key() == Qt.Key_1:
+    #         global_.hostData.mode = 1
 
-        # if event.key() == Qt.Key_2:
-        #     global_.hostData.mode = 2
+    #     if event.key() == Qt.Key_2:
+    #         global_.hostData.mode = 2
 
-        # if event.key() == Qt.Key_A:
-        #     global_.hostData.direction = -1
+    #     if event.key() == Qt.Key_A:
+    #         global_.hostData.direction = -1
 
-        # if event.key() == Qt.Key_D:
-        #     global_.hostData.direction = 1
+    #     if event.key() == Qt.Key_D:
+    #         global_.hostData.direction = 1
 
-        # if event.key() == Qt.Key_S:
-        #     global_.hostData.mode = 0
-        #     # FIXME: CHANGE DIRECTION HERE
-        #     self.workWidget.ui.Velocity.setValue(0)
+    #     if event.key() == Qt.Key_S:
+    #         global_.hostData.mode = 0
+    #         # FIXME: CHANGE DIRECTION HERE
+    #         self.workWidget.ui.Velocity.setValue(0)
 
-        # if event.key() == Qt.Key_W:
-        #     if global_.hostData.set_base == 1:
-        #         global_.hostData.set_base = 2
-        #     else:
-        #         global_.hostData.set_base = 1
+    #     if event.key() == Qt.Key_W:
+    #         if global_.hostData.set_base == 1:
+    #             global_.hostData.set_base = 2
+    #         else:
+    #             global_.hostData.set_base = 1
 
-        # if event.key() == Qt.Key_R:
-        #     global_.hostData.mode = 0
-        #     global_.hostData.direction = 0
-        #     global_.hostData.set_base = 1
+    #     if event.key() == Qt.Key_R:
+    #         global_.hostData.mode = 0
+    #         global_.hostData.direction = 0
+    #         global_.hostData.set_base = 1

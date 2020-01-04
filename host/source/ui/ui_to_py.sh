@@ -1,3 +1,4 @@
+#!/bin/bash
 rm -f window.py
 rm -f workwidget.py
 rm -f settingswidget.py

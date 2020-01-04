@@ -156,12 +156,18 @@ class HBData(QObject):
         self.color_green = QColor(0, 255, 0).name()
 
     @staticmethod
-    def set_color(button, color):
+    def color_button(button, color):
+        button.setStyleSheet('QToolButton { background-color: %s}' % color)
+
+    def set_color(self, button, state):
+        color = self.color_green if (state is True) else self.color_red
         button.setStyleSheet('QToolButton { background-color: %s}' % color)
 
     @pyqtSlot(bool)
     def lock_buttons_(self, value):
-        pass
+        self.lock_buttons = value
+        self.set_color(self.sender(), value)
+
         # sender = self.sender()
         # if value:
         #     color, self.lock_buttons = self.color_green, True
@@ -171,70 +177,42 @@ class HBData(QObject):
         #     color, self.lock_buttons = self.color_red, False
         #     # for button in global_.window.settingsWidget.buttons:
         #     #     button.setCheckable(True)
-        # self.set_color(sender, color)
+        # self.color_button(sender, color)
 
     @pyqtSlot(bool)
     def enable_end_points_(self, value):
         if not self.lock_buttons:
-            sender = self.sender()
-            if value:
-                color, self.end_points = self.color_green, True
-            else:
-                color, self.end_points = self.color_red, False
-            self.set_color(sender, color)
-
+            self.end_points = value
+            self.set_color(self.sender(), value)
 
     @pyqtSlot(bool)
     def end_points_stop_(self, value):
         if not self.lock_buttons:
-            sender = self.sender()
-            if value:
-                color, self.end_points_stop = self.color_green, True
-            else:
-                color, self.end_points_stop = self.color_red, False
-            self.set_color(sender, color)
+            self.end_points_stop = value
+            self.set_color(self.sender(), value)
 
     @pyqtSlot(bool)
     def end_points_reverse_(self, value):
         if not self.lock_buttons:
-            sender = self.sender()
-            if value:
-                color, self.end_points_reverse = self.color_green, True
-            else:
-                color, self.end_points_reverse = self.color_red, False
-            self.set_color(sender, color)
+            self.end_points_reverse = value
+            self.set_color(self.sender(), value)
 
     @pyqtSlot(bool)
     def sound_stop_(self, value):
         if not self.lock_buttons:
-            sender = self.sender()
-            if value:
-                color, self.sound_stop = self.color_green, True
-            else:
-                color, self.sound_stop = self.color_red, False
-            self.set_color(sender, color)
+            self.sound_stop = value
+            self.set_color(self.sender(), value)
 
     @pyqtSlot(bool)
     def swap_direction_(self, value):
         if not self.lock_buttons:
-            sender = self.sender()
-            if value:
-                color, self.swap_direction = self.color_green, True
-            else:
-                color, self.swap_direction = self.color_red, False
-            self.set_color(sender, color)
+            self.swap_direction = value
+            self.set_color(self.sender(), value)
 
     @pyqtSlot(bool)
     def stop_accelerometer_(self, value):
-        if not self.lock_buttons:
-            sender = self.sender()
-            if value:
-                color, self.accelerometer_stop = self.color_green, True
-            else:
-                color, self.accelerometer_stop = self.color_red, False
-            self.set_color(sender, color)
-        else:
-            print(self.sender().isCheckable())
+            self.accelerometer_stop = value
+            self.set_color(self.sender(), value)
 
     @pyqtSlot(bool)
     def base1_(self, value):
@@ -242,7 +220,7 @@ class HBData(QObject):
             color = self.color_green
         else:
             color = self.color_red
-        self.set_color(global_.window.workWidget.ui.Base1, color)
+        self.color_button(global_.window.workWidget.ui.Base1, color)
 
     @pyqtSlot(bool)
     def base2_(self, value):
@@ -250,4 +228,4 @@ class HBData(QObject):
             color = self.color_green
         else:
             color = self.color_red
-        self.set_color(global_.window.workWidget.ui.Base2, color)
+        self.color_button(global_.window.workWidget.ui.Base2, color)

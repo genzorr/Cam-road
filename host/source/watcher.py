@@ -34,6 +34,18 @@ class WatcherThread(QThread):
             global_.roadData.coordinate_signal.connect(global_.window.workWidget.ui.Coordinate.setValue)
 
         if global_.window.settingsWidget:
+            global_.window.settingsWidget.ui.EndPointsReverse.setCheckable(True)
+            global_.window.settingsWidget.ui.EndPointsReverse.setAutoExclusive(True)
+            global_.window.settingsWidget.ui.EndPointsStop.setCheckable(True)
+            global_.window.settingsWidget.ui.EndPointsStop.setAutoExclusive(True)
+            global_.window.settingsWidget.ui.SoundStop.setAutoExclusive(True)
+
+            print(global_.window.settingsWidget.ui.EndPointsReverse.autoExclusive())
+            print(global_.window.settingsWidget.ui.EndPointsStop.autoExclusive())
+
+            # global_.window.settingsWidget.ui.EnableEndPoints.pressed.connect(global_.specialData.enable_end_points_pressed)
+            # global_.window.settingsWidget.ui.EnableEndPoints.released.connect(global_.specialData.enable_end_points_released)
+
             global_.window.settingsWidget.ui.EnableEndPoints.toggled.connect(global_.specialData.enable_end_points_)
             global_.window.settingsWidget.ui.EndPointsStop.toggled.connect(global_.specialData.end_points_stop_)
             global_.window.settingsWidget.ui.EndPointsReverse.toggled.connect(global_.specialData.end_points_reverse_)
@@ -42,17 +54,13 @@ class WatcherThread(QThread):
             global_.window.settingsWidget.ui.StopAccelerometer.toggled.connect(global_.specialData.stop_accelerometer_)
             global_.window.settingsWidget.ui.LockButtons.toggled.connect(global_.specialData.lock_buttons_)
 
-            '''Stop-reverse end points behavior'''
-            global_.window.settingsWidget.ui.EndPointsStop.pressed.connect(global_.window.settingsWidget.setChecked)
-            global_.window.settingsWidget.ui.EndPointsReverse.pressed.connect(global_.window.settingsWidget.setChecked)
-
-            global_.window.settingsWidget.ui.EnableEndPoints.toggled.emit(True)
-            global_.window.settingsWidget.ui.EndPointsStop.toggled.emit(True)
+            global_.window.settingsWidget.ui.LockButtons.toggled.emit(False)
+            global_.window.settingsWidget.ui.EnableEndPoints.setChecked(True)
+            global_.window.settingsWidget.ui.EndPointsStop.setChecked(True)
             global_.window.settingsWidget.ui.EndPointsReverse.toggled.emit(False)
             global_.window.settingsWidget.ui.SoundStop.toggled.emit(False)
             global_.window.settingsWidget.ui.SwapDirection.toggled.emit(False)
             global_.window.settingsWidget.ui.StopAccelerometer.toggled.emit(False)
-            global_.window.settingsWidget.ui.LockButtons.toggled.emit(False)
 
     def run(self):
         while self.alive:
