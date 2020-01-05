@@ -15,6 +15,8 @@ TX_ADDR = '0002'
 def update_host_to_road():
     global_.motor_thread.controller.accel = global_.hostData.acceleration * global_.ACCEL_MAX / 100
     global_.motor_thread.controller.braking = global_.hostData.braking * global_.BRAKING_MAX / 100
+    if (global_.motor_thread.controller.braking < 1):
+        global_.motor_thread.controller.braking = 1
 
     #  Move to stop mode.
     if global_.hostData.mode == 0:

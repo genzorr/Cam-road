@@ -300,22 +300,36 @@ class Controller(FSM):
         #  Bases are set.
         if self.end_points and (self.base1_set and self.base2_set):
             #  Check here that we are in base area and go here if not.
-            out_left = (self.coordinate < self.base1)
-            out_right = (self.coordinate > self.base2)
+            out_left = True if (self.coordinate <= self.base1) else False
+            out_right = True if (self.coordinate >= self.base2) else False
 
-            if out_left:    # We are in the left from the 1st base.
+            if out_left:    # We are to the left of the 1st base.
                 if (self.direction == -1):
                     self.reverse = 1
                     self.changeState(self.stop_transitial)
                     return
 
+                dist_to_base = self.base1 - self.coordinate
+                braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
+
+                if self.end_points_stop and (dist_to_base <= braking_dist-1):
+                    self.changeState(self.stop)
+                    return
+
                 #  Direction = +1
                 self.update_coordinate(speed_to=self.est_speed)
 
-            elif out_right: # We are in the right from the 2nd base.
+            elif out_right: # We are to the right of the 2nd base.
                 if (self.direction == 1):
                     self.reverse = 1
                     self.changeState(self.stop_transitial)
+                    return
+
+                dist_to_base = self.coordinate - self.base2
+                braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
+
+                if self.end_points_stop and (dist_to_base <= braking_dist-1):
+                    self.changeState(self.stop)
                     return
 
                 #  Direction = -1
@@ -330,7 +344,7 @@ class Controller(FSM):
                 #  Consider if we should break before going to base point.
                 braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
 
-                if (dist_to_base <= braking_dist):
+                if (dist_to_base <= braking_dist+1):
                     if self.end_points_stop:
                         self.changeState(self.stop)
                     elif self.end_points_reverse:

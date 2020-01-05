@@ -16,9 +16,8 @@ import sys
 import logging
 import coloredlogs
 
-format = "%(asctime)s — %(name)-7s — %(levelname)-7s — %(filename)-12s:%(lineno)3d — %(message)s"
-# FORMATTER = logging.Formatter(format)
-FORMATTER = coloredlogs.ColoredFormatter(format)
+format = "%(asctime)s — %(name)-7s — %(levelname)s — %(filename)-12s:%(lineno)3d — %(message)s"
+FORMATTER = coloredlogs.ColoredFormatter(fmt=format, datefmt='%d-%m-%y %H:%M:%S')
 
 def get_console_handler():
     console_handler = logging.StreamHandler(sys.stdout)

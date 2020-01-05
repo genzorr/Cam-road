@@ -205,7 +205,6 @@ class ControlThread(QThread):
 
             # Set base.
             global_.specialData.end_points_reset = False
-            # global_.hostData.set_base = 0
             if _check_bit(value, BASE):
                 self.logger.info('Base pressed {} {}'.format(global_.roadData.base1_set, global_.roadData.base2_set))
                 t = time.time()

@@ -21,7 +21,7 @@ class Writer(threading.Thread):
         self.logger = get_logger('Writer')
 
     def run(self):
-        stringData = 't:\t{:3.2f}\tv:\t{:2.1f} | {:2.1f}\tB1:\t{:3.1f}\tB2:\t{:3.1f}\tmode:\t{}\tL:\t{:3.3f}\t\t{:s}'
+        stringData = 't:{:5.1f} | v:{:4.1f}  {:4.1f} | B1:{:5.1f}  B2:{:5.1f} | mode: {} | L:{:7.2f} | {:s}'
         data = None
         while self.alive:
             # Get data for printing.
@@ -113,7 +113,7 @@ class Watcher(threading.Thread):
 
     def run(self):
         while self.alive:
-            if self.usound:
+            if self.usound and global_.specialData.sound_stop:
                 usound = self.usound.read()
                 # print(usound)
                 if (usound < 300):
@@ -121,7 +121,7 @@ class Watcher(threading.Thread):
                     if (usound < 70):
                         global_.motor_thread.controller.HARD_STOP = 1
 
-            if global_.motor_thread.alive:
+            if global_.motor_thread.alive and global_.specialData.accelerometer_stop:
                 # Check accelerometer data.
                 [x, y, z] = self.accel.getdata()
                 thr = 12
