@@ -1,4 +1,5 @@
 import sys
+sys.path.append('../../../fortune-controls/Lib/')
 import threading, signal
 import hjson
 import os.path as path
