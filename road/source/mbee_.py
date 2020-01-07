@@ -174,7 +174,7 @@ class MBeeThread(threading.Thread):
                 global_.motor_thread.controller.signal_lost_sig = False
                 global_.motor_thread.controller.signal_lost_sig_set = False
 
-            time.sleep(0.01)
+            time.sleep(0.05)
 
         self.off()
 

@@ -78,7 +78,7 @@ class MotorThread(threading.Thread):
 
             # if self.controller.motor and self.controller.motor_state:
             #     self.controller.motor.dstep = self.controller.dstep
-            time.sleep(0.02)
+            #time.sleep(0.02)
 
         self.off()
 

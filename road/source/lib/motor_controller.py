@@ -13,11 +13,11 @@ from x4motor import X4Motor
 config = {
     'id': 1,\
     'Mode': 'Angle',\
-    'PWM_Limit' : 900,\
+    'PWM_Limit' : 1000,\
     'PWM_inc_limit' : 2,\
     'I_limit': 10.0,\
     'V_min': 12.0,\
-    'Angle_PID_P' : 50,\
+    'Angle_PID_P' : 20,\
     'Angle_PID_I' : 1,\
     'Speed_PID_P' : 100,\
     'Speed_PID_I' : 100,\
