@@ -1,6 +1,6 @@
 import time
 import sys
-sys.path.append('../../fortune-controls/Lib')
+sys.path.append('../../../fortune-controls/Lib')
 
 import global_
 from global_ import get_logger

@@ -9,9 +9,6 @@ import serialstar
 from lib.data_classes import *
 
 
-# global_.TX_ADDR_ROAD = '0002'
-
-
 def update_host_to_road():
     global_.motor_thread.controller.accel = global_.hostData.acceleration * global_.ACCEL_MAX / 100
     global_.motor_thread.controller.braking = global_.hostData.braking * global_.BRAKING_MAX / 100
@@ -104,25 +101,28 @@ class MBeeThread(threading.Thread):
         if self.dev:
             #  Callback-functions registering.
             self.dev.callback_registring("81", self.frame_81_received)
-            self.dev.callback_registring("83", self.frame_83_received)
+            # self.dev.callback_registring("83", self.frame_83_received)
             self.dev.callback_registring("87", self.frame_87_received)
-            self.dev.callback_registring("88", self.frame_88_received)
-            self.dev.callback_registring("89", self.frame_89_received)
-            self.dev.callback_registring("8A", self.frame_8A_received)
-            self.dev.callback_registring("8B", self.frame_8B_received)
+            # self.dev.callback_registring("88", self.frame_88_received)
+            # self.dev.callback_registring("89", self.frame_89_received)
+            # self.dev.callback_registring("8A", self.frame_8A_received)
+            # self.dev.callback_registring("8B", self.frame_8B_received)
             self.dev.callback_registring("8C", self.frame_8C_received)
-            self.dev.callback_registring("8F", self.frame_8F_received)
-            self.dev.callback_registring("97", self.frame_97_received)
+            # self.dev.callback_registring("8F", self.frame_8F_received)
+            # self.dev.callback_registring("97", self.frame_97_received)
 
+
+        self.dev.send_immidiate_apply_local_at('01', 'MY')
+        self.dev.run()
 
     def run(self):
         if self.dev:
+            self.mbee_init_settings()
             self.run_self_test()
-
             if (self.test_local == 0) or (self.test_remote == 0):
                 self.alive = False
             else:
-                self.logger.info('# Tests passed.')
+                self.logger.info('# Tests passed')
 
         while self.alive:
             # Receive
@@ -157,13 +157,23 @@ class MBeeThread(threading.Thread):
             self.dev = None
         self.logger.info('############  Mbee closed  ################')
 
+
+    def command_run(self, command, params):
+        self.dev.send_immidiate_apply_and_save_local_at(frame_id='01', at_command=command, at_parameter=params)
+
+    def mbee_init_settings(self):
+        # self.command_run('MY', '0001')
+        # self.command_run('RB', '06')
+        pass
+
+
     def run_self_test(self):
         # Test 1: remote
         self.self_test = 1
         test_time = time.time()
 
         while (time.time() - test_time) < 5:
-            self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, '0001', '10')
+            self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, '0000', '10')
             self.dev.run()
 
             if self.self_test == 0:
@@ -171,7 +181,7 @@ class MBeeThread(threading.Thread):
                 break
 
         if self.self_test == 1:
-            self.logger.warning('# No remote module.')
+            self.logger.warning('# No remote module')
             self.test_remote = 0
 
         # Test 2: local
@@ -187,7 +197,7 @@ class MBeeThread(threading.Thread):
                 break
 
         if self.self_test == 1:
-            self.logger.warning('# No module.')
+            self.logger.warning('# No module')
             self.test_local = 0
 
     def frame_81_received(self, package):

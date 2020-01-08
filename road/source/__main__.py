@@ -32,6 +32,7 @@ def main():
     global_.ACCEL_MAX = config["ACCEL_MAX"]
     global_.BRAKING_MAX = config["BRAKING_MAX"]
     global_.VELO_MAX = config["VELO_MAX"]
+    global_.TX_ADDR_HOST = config["TX_ADDR_HOST"]
     global_.TX_ADDR_ROAD = config["TX_ADDR_ROAD"]
 
     ## Variables.

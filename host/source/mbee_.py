@@ -40,14 +40,13 @@ class MbeeThread(QThread):
             self.dev.callback_registring("81", self.frame_81_received)
             # self.dev.callback_registring("83", self.frame_83_received)
             self.dev.callback_registring("87", self.frame_87_received)
-            # self.dev.callback_registring("88", self.frame_88_received)
+            self.dev.callback_registring("88", self.frame_88_received)
             # self.dev.callback_registring("89", self.frame_89_received)
             # self.dev.callback_registring("8A", self.frame_8A_received)
             # self.dev.callback_registring("8B", self.frame_8B_received)
             self.dev.callback_registring("8C", self.frame_8C_received)
             # self.dev.callback_registring("8F", self.frame_8F_received)
             # self.dev.callback_registring("97", self.frame_97_received)
-
 
     def update_road_to_host(self):
         if global_.roadData.mode == global_.hostData.mode:
@@ -56,9 +55,13 @@ class MbeeThread(QThread):
 
 
     def run(self):
-        self.run_self_test()
-        if (self.test_local == 0) or (self.test_remote == 0):
-            self.alive = False
+        if self.dev:
+            # self.mbee_init_settings()
+            self.run_self_test()
+            if (self.test_local == 0) or (self.test_remote == 0):
+                self.alive = False
+            else:
+                self.logger.info('# Tests passed')
 
         while self.alive:
             t = time.time()
@@ -100,6 +103,21 @@ class MbeeThread(QThread):
         if package_special is not None:
             self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(package_special), '11')
 
+
+    def command_run(self, command, params):
+        self.dev.send_immidiate_apply_and_save_local_at(frame_id='01', at_command=command, at_parameter=params)
+        self.dev.send_immidiate_apply_and_save_local_at(frame_id='02', at_command=command, at_parameter='')
+
+    def mbee_init_settings(self):
+        # self.command_run('MY', '0002')
+        self.command_run('RB', '0006')
+        # self.command_run('AC', '')
+        # self.command_run('WR', '')
+        # self.command_run('RB', '')
+        self.dev.run()
+        pass
+
+
     def run_self_test(self):
         if not self.dev:
             return
@@ -108,14 +126,14 @@ class MbeeThread(QThread):
         test_time = time.time()
 
         while (time.time() - test_time) < 5:
-            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, '0001', '10')
+            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, '0000', '10')
             self.dev.run()
 
             if self.self_test == 0:
                 break
 
         if self.self_test == 1:
-            self.logger.warning('# No remote module.')
+            self.logger.warning('# No remote module')
             self.test_remote = 0
 
         # Test 2: local
@@ -130,7 +148,7 @@ class MbeeThread(QThread):
                 break
 
         if self.self_test == 1:
-            self.logger.warning('# No module.')
+            self.logger.warning('# No module')
             self.test_local = 0
 
     #--------------------------------------------------
@@ -159,12 +177,12 @@ class MbeeThread(QThread):
         if self.self_test == 1:
             self.self_test = 0
         # print("Received 87-frame.")
-        # print(package)
+        print(package)
         pass
 
     def frame_88_received(self, package):
         # print("Received 88-frame.")
-        # print(package)
+        print(package)
         pass
 
     def frame_89_received(self, package):

@@ -13,6 +13,7 @@ global roadData
 global specialData
 
 global TX_ADDR_HOST
+global TX_ADDR_ROAD
 
 import sys
 import logging

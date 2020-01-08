@@ -15,6 +15,7 @@ global motor_thread
 global ACCEL_MAX
 global BRAKING_MAX
 global VELO_MAX
+global TX_ADDR_HOST
 global TX_ADDR_ROAD
 
 import sys

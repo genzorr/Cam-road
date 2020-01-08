@@ -90,6 +90,7 @@ if __name__ == "__main__":
     f = open(get_dir_path() + '/config.json')
     config = hjson.loads(f.read())
     global_.TX_ADDR_HOST = config["TX_ADDR_HOST"]
+    global_.TX_ADDR_ROAD = config["TX_ADDR_ROAD"]
 
     global_.mutex = QMutex()
     global_.flag = True
