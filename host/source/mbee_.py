@@ -7,8 +7,6 @@ from global_ import get_logger
 import serialstar
 from lib.data_classes import *
 
-TX_ADDR = '0001'
-
 #----------------------------------------------------------------------------------------------#
 #   A thread used to operate with MBee.
 class MbeeThread(QThread):
@@ -98,9 +96,9 @@ class MbeeThread(QThread):
         global_.mutex.unlock()
 
         if package_host is not None:
-            self.dev.send_tx_request('00', TX_ADDR, self.encrypt_package(package_host), '11')
+            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(package_host), '11')
         if package_special is not None:
-            self.dev.send_tx_request('00', TX_ADDR, self.encrypt_package(package_special), '11')
+            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(package_special), '11')
 
     def run_self_test(self):
         if not self.dev:
@@ -110,7 +108,7 @@ class MbeeThread(QThread):
         test_time = time.time()
 
         while (time.time() - test_time) < 5:
-            self.dev.send_tx_request('00', TX_ADDR, '0001', '10')
+            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, '0001', '10')
             self.dev.run()
 
             if self.self_test == 0:

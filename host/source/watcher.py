@@ -10,8 +10,6 @@ from lib.data_classes import *
 from lib.data_parser import *
 from lib.controls import *
 
-ENC_MAX = 100
-
 #----------------------------------------------------------------------------------------------#
 #   Main thread for getting/throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):

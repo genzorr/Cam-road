@@ -1,5 +1,7 @@
 import sys
 import threading, signal
+import hjson
+import os.path as path
 
 import global_
 from watcher import *
@@ -14,9 +16,23 @@ def handler(signal, frame):
         t.alive = False
     sys.exit(0)
 
+def get_dir_path():
+    filepath = path.abspath(__file__)
+    dirname = path.dirname(filepath)
+    dirname_parent = path.split(dirname)[0]
+    return path.split(dirname_parent)[0]
+
 #-------------------------------------------------------------------------------------#
 def main():
     global THREADS
+
+    # Config file data.
+    f = open(get_dir_path() + '/config.json')
+    config = hjson.loads(f.read())
+    global_.ACCEL_MAX = config["ACCEL_MAX"]
+    global_.BRAKING_MAX = config["BRAKING_MAX"]
+    global_.VELO_MAX = config["VELO_MAX"]
+    global_.TX_ADDR_ROAD = config["TX_ADDR_ROAD"]
 
     ## Variables.
     global_.lock = threading.Lock()

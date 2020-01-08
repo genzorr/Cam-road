@@ -12,6 +12,8 @@ global hostData
 global roadData
 global specialData
 
+global TX_ADDR_HOST
+
 import sys
 import logging
 import coloredlogs

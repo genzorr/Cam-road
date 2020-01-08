@@ -1,6 +1,6 @@
-VELO_MAX = 60
-ACCEL_MAX = 20
-BRAKING_MAX = 20
+# VELO_MAX = 60
+# ACCEL_MAX = 20
+# BRAKING_MAX = 20
 
 global lock
 global hostData
@@ -11,6 +11,11 @@ global watcher
 global writer
 global mbee_thread
 global motor_thread
+
+global ACCEL_MAX
+global BRAKING_MAX
+global VELO_MAX
+global TX_ADDR_ROAD
 
 import sys
 import logging

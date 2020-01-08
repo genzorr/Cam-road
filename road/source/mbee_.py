@@ -9,7 +9,7 @@ import serialstar
 from lib.data_classes import *
 
 
-TX_ADDR = '0002'
+# global_.TX_ADDR_ROAD = '0002'
 
 
 def update_host_to_road():
@@ -137,7 +137,7 @@ class MBeeThread(threading.Thread):
 
             if package is not None:
                 package = self.encrypt_package(package)
-                self.dev.send_tx_request('00', TX_ADDR, package, '11')
+                self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, package, '11')
 
             # Flush dev buffers
             self.t = time.time()
@@ -163,7 +163,7 @@ class MBeeThread(threading.Thread):
         test_time = time.time()
 
         while (time.time() - test_time) < 5:
-            self.dev.send_tx_request('00', TX_ADDR, '0001', '10')
+            self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, '0001', '10')
             self.dev.run()
 
             if self.self_test == 0:

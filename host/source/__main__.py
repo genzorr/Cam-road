@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import sys, signal, os, time
 import logging, logging.handlers
+import hjson
+import os.path as path
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QMutex
@@ -71,12 +73,23 @@ class Killer:
         time.sleep(1)
         sys.exit()
 
+def get_dir_path():
+    filepath = path.abspath(__file__)
+    dirname = path.dirname(filepath)
+    dirname_parent = path.split(dirname)[0]
+    return path.split(dirname_parent)[0]
+
 
 if __name__ == "__main__":
     # configure_logging()
 
     global_.killer = Killer()
     app = QApplication(sys.argv)
+
+    # Config file data.
+    f = open(get_dir_path() + '/config.json')
+    config = hjson.loads(f.read())
+    global_.TX_ADDR_HOST = config["TX_ADDR_HOST"]
 
     global_.mutex = QMutex()
     global_.flag = True
