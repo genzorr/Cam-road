@@ -3,5 +3,7 @@
     "BRAKING_MAX" : 20,
     "VELO_MAX" : 60,
     "TX_ADDR_HOST" : "0001",
-    "TX_ADDR_ROAD" : "0002"
+    "TX_ADDR_ROAD" : "0002",
+    "FREQUENCY" : 860,
+    "POWER" : 10
 }

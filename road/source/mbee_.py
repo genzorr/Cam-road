@@ -103,7 +103,7 @@ class MBeeThread(threading.Thread):
             self.dev.callback_registring("81", self.frame_81_received)
             # self.dev.callback_registring("83", self.frame_83_received)
             self.dev.callback_registring("87", self.frame_87_received)
-            # self.dev.callback_registring("88", self.frame_88_received)
+            self.dev.callback_registring("88", self.frame_88_received)
             # self.dev.callback_registring("89", self.frame_89_received)
             # self.dev.callback_registring("8A", self.frame_8A_received)
             # self.dev.callback_registring("8B", self.frame_8B_received)
@@ -162,8 +162,21 @@ class MBeeThread(threading.Thread):
         self.dev.send_immidiate_apply_and_save_local_at(frame_id='01', at_command=command, at_parameter=params)
 
     def mbee_init_settings(self):
-        # self.command_run('MY', '0001')
-        # self.command_run('RB', '06')
+        frequency = str(global_.settings['FREQUENCY'])
+        power = str(global_.settings['POWER'])
+
+        CF = {'780':'2E7DDB00', '800':'2FAF0800', '820':'30E03500', '840':'32116200',\
+            '860':'33428EA4', '880':'3473BC00', '900':'35A4E900', '920':'36D61600'}
+        PL = {'-32':'00', '-6':'30', '-3':'02', '0':'04', '1':'05', '3':'06', '4':'21', '5':'09', '6':'0A',\
+                '7':'0B', '8':'0D', '9':'0F', '10':'19', '11':'1A', '12':'23', '13':'1D', '14':'1F', '15':'33',\
+                '16':'25', '17':'34', '18':'27', '19':'6C', '20':'6B'}
+
+        self.command_run('CF', CF[frequency])
+        self.command_run('PL', PL[power])
+
+        self.command_run('CH', '')
+        self.command_run('CF', '')
+        self.command_run('PL', '')
         pass
 
 
@@ -232,7 +245,7 @@ class MBeeThread(threading.Thread):
 
     def frame_88_received(self, package):
         # print("Received 88-frame.")
-        # print(package)
+        print(package)
         pass
 
     def frame_89_received(self, package):

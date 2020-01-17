@@ -12,6 +12,7 @@ global writer
 global mbee_thread
 global motor_thread
 
+global settings
 global ACCEL_MAX
 global BRAKING_MAX
 global VELO_MAX

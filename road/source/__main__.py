@@ -34,6 +34,7 @@ def main():
     global_.VELO_MAX = config["VELO_MAX"]
     global_.TX_ADDR_HOST = config["TX_ADDR_HOST"]
     global_.TX_ADDR_ROAD = config["TX_ADDR_ROAD"]
+    global_.settings = config
 
     ## Variables.
     global_.lock = threading.Lock()

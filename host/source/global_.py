@@ -12,6 +12,7 @@ global hostData
 global roadData
 global specialData
 
+global settings
 global TX_ADDR_HOST
 global TX_ADDR_ROAD
 
