@@ -161,7 +161,7 @@ class ControlThread(QThread):
             (dummy, value) = self.controller.getButtonValue(0)
 
             #------------------------------------------------------------------#
-            global_.mutex.tryLock(timeout=5)
+            global_.mutex.tryLock(timeout=1)
 
             #  Encoders.
             global_.hostData.acceleration = self.controller.encoders[1]
@@ -185,21 +185,27 @@ class ControlThread(QThread):
                 stop_flag = 1
                 global_.hostData.mode = 0
 
-            elif _check_bit(value, self.left) and (global_.hostData.velocity != 0):
-                if global_.roadData.mode == 0:
-                    global_.hostData.direction = -1
-                    global_.hostData.mode = 2
+            elif _check_bit(value, self.left):
+                global_.hostData.direction = -1
 
-                if global_.roadData.direction == 1:
-                    global_.hostData.mode = 1
+            elif _check_bit(value, self.right):
+                global_.hostData.direction = 1
 
-            elif _check_bit(value, self.right) and (global_.hostData.velocity != 0):
-                if global_.roadData.mode == 0:
-                    global_.hostData.direction = 1
-                    global_.hostData.mode = 2
+            # elif _check_bit(value, self.left) and (global_.hostData.velocity != 0):
+            #     if global_.roadData.mode == 0:
+            #         global_.hostData.direction = -1
+            #         global_.hostData.mode = 2
 
-                if global_.roadData.direction == -1:
-                    global_.hostData.mode = 1
+            #     if global_.roadData.direction == 1:
+            #         global_.hostData.mode = 1
+
+            # elif _check_bit(value, self.right) and (global_.hostData.velocity != 0):
+            #     if global_.roadData.mode == 0:
+            #         global_.hostData.direction = 1
+            #         global_.hostData.mode = 2
+
+            #     if global_.roadData.direction == -1:
+            #         global_.hostData.mode = 1
 
             # Set base.
             global_.specialData.end_points_reset = False

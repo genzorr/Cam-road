@@ -16,24 +16,48 @@ def update_host_to_road():
         global_.motor_thread.controller.braking = 1
 
     #  Move to stop mode.
+    # if global_.hostData.mode == 0:
+    #     global_.motor_thread.controller.est_speed = 0
+    #     if global_.motor_thread.controller.mode != 0:
+    #         global_.motor_thread.controller.soft_stop = 1
+    #  Move to reverse mode.
+    # elif global_.hostData.mode == 1:
+    #     if global_.motor_thread.controller.mode == 2:
+    #         global_.motor_thread.controller.reverse = 1
+    #         # global_.motor_thread.controller.est_speed = 0     # CHANGED
+    #  Move to coursing mode.
+    # elif global_.hostData.mode == 2:
+    #     global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
+    #     if global_.motor_thread.controller.mode == 0:
+    #         if global_.motor_thread.controller.stopped == 1:
+    #             global_.motor_thread.controller.direction = global_.hostData.direction
+    #         else:
+    #             global_.motor_thread.controller.reverse = 1
+    #             global_.motor_thread.controller.est_speed = 0
+
     if global_.hostData.mode == 0:
+        print('here')
         global_.motor_thread.controller.est_speed = 0
         if global_.motor_thread.controller.mode != 0:
             global_.motor_thread.controller.soft_stop = 1
-    #  Move to reverse mode.
-    elif global_.hostData.mode == 1:
-        if global_.motor_thread.controller.mode == 2:
-            global_.motor_thread.controller.reverse = 1
-            # global_.motor_thread.controller.est_speed = 0     # CHANGED
-    #  Move to coursing mode.
-    elif global_.hostData.mode == 2:
-        global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
-        if global_.motor_thread.controller.mode == 0:
-            if global_.motor_thread.controller.stopped == 1:
-                global_.motor_thread.controller.direction = global_.hostData.direction
-            else:
-                global_.motor_thread.controller.reverse = 1
-                global_.motor_thread.controller.est_speed = 0
+
+    else:
+        if global_.hostData.direction != 0:
+            if global_.motor_thread.controller.mode == 0:
+                if global_.motor_thread.controller.stopped == 1:
+                    global_.motor_thread.controller.direction = global_.hostData.direction
+                else:
+                    global_.motor_thread.controller.reverse = 1
+                    global_.motor_thread.controller.est_speed = 0
+
+            elif global_.motor_thread.controller.mode == 1:
+                if global_.hostData.direction == global_.motor_thread.controller.direction:
+                    global_.motor_thread.controller.continue_ = 1
+
+            elif global_.motor_thread.controller.mode == 2:
+                if global_.hostData.direction != global_.motor_thread.controller.direction:
+                    global_.motor_thread.controller.reverse = 1
+
 
     #  Set base points.
     if global_.hostData.set_base == 1 and not global_.roadData.base1_set:
@@ -111,11 +135,6 @@ class MBeeThread(threading.Thread):
             # self.dev.callback_registring("8F", self.frame_8F_received)
             # self.dev.callback_registring("97", self.frame_97_received)
 
-
-        self.dev.send_immidiate_apply_local_at('01', 'MY')
-        self.dev.run()
-
-    def run(self):
         if self.dev:
             self.mbee_init_settings()
             self.run_self_test()
@@ -124,6 +143,7 @@ class MBeeThread(threading.Thread):
             else:
                 self.logger.info('# Tests passed')
 
+    def run(self):
         while self.alive:
             # Receive
             self.dev.run()
@@ -159,24 +179,31 @@ class MBeeThread(threading.Thread):
 
 
     def command_run(self, command, params):
-        self.dev.send_immidiate_apply_and_save_local_at(frame_id='01', at_command=command, at_parameter=params)
+        frame_id = '00' if params else '01'
+        self.dev.send_immidiate_apply_and_save_local_at(frame_id=frame_id, at_command=command, at_parameter=params)
+        self.dev.send_immidiate_apply_and_save_local_at(frame_id='00', at_command='AC', at_parameter='')
+
+        if not params:
+            frame = self.dev.run()
+            if frame and frame['FRAME_TYPE'] != '81':
+                self.logger.info('frame {:2s}: AT-{:2s} {:10s}'.format(frame['FRAME_TYPE'], frame['AT_COMMAND'], frame['AT_PARAMETER_HEX']))
 
     def mbee_init_settings(self):
-        frequency = str(global_.settings['FREQUENCY'])
-        power = str(global_.settings['POWER'])
+        frequency = global_.settings['FREQUENCY']
+        power = global_.settings['POWER']
 
-        CF = {'780':'2E7DDB00', '800':'2FAF0800', '820':'30E03500', '840':'32116200',\
-            '860':'33428EA4', '880':'3473BC00', '900':'35A4E900', '920':'36D61600'}
         PL = {'-32':'00', '-6':'30', '-3':'02', '0':'04', '1':'05', '3':'06', '4':'21', '5':'09', '6':'0A',\
                 '7':'0B', '8':'0D', '9':'0F', '10':'19', '11':'1A', '12':'23', '13':'1D', '14':'1F', '15':'33',\
                 '16':'25', '17':'34', '18':'27', '19':'6C', '20':'6B'}
 
-        self.command_run('CF', CF[frequency])
-        self.command_run('PL', PL[power])
+        self.command_run('CF', '{:x}'.format(int(frequency)))
+        self.command_run('PL', PL[str(power)])
 
         self.command_run('CH', '')
         self.command_run('CF', '')
         self.command_run('PL', '')
+
+        self.logger.info('# MBee settings passed to device')
         pass
 
 
@@ -218,11 +245,11 @@ class MBeeThread(threading.Thread):
         if isinstance(data, HTRData):
             global_.lock.acquire(blocking=True, timeout=1)
             global_.hostData = data
-            self.logger.debug('HTR data ' + str(data.__dict__))
+            # self.logger.debug('HTR data ' + str(data.__dict__))
             update_host_to_road()
             global_.lock.release()
         if isinstance(data, HBData):
-            self.logger.debug('HB data ' + str(data.__dict__))
+            # self.logger.debug('HB data ' + str(data.__dict__))
             global_.lock.acquire(blocking=True, timeout=1)
             global_.specialData = data
             update_special()
@@ -245,7 +272,7 @@ class MBeeThread(threading.Thread):
 
     def frame_88_received(self, package):
         # print("Received 88-frame.")
-        print(package)
+        # print(package)
         pass
 
     def frame_89_received(self, package):

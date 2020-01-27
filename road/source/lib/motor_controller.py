@@ -116,6 +116,7 @@ class Controller(FSM):
         self.soft_stop = 0
         self.reverse = 0
         self.stopped = 0
+        self.continue_ = 0
 
         self.end_points = True
         self.end_points_stop = True
@@ -286,6 +287,11 @@ class Controller(FSM):
         if (self.HARD_STOP or self.soft_stop):
             self.reverse = 0
             self.changeState(self.stop)
+
+        if self.continue_ == 1:
+            self.reverse = 0
+            self.continue_ = 0
+            self.changeState(self.course)
 
         if (self.speed == 0.0):
             self.direction = - self.direction

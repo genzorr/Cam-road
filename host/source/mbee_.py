@@ -26,7 +26,7 @@ class MbeeThread(QThread):
         self.RSSI = 0
 
         try:
-            self.dev = serialstar.SerialStar(port, baudrate, 0.4)
+            self.dev = serialstar.SerialStar(port, baudrate, 0.2)
         except BaseException:
             self.dev = None
             self.alive = False
@@ -48,13 +48,6 @@ class MbeeThread(QThread):
             # self.dev.callback_registring("8F", self.frame_8F_received)
             # self.dev.callback_registring("97", self.frame_97_received)
 
-    def update_road_to_host(self):
-        if global_.roadData.mode == global_.hostData.mode:
-            global_.hostData.mode = -1
-        pass
-
-
-    def run(self):
         if self.dev:
             self.mbee_init_settings()
             self.run_self_test()
@@ -63,6 +56,14 @@ class MbeeThread(QThread):
             else:
                 self.logger.info('# Tests passed')
 
+
+    def update_road_to_host(self):
+        if global_.roadData.mode == global_.hostData.mode:
+            global_.hostData.mode = -1
+        pass
+
+
+    def run(self):
         while self.alive:
             t = time.time()
 
@@ -72,7 +73,6 @@ class MbeeThread(QThread):
             global_.mutex.unlock()
 
             self.transmit()
-            global_.hostData.mode = -1
 
             # Flush dev buffers
             self.t = time.time()
@@ -102,27 +102,36 @@ class MbeeThread(QThread):
         if package_special is not None:
             self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(package_special), '11')
 
+        global_.hostData.direction = 0
+        global_.hostData.mode = -1
+
 
     def command_run(self, command, params):
-        self.dev.send_immidiate_apply_and_save_local_at(frame_id='01', at_command=command, at_parameter=params)
+        frame_id = '00' if params else '01'
+        self.dev.send_immidiate_apply_and_save_local_at(frame_id=frame_id, at_command=command, at_parameter=params)
         self.dev.send_immidiate_apply_and_save_local_at(frame_id='00', at_command='AC', at_parameter='')
 
-    def mbee_init_settings(self):
-        frequency = str(global_.settings['FREQUENCY'])
-        power = str(global_.settings['POWER'])
+        if not params:
+            frame = self.dev.run()
+            if frame['FRAME_TYPE'] != '81':
+                self.logger.info('frame {:2s}: AT-{:2s} {:10s}'.format(frame['FRAME_TYPE'], frame['AT_COMMAND'], frame['AT_PARAMETER_HEX']))
 
-        CF = {'780':'2E7DDB00', '800':'2FAF0800', '820':'30E03500', '840':'32116200',\
-            '860':'33428EA4', '880':'3473BC00', '900':'35A4E900', '920':'36D61600'}
+    def mbee_init_settings(self):
+        frequency = global_.settings['FREQUENCY']
+        power = global_.settings['POWER']
+
         PL = {'-32':'00', '-6':'30', '-3':'02', '0':'04', '1':'05', '3':'06', '4':'21', '5':'09', '6':'0A',\
                 '7':'0B', '8':'0D', '9':'0F', '10':'19', '11':'1A', '12':'23', '13':'1D', '14':'1F', '15':'33',\
                 '16':'25', '17':'34', '18':'27', '19':'6C', '20':'6B'}
 
-        self.command_run('CF', CF[frequency])
-        self.command_run('PL', PL[power])
+        self.command_run('CF', '{:x}'.format(int(frequency)))
+        self.command_run('PL', PL[str(power)])
 
         self.command_run('CH', '')
         self.command_run('CF', '')
         self.command_run('PL', '')
+
+        self.logger.info('# MBee settings passed to device')
         pass
 
 
@@ -185,12 +194,12 @@ class MbeeThread(QThread):
         if self.self_test == 1:
             self.self_test = 0
         # print("Received 87-frame.")
-        print(package)
+        # print(package)
         pass
 
     def frame_88_received(self, package):
         # print("Received 88-frame.")
-        print(package)
+        # print(package)
         pass
 
     def frame_89_received(self, package):
