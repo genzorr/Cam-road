@@ -36,16 +36,20 @@ def update_host_to_road():
     #             global_.motor_thread.controller.est_speed = 0
 
     if global_.hostData.mode == 0:
-        print('here')
         global_.motor_thread.controller.est_speed = 0
+        global_.motor_thread.controller.continue_ = 0
+        global_.motor_thread.controller.reverse = 0
         if global_.motor_thread.controller.mode != 0:
             global_.motor_thread.controller.soft_stop = 1
 
     else:
         if global_.hostData.direction != 0:
             if global_.motor_thread.controller.mode == 0:
-                if global_.motor_thread.controller.stopped == 1:
+                if global_.motor_thread.controller.direction == 0:
                     global_.motor_thread.controller.direction = global_.hostData.direction
+                # if global_.motor_thread.controller.stopped == 1:
+                if global_.motor_thread.controller.direction == global_.hostData.direction:
+                    global_.motor_thread.controller.continue_ = 1
                 else:
                     global_.motor_thread.controller.reverse = 1
                     global_.motor_thread.controller.est_speed = 0
@@ -63,9 +67,10 @@ def update_host_to_road():
     if global_.hostData.set_base == 1 and not global_.roadData.base1_set:
         global_.motor_thread.controller.base1 = global_.motor_thread.controller.coordinate
         global_.roadData.base1_set = True
-    elif global_.hostData.set_base == 2 and not global_.roadData.base2_set:
-        global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
-        global_.roadData.base2_set = True
+    elif global_.hostData.set_base == 1 and not global_.roadData.base2_set:
+        if (global_.motor_thread.controller.coordinate != global_.motor_thread.controller.base1):
+            global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
+            global_.roadData.base2_set = True
 
     return
 
@@ -83,6 +88,7 @@ def update_road_to_host():
 
 def update_special():
     if global_.specialData.end_points_reset:
+        print('here')
         global_.roadData.base1_set = False
         global_.roadData.base2_set = False
         global_.motor_thread.controller.base1 = 0
@@ -253,6 +259,7 @@ class MBeeThread(threading.Thread):
             global_.lock.acquire(blocking=True, timeout=1)
             global_.specialData = data
             update_special()
+            print(global_.specialData.end_points_reset)
             global_.lock.release()
         # print("Received 81-frame.")
         # print(package)

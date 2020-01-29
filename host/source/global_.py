@@ -1,4 +1,5 @@
 global mutex
+global newHTR
 
 global window
 

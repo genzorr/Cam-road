@@ -20,7 +20,6 @@ class HTRData(QObject):
         self.direction = 0
         self.set_base = 0
 
-
     @property  # Acceleration value property
     def acceleration(self):
         return self._acceleration
@@ -83,6 +82,9 @@ class RTHData(QObject):
         self.base2_set = False
 
         self.direction = -1
+
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and (self.__dict__ == other.__dict__)
 
     @property  # Coordinate value property
     def coordinate(self):
@@ -158,6 +160,9 @@ class HBData(QObject):
         self.slots = [  self.enable_end_points_, self.end_points_stop_, self.end_points_reverse_,\
                         self.sound_stop_, self.swap_direction_, self.stop_accelerometer_]
         self.last_states = []
+
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and (self.__dict__ == other.__dict__)
 
     @staticmethod
     def color_button(button, color):

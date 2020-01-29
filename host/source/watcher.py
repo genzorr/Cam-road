@@ -60,6 +60,7 @@ class WatcherThread(QThread):
         while self.alive:
             t = time.time()
 
+            global_.mutex.tryLock(timeout=1)
             global_.mbeeThread.RSSI_signal.emit(global_.mbeeThread.RSSI)
 
             global_.window.base1.emit(global_.roadData.base1_set)
@@ -75,6 +76,7 @@ class WatcherThread(QThread):
                 self.coordinate_value_sig.emit(value * 100)
             else:
                 self.coordinate_value_sig.emit(0)
+            global_.mutex.unlock()
 
             # self.logger.info('')
 
@@ -120,10 +122,19 @@ class ControlThread(QThread):
 
         self.changeMenu_sig.connect(global_.window.changeMenu)
 
-        self.base_t = 0
         self.menu_t = 0
+        self.home_t = 0
+        self.base_t = 0
+        self.left_t = 0
+        self.right_t = 0
+        self.stop_t = 0
         self.reset_t = 0
         self.menu = 1
+
+        self.state = []
+        self.state_prev = []
+        self.state_prev_t = 0
+        global_.newHTR = False
 
         self.finished.connect(self.controller.off)
 
@@ -172,9 +183,6 @@ class ControlThread(QThread):
             # Stop.
             stop_flag = 0
             t = time.time()
-            # if (t - self.reset_t > 1):
-            #     global_.hostData.mode = -1
-            #     self.reset_t = t
 
             if not global_.specialData.swap_direction:
                 self.left, self.right = LEFT, RIGHT
@@ -182,50 +190,36 @@ class ControlThread(QThread):
                 self.left, self.right = RIGHT, LEFT
 
             if _check_bit(value, STOP):
-                stop_flag = 1
-                global_.hostData.mode = 0
+                if (t - self.stop_t) > 1:
+                    self.stop_t = t
+                    stop_flag = 1
+                    global_.hostData.mode = 0
 
             elif _check_bit(value, self.left):
-                global_.hostData.direction = -1
+                if (t - self.left_t) > 1:
+                    self.left_t = t
+                    global_.hostData.direction = -1
 
             elif _check_bit(value, self.right):
-                global_.hostData.direction = 1
-
-            # elif _check_bit(value, self.left) and (global_.hostData.velocity != 0):
-            #     if global_.roadData.mode == 0:
-            #         global_.hostData.direction = -1
-            #         global_.hostData.mode = 2
-
-            #     if global_.roadData.direction == 1:
-            #         global_.hostData.mode = 1
-
-            # elif _check_bit(value, self.right) and (global_.hostData.velocity != 0):
-            #     if global_.roadData.mode == 0:
-            #         global_.hostData.direction = 1
-            #         global_.hostData.mode = 2
-
-            #     if global_.roadData.direction == -1:
-            #         global_.hostData.mode = 1
+                if (t - self.right_t) > 1:
+                    self.right_t = t
+                    global_.hostData.direction = 1
 
             # Set base.
-            global_.specialData.end_points_reset = False
             if _check_bit(value, BASE):
-                self.logger.info('Base pressed {} {}'.format(global_.roadData.base1_set, global_.roadData.base2_set))
-                t = time.time()
-                if (t - self.base_t) > 2:
-                    self.base_t = t
-                    if not global_.roadData.base1_set:
-                        global_.hostData.set_base = 1
-                    elif not global_.roadData.base2_set:
-                        global_.hostData.set_base = 2
-                # print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
-
                 if stop_flag: # Reset base points when STOP and BASE buttons pressed.
                     self.logger.info('Reset end points')
-                    global_.hostData.mode = 0
-                    global_.hostData.direction = 0
-                    global_.hostData.set_base = 0
                     global_.specialData.end_points_reset = True
+
+                elif (t - self.base_t) > 1:
+                    self.logger.info('Base pressed {} {}'.format(global_.roadData.base1_set, global_.roadData.base2_set))
+                    self.base_t = t
+                    # if not global_.roadData.base1_set:
+                    global_.hostData.set_base = 1
+                    # elif not global_.roadData.base2_set:
+                        # global_.hostData.set_base = 2
+                # print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
+
 
             # Reset hard stop.
             global_.specialData.HARD_STOP = False
@@ -235,6 +229,15 @@ class ControlThread(QThread):
                     self.logger.info('Hard stop reset')
 
             global_.mutex.unlock()
+
+            self.state = [global_.hostData.velocity, global_.hostData.acceleration, global_.hostData.braking,\
+                            global_.hostData.mode, global_.hostData.direction, global_.hostData.set_base,\
+                            global_.specialData.end_points_reset]
+
+            if (t - self.state_prev_t > 3) or (self.state != self.state_prev):
+                global_.newHTR = True
+                self.state_prev = self.state
+                self.state_prev_t = t
 
             # global_.mutex.tryLock(timeout=5)
             # # t = time.time()
@@ -246,7 +249,6 @@ class ControlThread(QThread):
 
             # Menu
             if _check_bit(value, MENU):
-                t = time.time()
                 if (t - self.menu_t) > 0.5:
                     self.menu_t = t
                     self.changeMenu()

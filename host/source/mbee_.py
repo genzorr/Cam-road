@@ -1,11 +1,16 @@
 import time, struct, binascii
 from PyQt5.QtCore import QThread, pyqtSignal
 import logging
+import copy
 
 import global_
 from global_ import get_logger
 import serialstar
 from lib.data_classes import *
+
+def update_road_to_host():
+    if (not global_.roadData.base1_set and not global_.roadData.base2_set):
+        global_.specialData.end_points_reset = False
 
 #----------------------------------------------------------------------------------------------#
 #   A thread used to operate with MBee.
@@ -24,6 +29,11 @@ class MbeeThread(QThread):
         self.t = 0
         self.t_prev = 0
         self.RSSI = 0
+
+        self.package_host = HTRData()
+        self.package_special = HBData()
+        global_.newHTR = False
+        self.special_t = 0
 
         try:
             self.dev = serialstar.SerialStar(port, baudrate, 0.2)
@@ -57,12 +67,6 @@ class MbeeThread(QThread):
                 self.logger.info('# Tests passed')
 
 
-    def update_road_to_host(self):
-        if global_.roadData.mode == global_.hostData.mode:
-            global_.hostData.mode = -1
-        pass
-
-
     def run(self):
         while self.alive:
             t = time.time()
@@ -79,8 +83,8 @@ class MbeeThread(QThread):
             if (self.t - self.t_prev) > 3:
                 self.t_prev = self.t
                 self.dev.ser.flush()
-            #     self.dev.ser.reset_input_buffer()
-            #     self.dev.ser.reset_output_buffer()
+                # self.dev.ser.reset_input_buffer()
+                # self.dev.ser.reset_output_buffer()
 
             # print('MBee', t - time.time())
             time.sleep(0.01)
@@ -92,18 +96,28 @@ class MbeeThread(QThread):
             self.dev = None
 
     def transmit(self):
-        global_.mutex.tryLock(timeout=5)
-        package_host = global_.hostData
-        package_special = global_.specialData
+        t = time.time()
+        newHTR, newHB = False, False
+
+        global_.mutex.tryLock(timeout=1)
+        newHTR = global_.newHTR
+        global_.newHTR = False
+        if newHTR:
+            self.package_host = global_.hostData
+        if (t - self.special_t > 0.5):
+            self.special_t = t
+            self.package_special = global_.specialData
+            newHB = True
         global_.mutex.unlock()
 
-        if package_host is not None:
-            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(package_host), '11')
-        if package_special is not None:
-            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(package_special), '11')
-
-        global_.hostData.direction = 0
-        global_.hostData.mode = -1
+        if newHTR and (self.package_host is not None):
+            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(self.package_host), '11')
+            global_.hostData.direction = 0
+            global_.hostData.mode = -1
+            global_.hostData.set_base = 0
+        if (newHB or newHTR) and (self.package_special is not None):
+            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(self.package_special), '11')
+            global_.specialData.soft_stop = False
 
 
     def command_run(self, command, params):
@@ -176,7 +190,7 @@ class MbeeThread(QThread):
         if isinstance(data, RTHData):
             global_.mutex.tryLock(timeout=5)
             global_.roadData = data
-            # global_.mbeeThread.update_road_to_host()
+            update_road_to_host()
             global_.mutex.unlock()
             self.RSSI = package['RSSI']
         # print("Received 81-frame.")

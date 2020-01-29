@@ -264,18 +264,31 @@ class Controller(FSM):
         if self.HARD_STOP:
             self.dstep = 0
 
-        if (self.speed == 0) and not self.stopped:
-            self.direction = 0
-            self.stopped = 1
+        # if (self.speed == 0) and not self.stopped:
+        #     self.direction = 0
+        #     self.stopped = 1
 
         self.update_coordinate(speed_to=0)
 
+        # if ((self.stopped) and (self.direction != 0)):
+        #     self.HARD_STOP = 0                              # CHANGED
+        #     self.stopped = 0
+        #     self.soft_stop = 0
+        #     self.changeState(self.course)
+
         #  Exit from state.
-        if ((self.stopped) and (self.direction != 0)):
-            self.HARD_STOP = 0                              # CHANGED
-            self.stopped = 0
+        if self.reverse:
+            self.reverse = 0
+            self.HARD_STOP = 0
+            self.soft_stop = 0
+            self.changeState(self.stop_transitial)
+
+        if self.continue_:
+            self.continue_ = 0
+            self.HARD_STOP = 0
             self.soft_stop = 0
             self.changeState(self.course)
+
 
     def stop_transitial(self):
         self.mode = 1
