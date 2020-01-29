@@ -151,7 +151,7 @@ class HBData(QObject):
         self.sound_stop = False
         self.swap_direction = False
         self.accelerometer_stop = False
-        self.HARD_STOP = False
+        self.motor = False
         self.lock_buttons = False
 
         self.color_red = QColor(255, 0, 0).name()

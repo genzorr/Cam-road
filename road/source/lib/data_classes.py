@@ -46,7 +46,7 @@ class HBData():
         self.sound_stop = False
         self.swap_direction = False
         self.accelerometer_stop = False
-        self.HARD_STOP = False
+        self.motor = False
         self.lock_buttons = False
 
 #----------------------------------------------------------------------------------------------#

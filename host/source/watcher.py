@@ -220,19 +220,18 @@ class ControlThread(QThread):
                         # global_.hostData.set_base = 2
                 # print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
 
-
             # Reset hard stop.
-            global_.specialData.HARD_STOP = False
             if _check_bit(value, HOME):
-                if stop_flag:
-                    global_.specialData.HARD_STOP = True
-                    self.logger.info('Hard stop reset')
+                if (t - self.home_t > 1):
+                    self.home_t = t
+                    global_.specialData.motor = True
+                    self.logger.info('Motor off')
 
             global_.mutex.unlock()
 
             self.state = [global_.hostData.velocity, global_.hostData.acceleration, global_.hostData.braking,\
                             global_.hostData.mode, global_.hostData.direction, global_.hostData.set_base,\
-                            global_.specialData.end_points_reset]
+                            global_.specialData.end_points_reset, global_.specialData.motor]
 
             if (t - self.state_prev_t > 3) or (self.state != self.state_prev):
                 global_.newHTR = True

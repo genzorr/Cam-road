@@ -124,10 +124,11 @@ class Watcher(threading.Thread):
             if global_.motor_thread.alive and global_.specialData.accelerometer_stop:
                 # Check accelerometer data.
                 [x, y, z] = self.accel.getdata()
-                thr = 12
+                thr = global_.ACCEL_MAX+1
+                # thr = 5
                 if (x > thr) or (z > thr):
                     global_.motor_thread.controller.HARD_STOP = 1
-                    self.logger.info('got ', x, ' ', y, ' ', z)
+                    self.logger.info('got {:2f} {:2f} {:2f}'.format(x, y, z))
 
             time.sleep(0.02)
 

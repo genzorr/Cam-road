@@ -11,6 +11,8 @@ from lib.data_classes import *
 def update_road_to_host():
     if (not global_.roadData.base1_set and not global_.roadData.base2_set):
         global_.specialData.end_points_reset = False
+    if global_.roadData.mode == -1:
+        global_.specialData.motor = False
 
 #----------------------------------------------------------------------------------------------#
 #   A thread used to operate with MBee.
@@ -29,6 +31,7 @@ class MbeeThread(QThread):
         self.t = 0
         self.t_prev = 0
         self.RSSI = 0
+        self.received_t = 0
 
         self.package_host = HTRData()
         self.package_special = HBData()
@@ -60,23 +63,29 @@ class MbeeThread(QThread):
 
         if self.dev:
             self.mbee_init_settings()
-            self.run_self_test()
-            if (self.test_local == 0) or (self.test_remote == 0):
-                self.alive = False
-            else:
-                self.logger.info('# Tests passed')
-
 
     def run(self):
+        self.run_self_test()
+        if (self.test_local == 0) or (self.test_remote == 0):
+            self.alive = False
+        else:
+            self.logger.info('# Tests passed')
+
         while self.alive:
             t = time.time()
+
+            self.transmit()
 
             # Receive
             global_.mutex.tryLock(timeout=1)
             self.dev.run()
             global_.mutex.unlock()
 
-            self.transmit()
+            # Check if connection is ok
+            if (t - self.received_t > 3):
+                self.logger.warning('# MBee receiver disconnected')
+                self.RSSI = 0
+                time.sleep(1)
 
             # Flush dev buffers
             self.t = time.time()
@@ -152,22 +161,8 @@ class MbeeThread(QThread):
     def run_self_test(self):
         if not self.dev:
             return
-        # Test 1: remote
-        self.self_test = 1
-        test_time = time.time()
 
-        while (time.time() - test_time) < 5:
-            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, '0000', '10')
-            self.dev.run()
-
-            if self.self_test == 0:
-                break
-
-        if self.self_test == 1:
-            self.logger.warning('# No remote module')
-            self.test_remote = 0
-
-        # Test 2: local
+        # Test 1: local
         self.self_test = 1
         test_time = time.time()
 
@@ -176,11 +171,32 @@ class MbeeThread(QThread):
             self.dev.run()
 
             if self.self_test == 0:
+                self.test_local = 1
                 break
 
         if self.self_test == 1:
             self.logger.warning('# No module')
             self.test_local = 0
+
+        # Test 2: remote
+        self.self_test = 1
+        test_time = time.time()
+
+        while True:
+            self.dev.send_tx_request('00', global_.TX_ADDR_HOST, '0000', '10')
+            self.dev.run()
+
+            if self.self_test == 0:
+                break
+
+            dt = time.time() - test_time
+            if (int(dt) > 5):
+                test_time = time.time()
+                self.logger.info('# Waiting for MBee receiver...')
+
+        if self.self_test == 1:
+            self.logger.warning('# No remote module')
+            self.test_remote = 0
 
     #--------------------------------------------------
     # Callback functions.
@@ -193,6 +209,7 @@ class MbeeThread(QThread):
             update_road_to_host()
             global_.mutex.unlock()
             self.RSSI = package['RSSI']
+            self.received_t = time.time()
         # print("Received 81-frame.")
         # print(package)
         pass
@@ -295,7 +312,7 @@ class MbeeThread(QThread):
                 package.sound_stop = hex_to_bool(data[10:12])
                 package.swap_direction = hex_to_bool(data[12:14])
                 package.accelerometer_stop = hex_to_bool(data[14:16])
-                package.HARD_STOP = hex_to_bool(data[16:18])
+                package.motor = hex_to_bool(data[16:18])
                 package.lock_buttons = hex_to_bool(data[18:20])
 
             else:
@@ -352,7 +369,7 @@ class MbeeThread(QThread):
             data += bool_to_hex(package.sound_stop)
             data += bool_to_hex(package.swap_direction)
             data += bool_to_hex(package.accelerometer_stop)
-            data += bool_to_hex(package.HARD_STOP)
+            data += bool_to_hex(package.motor)
             data += bool_to_hex(package.lock_buttons)
 
         else:

@@ -15,25 +15,6 @@ def update_host_to_road():
     if (global_.motor_thread.controller.braking < 1):
         global_.motor_thread.controller.braking = 1
 
-    #  Move to stop mode.
-    # if global_.hostData.mode == 0:
-    #     global_.motor_thread.controller.est_speed = 0
-    #     if global_.motor_thread.controller.mode != 0:
-    #         global_.motor_thread.controller.soft_stop = 1
-    #  Move to reverse mode.
-    # elif global_.hostData.mode == 1:
-    #     if global_.motor_thread.controller.mode == 2:
-    #         global_.motor_thread.controller.reverse = 1
-    #         # global_.motor_thread.controller.est_speed = 0     # CHANGED
-    #  Move to coursing mode.
-    # elif global_.hostData.mode == 2:
-    #     global_.motor_thread.controller.est_speed = global_.hostData.velocity * global_.VELO_MAX / 100
-    #     if global_.motor_thread.controller.mode == 0:
-    #         if global_.motor_thread.controller.stopped == 1:
-    #             global_.motor_thread.controller.direction = global_.hostData.direction
-    #         else:
-    #             global_.motor_thread.controller.reverse = 1
-    #             global_.motor_thread.controller.est_speed = 0
 
     if global_.hostData.mode == 0:
         global_.motor_thread.controller.est_speed = 0
@@ -44,10 +25,11 @@ def update_host_to_road():
 
     else:
         if global_.hostData.direction != 0:
+            global_.motor_thread.controller.motor_state = True
             if global_.motor_thread.controller.mode == 0:
                 if global_.motor_thread.controller.direction == 0:
                     global_.motor_thread.controller.direction = global_.hostData.direction
-                # if global_.motor_thread.controller.stopped == 1:
+
                 if global_.motor_thread.controller.direction == global_.hostData.direction:
                     global_.motor_thread.controller.continue_ = 1
                 else:
@@ -88,15 +70,16 @@ def update_road_to_host():
 
 def update_special():
     if global_.specialData.end_points_reset:
-        print('here')
         global_.roadData.base1_set = False
         global_.roadData.base2_set = False
         global_.motor_thread.controller.base1 = 0
         global_.motor_thread.controller.base2 = 0
         global_.motor_thread.controller.base1_set = False
         global_.motor_thread.controller.base2_set = False
-    if global_.specialData.HARD_STOP:
-        global_.motor_thread.controller.HARD_STOP = 0
+
+    # print('received', global_.specialData.motor)
+    if global_.specialData.motor:
+        global_.motor_thread.controller.motor_state = False
 
     global_.motor_thread.controller.end_points = global_.specialData.end_points
     global_.motor_thread.controller.end_points_stop = global_.specialData.end_points_stop
@@ -117,6 +100,7 @@ class MBeeThread(threading.Thread):
 
         self.t = 0
         self.t_prev = 0
+        self.received_t = 0
 
         try:
             self.dev = serialstar.SerialStar(port, baudrate, 0.1)
@@ -143,13 +127,14 @@ class MBeeThread(threading.Thread):
 
         if self.dev:
             self.mbee_init_settings()
-            self.run_self_test()
-            if (self.test_local == 0) or (self.test_remote == 0):
-                self.alive = False
-            else:
-                self.logger.info('# Tests passed')
 
     def run(self):
+        self.run_self_test()
+        if (self.test_local == 0) or (self.test_remote == 0):
+            self.alive = False
+        else:
+            self.logger.info('# Tests passed')
+
         while self.alive:
             # Receive
             self.dev.run()
@@ -164,6 +149,17 @@ class MBeeThread(threading.Thread):
             if package is not None:
                 package = self.encrypt_package(package)
                 self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, package, '11')
+
+            # Check if connection is ok
+            if (self.t - self.received_t > 3):
+                global_.motor_thread.controller.est_speed = 0
+                global_.motor_thread.controller.continue_ = 0
+                global_.motor_thread.controller.reverse = 0
+                if global_.motor_thread.controller.mode != 0:
+                    global_.motor_thread.controller.soft_stop = 1
+                self.logger.warning('# MBee receiver disconnected')
+                time.sleep(1)
+
 
             # Flush dev buffers
             self.t = time.time()
@@ -214,23 +210,10 @@ class MBeeThread(threading.Thread):
 
 
     def run_self_test(self):
-        # Test 1: remote
-        self.self_test = 1
-        test_time = time.time()
+        if not self.dev:
+            return
 
-        while (time.time() - test_time) < 5:
-            self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, '0000', '10')
-            self.dev.run()
-
-            if self.self_test == 0:
-                self.test_remote = 1
-                break
-
-        if self.self_test == 1:
-            self.logger.warning('# No remote module')
-            self.test_remote = 0
-
-        # Test 2: local
+        # Test 1: local
         self.self_test = 1
         test_time = time.time()
 
@@ -246,6 +229,27 @@ class MBeeThread(threading.Thread):
             self.logger.warning('# No module')
             self.test_local = 0
 
+        # Test 1: remote
+        self.self_test = 1
+        test_time = time.time()
+
+        while True:
+            self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, '0000', '10')
+            self.dev.run()
+
+            if self.self_test == 0:
+                break
+
+            dt = time.time() - test_time
+            if (int(dt) > 5):
+                test_time = time.time()
+                self.logger.info('# Waiting for MBee receiver...')
+
+        if self.self_test == 1:
+            self.logger.warning('# No remote module')
+            self.test_remote = 0
+
+
     def frame_81_received(self, package):
         data = self.decrypt_package(package['DATA'])
         if isinstance(data, HTRData):
@@ -254,13 +258,14 @@ class MBeeThread(threading.Thread):
             # self.logger.debug('HTR data ' + str(data.__dict__))
             update_host_to_road()
             global_.lock.release()
+            self.received_t = time.time()
         if isinstance(data, HBData):
             # self.logger.debug('HB data ' + str(data.__dict__))
             global_.lock.acquire(blocking=True, timeout=1)
             global_.specialData = data
             update_special()
-            print(global_.specialData.end_points_reset)
             global_.lock.release()
+            self.received_t = time.time()
         # print("Received 81-frame.")
         # print(package)
         pass
@@ -368,7 +373,7 @@ class MBeeThread(threading.Thread):
                 package.sound_stop = hex_to_bool(data[10:12])
                 package.swap_direction = hex_to_bool(data[12:14])
                 package.accelerometer_stop = hex_to_bool(data[14:16])
-                package.HARD_STOP = hex_to_bool(data[16:18])
+                package.motor = hex_to_bool(data[16:18])
                 package.lock_buttons = hex_to_bool(data[18:20])
 
             else:
@@ -422,7 +427,7 @@ class MBeeThread(threading.Thread):
             data += bool_to_hex(package.sound_stop)
             data += bool_to_hex(package.swap_direction)
             data += bool_to_hex(package.accelerometer_stop)
-            data += bool_to_hex(package.HARD_STOP)
+            data += bool_to_hex(package.motor)
             data += bool_to_hex(package.lock_buttons)
 
         else:

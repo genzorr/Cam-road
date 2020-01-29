@@ -107,6 +107,8 @@ class Controller(FSM):
         self.t = 0.0
         self.t_prev = 0.0
 
+        self._motor_state = True
+
         self._speed = 0.0
         self._accel = 0.0
         self._braking = 0.0
@@ -150,6 +152,19 @@ class Controller(FSM):
         if value == 1:
             self._speed = 0
             self._est_speed = 0
+
+    @property
+    def motor_state(self):
+        return self._motor_state
+
+    @motor_state.setter
+    def motor_state(self, value):
+        self._motor_state = value
+        if self.motor and value and not self._motor_state:
+            self.motor.mode = self.motor.MODE_ANGLE
+        elif self.motor and not value:
+            self.motor.release()
+
 
     @property
     def accel(self):
@@ -257,12 +272,21 @@ class Controller(FSM):
         self.coordinate += self.dstep
 
 
+    def motor_off(self):
+        self.mode = -1
+
+        if self.motor_state:
+            self.changeState(self.course)
+
     def stop(self):
         self.mode = 0
         self.est_speed = 0
 
         if self.HARD_STOP:
             self.dstep = 0
+
+        if self.speed == 0:
+            self.HARD_STOP = 0
 
         # if (self.speed == 0) and not self.stopped:
         #     self.direction = 0
@@ -289,6 +313,13 @@ class Controller(FSM):
             self.soft_stop = 0
             self.changeState(self.course)
 
+        if not self.motor_state:
+            self.reverse = 0
+            self.continue_ = 0
+            self.soft_stop = 0
+            self.HARD_STOP = 0
+            self.changeState(self.motor_off)
+
 
     def stop_transitial(self):
         self.mode = 1
@@ -310,6 +341,12 @@ class Controller(FSM):
             self.direction = - self.direction
             self.reverse = 0
             self.changeState(self.course)
+
+        if not self.motor_state:
+            self.reverse = 0
+            self.continue_ = 0
+            self.changeState(self.motor_off)
+
 
 
     def course(self):
@@ -383,3 +420,8 @@ class Controller(FSM):
 
         if self.reverse:
             self.changeState(self.stop_transitial)
+
+        if not self.motor_state:
+            self.reverse = 0
+            self.continue_ = 0
+            self.changeState(self.motor_off)
