@@ -21,7 +21,7 @@ config = {'id': 1,\
         'Speed_PID_P' : 100,\
         'Speed_PID_I' : 100,\
         'StepsPerMM': 210,\
-        'TimeOut' : 1000,\
+        'TimeOut' : 2000,\
         'TempShutDown' : 100,\
         'Reverse': 0}           #   210 - 1step = 0.01m
 
@@ -107,7 +107,8 @@ class Controller(FSM):
         self.t = 0.0
         self.t_prev = 0.0
 
-        self._motor_state = True
+        self.motor_state = True
+        self.motor_released = False
 
         self._speed = 0.0
         self._accel = 0.0
@@ -153,18 +154,15 @@ class Controller(FSM):
             self._speed = 0
             self._est_speed = 0
 
-    @property
-    def motor_state(self):
-        return self._motor_state
+    # @property
+    # def motor_state(self):
+    #     return self._motor_state
 
-    @motor_state.setter
-    def motor_state(self, value):
-        self._motor_state = value
-        if self.motor and value and not self._motor_state:
-            self.motor.mode = self.motor.MODE_ANGLE
-        elif self.motor and not value:
-            self.motor.release()
-
+    # @motor_state.setter
+    # def motor_state(self, value):
+    #     self._motor_state = value
+    #     if self.motor and not value:
+    #         self.motor.release()
 
     @property
     def accel(self):
@@ -270,12 +268,26 @@ class Controller(FSM):
         self.dstep = (self.speed + speed_new) / 2 * dt * self.direction
         self.speed = speed_new
         self.coordinate += self.dstep
+        self.motor.dstep = self.dstep
 
 
     def motor_off(self):
         self.mode = -1
 
+        if not self.motor_released:
+            self.motor.setTimeout(0)
+            self.motor.release()
+            self.motor_released = True
+
         if self.motor_state:
+            self.motor_released = False
+            self.motor.setTimeout(config['TimeOut'])
+
+            t = time.time()
+            while self.motor.readError():
+                self.motor.clear_error()
+                if time.time() - t > 10:
+                    break
             self.changeState(self.course)
 
     def stop(self):
@@ -287,6 +299,14 @@ class Controller(FSM):
 
         if self.speed == 0:
             self.HARD_STOP = 0
+
+            if not self.motor_state:
+                self.reverse = 0
+                self.continue_ = 0
+                self.soft_stop = 0
+                self.HARD_STOP = 0
+                self.changeState(self.motor_off)
+
 
         # if (self.speed == 0) and not self.stopped:
         #     self.direction = 0
@@ -313,14 +333,6 @@ class Controller(FSM):
             self.soft_stop = 0
             self.changeState(self.course)
 
-        if not self.motor_state:
-            self.reverse = 0
-            self.continue_ = 0
-            self.soft_stop = 0
-            self.HARD_STOP = 0
-            self.changeState(self.motor_off)
-
-
     def stop_transitial(self):
         self.mode = 1
         self.est_speed = 0
@@ -341,13 +353,6 @@ class Controller(FSM):
             self.direction = - self.direction
             self.reverse = 0
             self.changeState(self.course)
-
-        if not self.motor_state:
-            self.reverse = 0
-            self.continue_ = 0
-            self.changeState(self.motor_off)
-
-
 
     def course(self):
         self.mode = 2
@@ -420,8 +425,3 @@ class Controller(FSM):
 
         if self.reverse:
             self.changeState(self.stop_transitial)
-
-        if not self.motor_state:
-            self.reverse = 0
-            self.continue_ = 0
-            self.changeState(self.motor_off)

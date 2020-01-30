@@ -45,7 +45,6 @@ def indicator_init():
 
 #   Indicates by given voltage
 def indicate(v, portex):
-    print(v)
     for i in [4,6,8]:
         value = (v/i - V_MIN) / (V_MAX - V_MIN)
         #print("indicate " + str(i) + " : " + str(value))

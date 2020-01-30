@@ -25,7 +25,10 @@ def update_host_to_road():
 
     else:
         if global_.hostData.direction != 0:
-            global_.motor_thread.controller.motor_state = True
+            if not global_.motor_thread.controller.motor_state:
+                global_.motor_thread.controller.direction = global_.hostData.direction
+                global_.motor_thread.controller.motor_state = True
+
             if global_.motor_thread.controller.mode == 0:
                 if global_.motor_thread.controller.direction == 0:
                     global_.motor_thread.controller.direction = global_.hostData.direction
@@ -77,9 +80,13 @@ def update_special():
         global_.motor_thread.controller.base1_set = False
         global_.motor_thread.controller.base2_set = False
 
-    # print('received', global_.specialData.motor)
     if global_.specialData.motor:
         global_.motor_thread.controller.motor_state = False
+        global_.motor_thread.controller.est_speed = 0
+        global_.motor_thread.controller.continue_ = 0
+        global_.motor_thread.controller.reverse = 0
+        if global_.motor_thread.controller.mode != 0:
+            global_.motor_thread.controller.soft_stop = 1
 
     global_.motor_thread.controller.end_points = global_.specialData.end_points
     global_.motor_thread.controller.end_points_stop = global_.specialData.end_points_stop
