@@ -17,7 +17,7 @@ def update_road_to_host():
 #----------------------------------------------------------------------------------------------#
 #   A thread used to operate with MBee.
 class MbeeThread(QThread):
-    RSSI_signal = pyqtSignal(int)
+    RSSI_signal = pyqtSignal(float)
 
     def __init__(self, port='/dev/ttySAC4', baudrate=230400):
         QThread.__init__(self)
@@ -30,7 +30,7 @@ class MbeeThread(QThread):
 
         self.t = 0
         self.t_prev = 0
-        self.RSSI = 0
+        self.RSSI = None
         self.received_t = 0
 
         self.package_host = HTRData()
@@ -84,7 +84,7 @@ class MbeeThread(QThread):
             # Check if connection is ok
             if (t - self.received_t > 3):
                 self.logger.warning('# MBee receiver disconnected')
-                self.RSSI = 0
+                self.RSSI = None
                 time.sleep(1)
 
             # Flush dev buffers

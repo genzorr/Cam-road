@@ -2,9 +2,10 @@
 
 # Form implementation generated from reading ui file 'workwidget.ui'
 #
-# Created by: PyQt5 UI code generator 5.12.2
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -139,8 +140,6 @@ class Ui_Form(object):
         self.label_2.setText(_translate("Form", "ТОРМОЖЕНИЕ"))
         self.label_3.setText(_translate("Form", "СКОРОСТЬ"))
         self.label_4.setText(_translate("Form", "ПОЛОЖЕНИЕ"))
-
-
 
 
 if __name__ == "__main__":

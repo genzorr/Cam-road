@@ -2,9 +2,10 @@
 
 # Form implementation generated from reading ui file 'settingswidget.ui'
 #
-# Created by: PyQt5 UI code generator 5.12.2
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -167,8 +168,6 @@ class Ui_SForm(object):
         self.label_2.setText(_translate("SForm", "СТОП ПО УДАРУ"))
         self.label_8.setText(_translate("SForm", "ЗАБЛОКИРОВАТЬ КНОПКИ"))
         self.label_10.setText(_translate("SForm", "ВЫКЛЮЧИТЬ ПРИЛОЖЕНИЕ"))
-
-
 
 
 if __name__ == "__main__":

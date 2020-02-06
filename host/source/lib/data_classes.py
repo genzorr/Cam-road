@@ -156,6 +156,7 @@ class HBData(QObject):
 
         self.color_red = QColor(255, 0, 0).name()
         self.color_green = QColor(0, 255, 0).name()
+        self.color_orange = QColor(255, 165, 0).name()
 
         self.slots = [  self.enable_end_points_, self.end_points_stop_, self.end_points_reverse_,\
                         self.sound_stop_, self.swap_direction_, self.stop_accelerometer_]
@@ -247,7 +248,10 @@ class HBData(QObject):
     @pyqtSlot(bool)
     def base1_(self, value):
         if value:
-            color = self.color_green
+            if self.enable_end_points_:
+                color = self.color_green
+            else:
+                color = self.color_orange
         else:
             color = self.color_red
         self.color_button(global_.window.workWidget.ui.Base1, color)
@@ -255,7 +259,11 @@ class HBData(QObject):
     @pyqtSlot(bool)
     def base2_(self, value):
         if value:
-            color = self.color_green
+            if self.enable_end_points_:
+                color = self.color_green
+            else:
+                color = self.color_orange
         else:
             color = self.color_red
         self.color_button(global_.window.workWidget.ui.Base2, color)
+        pass

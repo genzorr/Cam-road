@@ -2,9 +2,10 @@
 
 # Form implementation generated from reading ui file 'window.ui'
 #
-# Created by: PyQt5 UI code generator 5.12.2
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -16,13 +17,22 @@ class Ui_Watcher(object):
         self.centralwidget = QtWidgets.QWidget(Watcher)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 481, 31))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 481, 36))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.RSSI = QtWidgets.QLCDNumber(self.horizontalLayoutWidget)
+        self.battery_road = QtWidgets.QProgressBar(self.horizontalLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.battery_road.sizePolicy().hasHeightForWidth())
+        self.battery_road.setSizePolicy(sizePolicy)
+        self.battery_road.setProperty("value", 0)
+        self.battery_road.setObjectName("battery_road")
+        self.horizontalLayout.addWidget(self.battery_road)
+        self.RSSI = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         self.RSSI.setObjectName("RSSI")
         self.horizontalLayout.addWidget(self.RSSI)
         self.battery = QtWidgets.QProgressBar(self.horizontalLayoutWidget)
@@ -31,7 +41,7 @@ class Ui_Watcher(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.battery.sizePolicy().hasHeightForWidth())
         self.battery.setSizePolicy(sizePolicy)
-        self.battery.setProperty("value", 50)
+        self.battery.setProperty("value", 0)
         self.battery.setObjectName("battery")
         self.horizontalLayout.addWidget(self.battery)
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -80,11 +90,10 @@ class Ui_Watcher(object):
     def retranslateUi(self, Watcher):
         _translate = QtCore.QCoreApplication.translate
         Watcher.setWindowTitle(_translate("Watcher", "MainWindow"))
+        self.RSSI.setText(_translate("Watcher", "Сигнал"))
         self.workButton.setText(_translate("Watcher", "РАБОТА"))
         self.settingsButton.setText(_translate("Watcher", "НАСТРОЙКИ"))
         self.telemetryButton.setText(_translate("Watcher", "ТЕЛЕМЕТРИЯ"))
-
-
 
 
 if __name__ == "__main__":

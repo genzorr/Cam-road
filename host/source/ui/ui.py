@@ -79,6 +79,7 @@ class MainWindow(QMainWindow):
         self.telemetryWidget = QTelemetryWidget(layout=self.ui.layoutidontwant)
 
         self.workWidget.show()
+        self.ui.workButton.setStyleSheet("background-color: lightgray")
         self.settingsWidget.hide()
         self.telemetryWidget.hide()
 
@@ -95,15 +96,21 @@ class MainWindow(QMainWindow):
 
     def changeMenu(self, num):
         self.workWidget.hide()
+        self.ui.workButton.setStyleSheet("background-color: white")
         self.settingsWidget.hide()
+        self.ui.settingsButton.setStyleSheet("background-color: white")
         self.telemetryWidget.hide()
+        self.ui.telemetryButton.setStyleSheet("background-color: white")
 
         if num == 1:
             self.workWidget.show()
+            self.ui.workButton.setStyleSheet("background-color: lightgray")
         elif num == 2:
             self.settingsWidget.show()
+            self.ui.settingsButton.setStyleSheet("background-color: lightgray")
         elif num == 3:
             self.telemetryWidget.show()
+            self.ui.telemetryButton.setStyleSheet("background-color: lightgray")
         else:
             print('# Invalid menu value')
             pass

@@ -1,5 +1,5 @@
 import time
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 import logging
 
 import global_
@@ -14,6 +14,21 @@ from lib.controls import *
 #   Main thread for getting/throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
     coordinate_value_sig = pyqtSignal(float)
+    road_battery_sig = pyqtSignal(float)
+    
+    # @pyqtSlot
+    def rssi_value_slot(self, value):
+        if value is None:
+            global_.window.ui.RSSI.setStyleSheet("background-color: gray; color: black")
+        elif (value < -90):
+            global_.window.ui.RSSI.setStyleSheet("background-color: black; color: white")
+        elif (value < -80):
+            global_.window.ui.RSSI.setStyleSheet("background-color: red; color: black")
+        elif (value < -60):
+            global_.window.ui.RSSI.setStyleSheet("background-color: yellow; color: black")
+        else:
+            global_.window.ui.RSSI.setStyleSheet("background-color: green; color: black")
+
 
     def __init__(self):
         QThread.__init__(self)
@@ -21,8 +36,11 @@ class WatcherThread(QThread):
         self.logger = get_logger('Watcher')
 
         if global_.window:
-            global_.mbeeThread.RSSI_signal.connect(global_.window.ui.RSSI.display)
+            # global_.mbeeThread.RSSI_signal.connect(global_.window.ui.RSSI.display)
             self.coordinate_value_sig.connect(global_.window.workWidget.ui.Coordinate.setValue)
+            self.road_battery_sig.connect(global_.roadData.voltage_signal)
+            # global_.mbeeThread.RSSI_signal.connect(self.rssi_value_slot)
+
 
         #   Signals to slots connection
         if global_.window.workWidget:
@@ -61,7 +79,8 @@ class WatcherThread(QThread):
             t = time.time()
 
             global_.mutex.tryLock(timeout=1)
-            global_.mbeeThread.RSSI_signal.emit(global_.mbeeThread.RSSI)
+            # global_.mbeeThread.RSSI_signal.emit(global_.mbeeThread.RSSI)
+            self.rssi_value_slot(global_.mbeeThread.RSSI)
 
             global_.window.base1.emit(global_.roadData.base1_set)
             global_.window.base2.emit(global_.roadData.base2_set)
@@ -78,15 +97,7 @@ class WatcherThread(QThread):
                 self.coordinate_value_sig.emit(0)
             global_.mutex.unlock()
 
-            # self.logger.info('')
 
-            # print(global_.hostData.mode, global_.hostData.direction)
-            # print(global_.hostData.mode)
-            # print('{}\t{}'.format(global_.roadData.base1, global_.roadData.base2))
-            # print('{}\t{}\t{}'.format(global_.hostData.acceleration,
-            #                         global_.hostData.braking,
-            #                         global_.hostData.velocity))
-            # print('Watcher', t - time.time())
             time.sleep(0.05)
 
     def off(self):
