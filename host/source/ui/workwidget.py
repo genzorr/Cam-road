@@ -136,10 +136,10 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.label.setText(_translate("Form", "УСКОРЕНИЕ"))
-        self.label_2.setText(_translate("Form", "ТОРМОЖЕНИЕ"))
-        self.label_3.setText(_translate("Form", "СКОРОСТЬ"))
-        self.label_4.setText(_translate("Form", "ПОЛОЖЕНИЕ"))
+        self.label.setText(_translate("Form", "<html><head/><body><p><span style=\" font-size:14pt;\">УСКОРЕНИЕ</span></p></body></html>"))
+        self.label_2.setText(_translate("Form", "<html><head/><body><p><span style=\" font-size:14pt;\">ТОРМОЖЕНИЕ</span></p></body></html>"))
+        self.label_3.setText(_translate("Form", "<html><head/><body><p><span style=\" font-size:14pt;\">СКОРОСТЬ</span></p></body></html>"))
+        self.label_4.setText(_translate("Form", "<html><head/><body><p><span style=\" font-size:14pt;\">ПОЛОЖЕНИЕ</span></p></body></html>"))
 
 
 if __name__ == "__main__":

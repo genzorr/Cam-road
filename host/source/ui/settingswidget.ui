@@ -23,6 +23,41 @@
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>20</number>
+    </property>
+    <item>
+     <widget class="QWidget" name="widget_6" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>10</y>
+         <width>400</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;КОНЕЧНЫЕ ТОЧКИ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="scaledContents">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </widget>
+    </item>
     <item>
      <widget class="QWidget" name="widget" native="true">
       <property name="sizePolicy">
@@ -41,13 +76,19 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
-         <width>30</width>
-         <height>30</height>
+         <y>0</y>
+         <width>50</width>
+         <height>50</height>
         </rect>
        </property>
        <property name="text">
         <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -56,14 +97,17 @@
       <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>15</y>
+         <x>70</x>
+         <y>10</y>
          <width>400</width>
-         <height>20</height>
+         <height>30</height>
         </rect>
        </property>
        <property name="text">
-        <string>ВКЛ/ВЫКЛ КОНЕЧНЫЕ ТОЧКИ</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;ВКЛ/ВЫКЛ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="scaledContents">
+        <bool>false</bool>
        </property>
       </widget>
      </widget>
@@ -86,9 +130,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
-         <width>30</width>
-         <height>30</height>
+         <y>0</y>
+         <width>50</width>
+         <height>50</height>
         </rect>
        </property>
        <property name="text">
@@ -101,23 +145,23 @@
       <widget class="QLabel" name="label_3">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>15</y>
+         <x>70</x>
+         <y>10</y>
          <width>181</width>
-         <height>20</height>
+         <height>31</height>
         </rect>
        </property>
        <property name="text">
-        <string>ОСТАНОВ В КОН. ТОЧКАХ</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;ОСТАНОВ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
       <widget class="QToolButton" name="EndPointsReverse">
        <property name="geometry">
         <rect>
          <x>240</x>
-         <y>10</y>
-         <width>30</width>
-         <height>30</height>
+         <y>0</y>
+         <width>50</width>
+         <height>50</height>
         </rect>
        </property>
        <property name="text">
@@ -130,17 +174,33 @@
       <widget class="QLabel" name="label_6">
        <property name="geometry">
         <rect>
-         <x>280</x>
-         <y>15</y>
+         <x>300</x>
+         <y>10</y>
          <width>181</width>
-         <height>20</height>
+         <height>30</height>
         </rect>
        </property>
        <property name="text">
-        <string>РЕВЕРС В КОН. ТОЧКАХ</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;РЕВЕРС&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Maximum</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
     </item>
     <item>
      <widget class="QWidget" name="widget_5" native="true">
@@ -160,9 +220,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
-         <width>30</width>
-         <height>30</height>
+         <y>0</y>
+         <width>50</width>
+         <height>50</height>
         </rect>
        </property>
        <property name="text">
@@ -175,14 +235,14 @@
       <widget class="QLabel" name="label_5">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>15</y>
+         <x>70</x>
+         <y>10</y>
          <width>400</width>
-         <height>20</height>
+         <height>30</height>
         </rect>
        </property>
        <property name="text">
-        <string>СТОП ПО УЗ ДАТЧИКУ</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;СТОП ПО УЗ ДАТЧИКУ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>
@@ -205,9 +265,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
-         <width>30</width>
-         <height>30</height>
+         <y>0</y>
+         <width>50</width>
+         <height>50</height>
         </rect>
        </property>
        <property name="text">
@@ -220,14 +280,14 @@
       <widget class="QLabel" name="label_4">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>15</y>
+         <x>70</x>
+         <y>10</y>
          <width>400</width>
-         <height>20</height>
+         <height>30</height>
         </rect>
        </property>
        <property name="text">
-        <string>СМЕНА НАПРАВЛЕНИЯ</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;СМЕНА НАПРАВЛЕНИЯ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>
@@ -250,9 +310,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
-         <width>30</width>
-         <height>30</height>
+         <y>0</y>
+         <width>50</width>
+         <height>50</height>
         </rect>
        </property>
        <property name="text">
@@ -265,14 +325,14 @@
       <widget class="QLabel" name="label_2">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>15</y>
+         <x>70</x>
+         <y>10</y>
          <width>400</width>
-         <height>20</height>
+         <height>30</height>
         </rect>
        </property>
        <property name="text">
-        <string>СТОП ПО УДАРУ</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;СТОП ПО УДАРУ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>
@@ -295,9 +355,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
-         <width>30</width>
-         <height>30</height>
+         <y>0</y>
+         <width>50</width>
+         <height>50</height>
         </rect>
        </property>
        <property name="text">
@@ -310,14 +370,14 @@
       <widget class="QLabel" name="label_8">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>15</y>
+         <x>70</x>
+         <y>10</y>
          <width>400</width>
-         <height>20</height>
+         <height>30</height>
         </rect>
        </property>
        <property name="text">
-        <string>ЗАБЛОКИРОВАТЬ КНОПКИ</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;ЗАБЛОКИРОВАТЬ КНОПКИ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>
@@ -352,9 +412,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
-         <width>30</width>
-         <height>30</height>
+         <y>0</y>
+         <width>50</width>
+         <height>50</height>
         </rect>
        </property>
        <property name="text">
@@ -367,14 +427,14 @@
       <widget class="QLabel" name="label_10">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>15</y>
+         <x>70</x>
+         <y>10</y>
          <width>400</width>
-         <height>20</height>
+         <height>30</height>
         </rect>
        </property>
        <property name="text">
-        <string>ВЫКЛЮЧИТЬ ПРИЛОЖЕНИЕ</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;ВЫКЛЮЧИТЬ ПРИЛОЖЕНИЕ&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>

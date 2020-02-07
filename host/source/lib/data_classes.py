@@ -80,6 +80,7 @@ class RTHData(QObject):
         self.base2 = 0.0
         self.base1_set = False
         self.base2_set = False
+        self.bases_init_swap = False
 
         self.direction = -1
 

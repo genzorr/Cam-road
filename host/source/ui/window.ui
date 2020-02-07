@@ -20,7 +20,7 @@
       <x>0</x>
       <y>0</y>
       <width>481</width>
-      <height>36</height>
+      <height>41</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -42,6 +42,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="RSSI">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 87 10pt &quot;Droid Sans [MONO]&quot;;</string>
+       </property>
        <property name="text">
         <string>Сигнал</string>
        </property>
@@ -77,9 +83,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>30</y>
-      <width>481</width>
-      <height>61</height>
+      <y>40</y>
+      <width>479</width>
+      <height>51</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -97,6 +103,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font: 75 14pt &quot;Droid Sans [MONO]&quot;;</string>
+       </property>
        <property name="text">
         <string>РАБОТА</string>
        </property>
@@ -110,8 +119,11 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font: 75 14pt &quot;Droid Sans [MONO]&quot;;</string>
+       </property>
        <property name="text">
-        <string>НАСТРОЙКИ</string>
+        <string>НАСТРОЙКИ 1</string>
        </property>
       </widget>
      </item>
@@ -123,8 +135,11 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font: 75 14pt &quot;Droid Sans [MONO]&quot;;</string>
+       </property>
        <property name="text">
-        <string>ТЕЛЕМЕТРИЯ</string>
+        <string>НАСТРОЙКИ 2</string>
        </property>
       </widget>
      </item>

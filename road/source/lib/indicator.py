@@ -52,12 +52,14 @@ def indicate(v, portex):
             break
         value = 0
 
+    res = value
     value = round(value*10) + 1
     if (value >= len(BAT) - 1):
         value = len(BAT) - 1
     elif value < 0:
         value = 0
     [i.setword(BAT[value]) for i in portex]
+    return res*100
     #portex.setword(BAT[round(value)])
 
 def indicator_off(portex):

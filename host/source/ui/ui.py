@@ -32,6 +32,12 @@ class QWorkWidget(QQWidget):
 
         self.ui.Base1.setCheckable(False)
         self.ui.Base2.setCheckable(False)
+
+        self.ui.Base1.setToolButtonStyle(Qt.ToolButtonTextOnly)
+        self.ui.Base2.setToolButtonStyle(Qt.ToolButtonTextOnly)
+
+        self.ui.Base1.setText('1')
+        self.ui.Base2.setText('2')
 #----------------------------------------------------------------------------------------------#
 
 class QSettingsWidget(QQWidget):
@@ -40,6 +46,8 @@ class QSettingsWidget(QQWidget):
 
         self.buttons = [self.ui.EnableEndPoints, self.ui.EndPointsStop, self.ui.EndPointsReverse,\
                         self.ui.SoundStop, self.ui.SwapDirection, self.ui.StopAccelerometer]
+
+        self.ui.verticalLayout.setAlignment(Qt.AlignTop)
 
     # def setChecked(self):
     #     sender = self.sender()
@@ -74,20 +82,27 @@ class MainWindow(QMainWindow):
         self.ui = Ui_Watcher()
         self.ui.setupUi(self)
         self.setWindowTitle('Watcher')
-        self.showFullScreen()
 
         self.workWidget = QWorkWidget(layout=self.ui.layoutidontwant)
         self.settingsWidget = QSettingsWidget(layout=self.ui.layoutidontwant)
         self.telemetryWidget = QTelemetryWidget(layout=self.ui.layoutidontwant)
 
-        # self.workWidget.show()
-        # self.ui.workButton.setStyleSheet("background-color: lightgray")
-        # self.settingsWidget.hide()
-        # self.telemetryWidget.hide()
-
-        self.workWidget.hide()
+        self.workWidget.show()
+        self.ui.workButton.setStyleSheet("background-color:rgb(255,140,0)")
         self.settingsWidget.hide()
-        self.telemetryWidget.show()
+        self.telemetryWidget.hide()
+
+        self.ui.horizontalLayout.removeWidget(self.ui.battery)
+        self.ui.battery.deleteLater()
+        self.ui.battery = None
+
+        self.settingsWidget.ui.verticalLayout.removeWidget(self.settingsWidget.ui.widget_5)
+        self.settingsWidget.ui.widget_5.deleteLater()
+        self.settingsWidget.ui.widget_5 = None
+
+        # self.workWidget.hide()
+        # self.settingsWidget.hide()
+        # self.telemetryWidget.show()
 
         #   Signals to use menu buttons and shutdown button.
         # self.ui.workButton.clicked.connect(self.buttonClicked)
@@ -99,6 +114,7 @@ class MainWindow(QMainWindow):
         self.base1.connect(global_.specialData.base1_)
         self.base2.connect(global_.specialData.base2_)
 
+        self.showFullScreen()
 
     def changeMenu(self, num):
         self.workWidget.hide()
@@ -108,15 +124,16 @@ class MainWindow(QMainWindow):
         self.telemetryWidget.hide()
         self.ui.telemetryButton.setStyleSheet("background-color: white")
 
+# setStyleSheet("QPushButton {background-color: QColor (255,140,0)}")
         if num == 1:
             self.workWidget.show()
-            self.ui.workButton.setStyleSheet("background-color: lightgray")
+            self.ui.workButton.setStyleSheet("background-color:rgb(255,140,0)")
         elif num == 2:
             self.settingsWidget.show()
-            self.ui.settingsButton.setStyleSheet("background-color: lightgray")
+            self.ui.settingsButton.setStyleSheet("background-color:rgb(255,140,0)")
         elif num == 3:
             self.telemetryWidget.show()
-            self.ui.telemetryButton.setStyleSheet("background-color: lightgray")
+            self.ui.telemetryButton.setStyleSheet("background-color:rgb(255,140,0)")
         else:
             print('# Invalid menu value')
             pass

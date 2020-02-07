@@ -17,6 +17,7 @@ def update_host_to_road():
 
 
     if global_.hostData.mode == 0:
+        global_.motor_thread.controller.clean_motor_error()
         global_.motor_thread.controller.est_speed = 0
         global_.motor_thread.controller.continue_ = 0
         global_.motor_thread.controller.reverse = 0
@@ -57,9 +58,6 @@ def update_host_to_road():
             global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
             global_.roadData.base2_set = True
 
-    # Signal lost behavior
-    global_.motor_thread.signal_behavior = global_.specialData.signal_behavior
-
     return
 
 
@@ -82,6 +80,7 @@ def update_special():
         global_.motor_thread.controller.base2 = 0
         global_.motor_thread.controller.base1_set = False
         global_.motor_thread.controller.base2_set = False
+        global_.roadData.bases_init_swap = False
 
     if global_.specialData.motor:
         global_.motor_thread.controller.motor_state = False
@@ -94,6 +93,9 @@ def update_special():
     global_.motor_thread.controller.end_points = global_.specialData.end_points
     global_.motor_thread.controller.end_points_stop = global_.specialData.end_points_stop
     global_.motor_thread.controller.end_points_reverse = global_.specialData.end_points_reverse
+
+    # Signal lost behavior
+    global_.motor_thread.signal_behavior = int(global_.specialData.signal_behavior)
 
 
 class MBeeThread(threading.Thread):
@@ -146,6 +148,18 @@ class MBeeThread(threading.Thread):
             self.logger.info('# Tests passed')
 
         while self.alive:
+            # Check if connection is ok
+            if (self.t - self.received_t > 3):
+                if global_.motor_thread.controller.signal_lost_sig_set == False:
+                    global_.motor_thread.controller.signal_lost_sig = True
+                else:
+                    global_.motor_thread.controller.signal_lost_sig = False
+                self.logger.warning('# MBee receiver disconnected')
+                time.sleep(1)
+            else:
+                global_.motor_thread.controller.signal_lost_sig = False
+                global_.motor_thread.controller.signal_lost_sig_set = False
+            
             # Receive
             self.dev.run()
 
@@ -159,12 +173,6 @@ class MBeeThread(threading.Thread):
             if package is not None:
                 package = self.encrypt_package(package)
                 self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, package, '11')
-
-            # Check if connection is ok
-            if (self.t - self.received_t > 3):
-                self.logger.warning('# MBee receiver disconnected')
-                time.sleep(1)
-
 
             # Flush dev buffers
             self.t = time.time()
@@ -358,13 +366,14 @@ class MBeeThread(threading.Thread):
                 package.mode = hex_to_int(data[0:8])
                 package.coordinate = hex_to_float(data[8:16])
                 package.voltage = hex_to_float(data[16:24])
-                package.current = hex_to_float(data[24:32])
-                package.temperature = hex_to_float(data[32:40])
-                package.base1 = hex_to_float(data[40:48])
-                package.base2 = hex_to_float(data[48:56])
-                package.base1_set = hex_to_bool(data[56:58])
-                package.base2_set = hex_to_bool(data[58:60])
-                package.direction = hex_to_int(data[60:68])
+                # package.current = hex_to_float(data[24:32])
+                package.temperature = hex_to_float(data[24:32])
+                package.base1 = hex_to_float(data[32:40])
+                package.base2 = hex_to_float(data[40:48])
+                package.base1_set = hex_to_bool(data[48:50])
+                package.base2_set = hex_to_bool(data[50:52])
+                package.direction = hex_to_int(data[52:60])
+                package.bases_init_swap = hex_to_bool(data[60:62])
 
             elif package_type == 3:
                 package = HBData()
@@ -416,13 +425,14 @@ class MBeeThread(threading.Thread):
             data += int_to_hex(package.mode)
             data += float_to_hex(package.coordinate)
             data += float_to_hex(package.voltage)
-            data += float_to_hex(package.current)
+            # data += float_to_hex(package.current)
             data += float_to_hex(package.temperature)
             data += float_to_hex(package.base1)
             data += float_to_hex(package.base2)
             data += bool_to_hex(package.base1_set)
             data += bool_to_hex(package.base2_set)
             data += int_to_hex(package.direction)
+            data += bool_to_hex(package.bases_init_swap)
 
         elif package.type == 3:
             data += bool_to_hex(package.soft_stop)

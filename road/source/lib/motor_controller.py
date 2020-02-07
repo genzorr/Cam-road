@@ -14,7 +14,7 @@ config = {'id': 1,\
         'Mode': 'Angle',\
         'PWM_Limit' : 900,\
         'PWM_inc_limit' : 2,\
-        'I_limit': 5.0,\
+        'I_limit': 10.0,\
         'V_min': 12.0,\
         'Angle_PID_P' : 50,\
         'Angle_PID_I' : 1,\
@@ -136,7 +136,20 @@ class Controller(FSM):
         self.base1_set = False
         self.base2_set = False
 
-        self.signal_behavior = 1
+        self.signal_behavior = 0
+        self.signal_lost_sig = False
+        self.signal_lost_sig_set = False
+
+    # @property
+    # def signal_behavior(self):
+    #     return self._signal_behavior
+    
+    # @signal_behavior.setter
+    # def signal_behavior(self, value):
+    #     self._signal_behavior = value
+    #     # caller = eval('sys._getframe({}).f_code.co_name'.format(2))
+    #     # print(caller, value)
+    #     print('here')
 
 
     def off(self):
@@ -245,6 +258,7 @@ class Controller(FSM):
         if (value < self._base1):
             self._base2 = self._base1
             self._base1 = value
+            global_.roadData.bases_init_swap = True
         self.base2_set = True
     #--------------------------------#
 
@@ -256,7 +270,7 @@ class Controller(FSM):
             tmp = "-"
         else:
             tmp = " "
-        return (self.t, self.speed, self.est_speed, self.base1, self.base2, self.mode, self.coordinate, tmp, self.HARD_STOP)
+        return (self.t, self.speed, self.est_speed, self.base1, self.base2, self.mode, self.coordinate, tmp, self.motor.readError())
 
     def update_coordinate(self, speed_to):
         dt = self.t - self.t_prev
@@ -280,6 +294,14 @@ class Controller(FSM):
             global_.motor_thread.controller.soft_stop = 1
 
 
+    def clean_motor_error(self):
+        t = time.time()
+        while self.motor.readError():
+            self.motor.clear_error()
+            if time.time() - t > 5:
+                break
+
+
     def motor_off(self):
         self.mode = -1
 
@@ -292,70 +314,69 @@ class Controller(FSM):
             self.motor_released = False
             self.motor.setTimeout(config['TimeOut'])
 
-            t = time.time()
-            while self.motor.readError():
-                self.motor.clear_error()
-                if time.time() - t > 10:
-                    break
+            self.clean_motor_error()
             self.changeState(self.course)
+
+        if self.signal_lost_sig:
+            self.motor_released = False
+            self.motor.setTimeout(config['TimeOut'])
+
+            self.clean_motor_error()
+            self.changeState(self.signal_lost)
 
 
     def signal_lost(self):
         self.mode = -2
+        self.est_speed = 20
+        self.signal_behavior = global_.specialData.signal_behavior
 
-        if self.signal_behavior == 1:
+        s2_b1 = (self.signal_behavior == 2) and not global_.roadData.bases_init_swap        # goto 1
+        s2_b2 = (self.signal_behavior == 2) and global_.roadData.bases_init_swap            # goto 2
+        s3_b1 = (self.signal_behavior == 3) and not global_.roadData.bases_init_swap        # goto 2
+        s3_b2 = (self.signal_behavior == 3) and global_.roadData.bases_init_swap            # goto 1
+
+        if self.signal_behavior == 1 or (s2_b1 and not self.base1_set) or (s2_b2 and not self.base2_set) or (s3_b2 and not self.base1_set) or (s3_b1 and not self.base2_set):
             self.goto_stop()
+            self.signal_lost_sig = False
+            self.signal_lost_sig_set = True
             self.changeState(self.stop)
 
-        elif self.signal_behavior == 1 or self.signal_behavior == 2:
-            base = self.base1 if (self.signal_behavior == 1) else self.base2
+        elif self.signal_behavior == 2 or self.signal_behavior == 3:
+            # base = self.base1 if (self.signal_behavior == 2) else self.base2
+            if s2_b1 or s3_b2:
+                base = self.base1
+            else:
+                base = self.base2
+            print(base)
+
             l = self.coordinate - base
 
             sign = l * self.direction
 
-            if sign >= 0:
+            if sign > 0:
                 self.update_coordinate(speed_to=0)
                 if (self.speed == 0.0):
                     self.direction = - self.direction
-            else:
-                dist_to_base = abs(l)
-                braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
-                braking_dist = abs(braking_dist)
+            elif sign < 0:
+                print('here')
+                if self.speed != 0:
+                    dist_to_base = abs(l)
+                    braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
+                    braking_dist = abs(braking_dist)
 
-                if (dist_to_base <= braking_dist-1):
-                    self.goto_stop()
-                    self.changeState(self.stop)
+                    if (dist_to_base <= braking_dist+2):
+                        self.goto_stop()
+                        self.signal_lost_sig = False
+                        self.signal_lost_sig_set = True
+                        self.changeState(self.stop)
+
+                self.update_coordinate(speed_to=self.est_speed)
+            else:
+                self.direction = -1 if (l > 0) else +1
+                self.update_coordinate(speed_to=self.est_speed)
 
         else:
-            self.logger.error('No such value for signal_behavior:', global_.motor_thread.signal_behavior)
-
-
-
-
-        if global_.motor_thread.signal_behavior == 1:
-        elif global_.motor_thread.signal_behavior == 2:
-            dist_to_base = abs(self.base1 - self.coordinate)
-            braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
-            braking_dist = abs(braking_dist)
-
-            if (dist_to_base <= braking_dist-1):
-                global_.motor_thread.controller.est_speed = 0
-                global_.motor_thread.controller.continue_ = 0
-                global_.motor_thread.controller.reverse = 0
-                if global_.motor_thread.controller.mode != 0:
-                    global_.motor_thread.controller.soft_stop = 1
-
-        elif global_.motor_thread.signal_behavior == 3:
-            dist_to_base = abs(self.base2 - self.coordinate)
-            braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
-            braking_dist = abs(braking_dist)
-
-            if (dist_to_base <= braking_dist-1):
-                global_.motor_thread.controller.est_speed = 0
-                global_.motor_thread.controller.continue_ = 0
-                global_.motor_thread.controller.reverse = 0
-                if global_.motor_thread.controller.mode != 0:
-                    global_.motor_thread.controller.soft_stop = 1
+            self.logger.error('No such value for signal_behavior: {}'.format(self.signal_behavior))
 
 
     def stop(self):
@@ -401,6 +422,13 @@ class Controller(FSM):
             self.soft_stop = 0
             self.changeState(self.course)
 
+        if self.signal_lost_sig:
+            self.continue_ = 0
+            self.HARD_STOP = 0
+            self.soft_stop = 0
+            self.changeState(self.signal_lost)
+
+
     def stop_transitial(self):
         self.mode = 1
         self.est_speed = 0
@@ -421,6 +449,12 @@ class Controller(FSM):
             self.direction = - self.direction
             self.reverse = 0
             self.changeState(self.course)
+
+        if self.signal_lost_sig:
+            self.reverse = 0
+            self.continue_ = 0
+            self.changeState(self.signal_lost)
+
 
     def course(self):
         self.mode = 2
@@ -493,3 +527,6 @@ class Controller(FSM):
 
         if self.reverse:
             self.changeState(self.stop_transitial)
+
+        if self.signal_lost_sig:
+            self.changeState(self.signal_lost)

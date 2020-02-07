@@ -1,7 +1,7 @@
 {
-    "ACCEL_MAX" : 20,
-    "BRAKING_MAX" : 20,
-    "VELO_MAX" : 60,
+    "ACCEL_MAX" : 50,
+    "BRAKING_MAX" : 50,
+    "VELO_MAX" : 90,
     "TX_ADDR_HOST" : "0001",
     "TX_ADDR_ROAD" : "0002",
     "FREQUENCY" : 901000000,
