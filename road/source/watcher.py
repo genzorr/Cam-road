@@ -67,7 +67,11 @@ class MotorThread(threading.Thread):
     def run(self):
         while self.alive:
             if self.portex:
-                indicate(self.controller.motor.readV(), self.portex)
+                v = self.controller.motor.readV()
+                indicate(v, self.portex)
+                global_.lock.acquire(blocking=True, timeout=1)
+                global_.mbee_thread.mbee_data.voltage = v
+                global_.lock.release()
 
             self.controller.t_prev = self.controller.t
             self.controller.t = time.time() - self.controller.starttime

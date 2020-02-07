@@ -57,6 +57,9 @@ def update_host_to_road():
             global_.motor_thread.controller.base2 = global_.motor_thread.controller.coordinate
             global_.roadData.base2_set = True
 
+    # Signal lost behavior
+    global_.motor_thread.signal_behavior = global_.specialData.signal_behavior
+
     return
 
 
@@ -159,11 +162,6 @@ class MBeeThread(threading.Thread):
 
             # Check if connection is ok
             if (self.t - self.received_t > 3):
-                global_.motor_thread.controller.est_speed = 0
-                global_.motor_thread.controller.continue_ = 0
-                global_.motor_thread.controller.reverse = 0
-                if global_.motor_thread.controller.mode != 0:
-                    global_.motor_thread.controller.soft_stop = 1
                 self.logger.warning('# MBee receiver disconnected')
                 time.sleep(1)
 
@@ -382,6 +380,7 @@ class MBeeThread(threading.Thread):
                 package.accelerometer_stop = hex_to_bool(data[14:16])
                 package.motor = hex_to_bool(data[16:18])
                 package.lock_buttons = hex_to_bool(data[18:20])
+                package.signal_behavior = hex_to_int(data[20:28])
 
             else:
                 self.logger.warning('error: no such package')
@@ -436,6 +435,7 @@ class MBeeThread(threading.Thread):
             data += bool_to_hex(package.accelerometer_stop)
             data += bool_to_hex(package.motor)
             data += bool_to_hex(package.lock_buttons)
+            data += int_to_hex(package.signal_behavior)
 
         else:
             return None

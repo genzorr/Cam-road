@@ -48,6 +48,7 @@ class HBData():
         self.accelerometer_stop = False
         self.motor = False
         self.lock_buttons = False
+        self.signal_behavior = 1
 
 #----------------------------------------------------------------------------------------------#
 class Mbee_data:

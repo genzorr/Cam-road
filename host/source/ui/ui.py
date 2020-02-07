@@ -60,6 +60,8 @@ class QTelemetryWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_TForm(), title=None, layout=None):
         QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
 
+        self.ui.layout.setAlignment(Qt.AlignTop)
+
 #----------------------------------------------------------------------------------------------#
 
 class MainWindow(QMainWindow):
@@ -78,10 +80,14 @@ class MainWindow(QMainWindow):
         self.settingsWidget = QSettingsWidget(layout=self.ui.layoutidontwant)
         self.telemetryWidget = QTelemetryWidget(layout=self.ui.layoutidontwant)
 
-        self.workWidget.show()
-        self.ui.workButton.setStyleSheet("background-color: lightgray")
+        # self.workWidget.show()
+        # self.ui.workButton.setStyleSheet("background-color: lightgray")
+        # self.settingsWidget.hide()
+        # self.telemetryWidget.hide()
+
+        self.workWidget.hide()
         self.settingsWidget.hide()
-        self.telemetryWidget.hide()
+        self.telemetryWidget.show()
 
         #   Signals to use menu buttons and shutdown button.
         # self.ui.workButton.clicked.connect(self.buttonClicked)

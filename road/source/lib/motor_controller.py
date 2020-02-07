@@ -136,6 +136,8 @@ class Controller(FSM):
         self.base1_set = False
         self.base2_set = False
 
+        self.signal_behavior = 1
+
 
     def off(self):
         if self.motor:
@@ -289,6 +291,40 @@ class Controller(FSM):
                 if time.time() - t > 10:
                     break
             self.changeState(self.course)
+
+    def signal_lost(self):
+        if global_.motor_thread.signal_behavior == 1:
+            global_.motor_thread.controller.est_speed = 0
+            global_.motor_thread.controller.continue_ = 0
+            global_.motor_thread.controller.reverse = 0
+            if global_.motor_thread.controller.mode != 0:
+                global_.motor_thread.controller.soft_stop = 1
+        elif global_.motor_thread.signal_behavior == 2:
+            dist_to_base = abs(self.base1 - self.coordinate)
+            braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
+            braking_dist = abs(braking_dist)
+
+            if (dist_to_base <= braking_dist-1):
+                global_.motor_thread.controller.est_speed = 0
+                global_.motor_thread.controller.continue_ = 0
+                global_.motor_thread.controller.reverse = 0
+                if global_.motor_thread.controller.mode != 0:
+                    global_.motor_thread.controller.soft_stop = 1
+
+        elif global_.motor_thread.signal_behavior == 3:
+            dist_to_base = abs(self.base2 - self.coordinate)
+            braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
+            braking_dist = abs(braking_dist)
+
+            if (dist_to_base <= braking_dist-1):
+                global_.motor_thread.controller.est_speed = 0
+                global_.motor_thread.controller.continue_ = 0
+                global_.motor_thread.controller.reverse = 0
+                if global_.motor_thread.controller.mode != 0:
+                    global_.motor_thread.controller.soft_stop = 1
+        else:
+            self.logger.error('No such value for signal_behavior:', global_.motor_thread.signal_behavior)
+
 
     def stop(self):
         self.mode = 0

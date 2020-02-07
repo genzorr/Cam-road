@@ -314,6 +314,7 @@ class MbeeThread(QThread):
                 package.accelerometer_stop = hex_to_bool(data[14:16])
                 package.motor = hex_to_bool(data[16:18])
                 package.lock_buttons = hex_to_bool(data[18:20])
+                package.signal_behavior = hex_to_int(data[20:28])
 
             else:
                 self.logger.warning('error: no such package')
@@ -371,6 +372,7 @@ class MbeeThread(QThread):
             data += bool_to_hex(package.accelerometer_stop)
             data += bool_to_hex(package.motor)
             data += bool_to_hex(package.lock_buttons)
+            data += int_to_hex(package.signal_behavior)
 
         else:
             return None

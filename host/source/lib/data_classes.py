@@ -153,6 +153,7 @@ class HBData(QObject):
         self.accelerometer_stop = False
         self.motor = False
         self.lock_buttons = False
+        self.signal_behavior = 1
 
         self.color_red = QColor(255, 0, 0).name()
         self.color_green = QColor(0, 255, 0).name()
@@ -244,6 +245,25 @@ class HBData(QObject):
         if not self.lock_buttons:
             self.accelerometer_stop = value
             self.set_color(self.sender(), value)
+
+    @pyqtSlot(bool)
+    def sig_stop_(self, value):
+        if value:
+            self.signal_behavior = 1
+        self.set_color(self.sender(), value)
+        
+    @pyqtSlot(bool)
+    def sig_ret1_(self, value):
+        if value:
+            self.signal_behavior = 2
+        self.set_color(self.sender(), value)
+
+    @pyqtSlot(bool)
+    def sig_ret2_(self, value):
+        if value:
+            self.signal_behavior = 3
+        self.set_color(self.sender(), value)
+
 
     @pyqtSlot(bool)
     def base1_(self, value):

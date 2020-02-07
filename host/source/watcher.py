@@ -74,6 +74,18 @@ class WatcherThread(QThread):
             global_.window.settingsWidget.ui.SwapDirection.toggled.emit(False)
             global_.window.settingsWidget.ui.StopAccelerometer.toggled.emit(False)
 
+
+            global_.window.telemetryWidget.ui.sig_stop.setAutoExclusive(True)
+            global_.window.telemetryWidget.ui.sig_ret1.setAutoExclusive(True)
+            global_.window.telemetryWidget.ui.sig_ret2.setAutoExclusive(True)
+            global_.window.telemetryWidget.ui.sig_stop.toggled.connect(global_.specialData.sig_stop_)
+            global_.window.telemetryWidget.ui.sig_ret1.toggled.connect(global_.specialData.sig_ret1_)
+            global_.window.telemetryWidget.ui.sig_ret2.toggled.connect(global_.specialData.sig_ret2_)
+
+            global_.window.telemetryWidget.ui.sig_stop.setChecked(True)
+            global_.window.telemetryWidget.ui.sig_ret1.toggled.emit(False)
+            global_.window.telemetryWidget.ui.sig_ret2.toggled.emit(False)
+
     def run(self):
         while self.alive:
             t = time.time()
@@ -96,7 +108,6 @@ class WatcherThread(QThread):
             else:
                 self.coordinate_value_sig.emit(0)
             global_.mutex.unlock()
-
 
             time.sleep(0.05)
 
