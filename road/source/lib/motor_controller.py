@@ -272,6 +272,13 @@ class Controller(FSM):
         self.coordinate += self.dstep
         self.motor.dstep = self.dstep
 
+    def goto_stop(self):
+        global_.motor_thread.controller.est_speed = 0
+        global_.motor_thread.controller.continue_ = 0
+        global_.motor_thread.controller.reverse = 0
+        if global_.motor_thread.controller.mode != 0:
+            global_.motor_thread.controller.soft_stop = 1
+
 
     def motor_off(self):
         self.mode = -1
@@ -292,13 +299,40 @@ class Controller(FSM):
                     break
             self.changeState(self.course)
 
+
     def signal_lost(self):
+        self.mode = -2
+
+        if self.signal_behavior == 1:
+            self.goto_stop()
+            self.changeState(self.stop)
+
+        elif self.signal_behavior == 1 or self.signal_behavior == 2:
+            base = self.base1 if (self.signal_behavior == 1) else self.base2
+            l = self.coordinate - base
+
+            sign = l * self.direction
+
+            if sign >= 0:
+                self.update_coordinate(speed_to=0)
+                if (self.speed == 0.0):
+                    self.direction = - self.direction
+            else:
+                dist_to_base = abs(l)
+                braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
+                braking_dist = abs(braking_dist)
+
+                if (dist_to_base <= braking_dist-1):
+                    self.goto_stop()
+                    self.changeState(self.stop)
+
+        else:
+            self.logger.error('No such value for signal_behavior:', global_.motor_thread.signal_behavior)
+
+
+
+
         if global_.motor_thread.signal_behavior == 1:
-            global_.motor_thread.controller.est_speed = 0
-            global_.motor_thread.controller.continue_ = 0
-            global_.motor_thread.controller.reverse = 0
-            if global_.motor_thread.controller.mode != 0:
-                global_.motor_thread.controller.soft_stop = 1
         elif global_.motor_thread.signal_behavior == 2:
             dist_to_base = abs(self.base1 - self.coordinate)
             braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
@@ -322,8 +356,6 @@ class Controller(FSM):
                 global_.motor_thread.controller.reverse = 0
                 if global_.motor_thread.controller.mode != 0:
                     global_.motor_thread.controller.soft_stop = 1
-        else:
-            self.logger.error('No such value for signal_behavior:', global_.motor_thread.signal_behavior)
 
 
     def stop(self):
