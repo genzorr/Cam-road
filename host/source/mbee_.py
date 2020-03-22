@@ -1,29 +1,33 @@
-import time, struct, binascii
+import binascii
+import struct
+import time
+
 from PyQt5.QtCore import QThread, pyqtSignal
-import logging
-import copy
 
 import global_
-from global_ import get_logger
 import serialstar
-from lib.data_classes import *
+from global_ import get_logger
+from lib.data_classes import HTRData, RTHData, HBData
 
+
+# Checks some global parameters
 def update_road_to_host():
-    if (not global_.roadData.base1_set and not global_.roadData.base2_set):
+    if not global_.roadData.base1_set and not global_.roadData.base2_set:
         global_.specialData.end_points_reset = False
     if global_.roadData.mode == -1:
         global_.specialData.motor = False
 
-#----------------------------------------------------------------------------------------------#
-#   A thread used to operate with MBee.
-class MbeeThread(QThread):
-    RSSI_signal = pyqtSignal(float)
+
+# MBee radio communication
+class MBeeThread(QThread):
+    RSSI_signal = pyqtSignal(float)     # This signal is used to update signal value in application
 
     def __init__(self, port='/dev/ttySAC4', baudrate=230400):
         QThread.__init__(self)
-        self.alive = True
-        self.logger = get_logger('MBee')
+        self.alive = True   # Shows that thread is alive
+        self.logger = get_logger('MBee')    # Thread logger
 
+        # These values are used to provide self-testing
         self.self_test = 0
         self.test_local = 1
         self.test_remote = 1
@@ -38,18 +42,12 @@ class MbeeThread(QThread):
         global_.newHTR = False
         self.special_t = 0
 
+        # Initialization
         try:
             self.dev = serialstar.SerialStar(port, baudrate, 0.2)
-        except BaseException:
-            self.dev = None
-            self.alive = False
-            self.logger.warning('# MBee init failed')
-            return
+            self.logger.info('# MBee OK')
 
-        self.logger.info('# MBee OK')
-
-        if self.dev:
-            #  Callback-functions registering.
+            # Callback-functions registering.
             self.dev.callback_registring("81", self.frame_81_received)
             # self.dev.callback_registring("83", self.frame_83_received)
             self.dev.callback_registring("87", self.frame_87_received)
@@ -61,8 +59,14 @@ class MbeeThread(QThread):
             # self.dev.callback_registring("8F", self.frame_8F_received)
             # self.dev.callback_registring("97", self.frame_97_received)
 
-        if self.dev:
+            # Sets needed settings for this MBee module
             self.mbee_init_settings()
+
+        except BaseException:
+            self.dev = None
+            self.alive = False
+            self.logger.warning('# MBee init failed')
+            return
 
     def run(self):
         self.run_self_test()
@@ -113,7 +117,7 @@ class MbeeThread(QThread):
         global_.newHTR = False
         if newHTR:
             self.package_host = global_.hostData
-        if (t - self.special_t > 0.5):
+        if t - self.special_t > 0.5:
             self.special_t = t
             self.package_special = global_.specialData
             newHB = True
@@ -128,7 +132,6 @@ class MbeeThread(QThread):
             self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(self.package_special), '11')
             global_.specialData.soft_stop = False
 
-
     def command_run(self, command, params):
         frame_id = '00' if params else '01'
         self.dev.send_immidiate_apply_and_save_local_at(frame_id=frame_id, at_command=command, at_parameter=params)
@@ -137,15 +140,16 @@ class MbeeThread(QThread):
         if not params:
             frame = self.dev.run()
             if frame['FRAME_TYPE'] != '81':
-                self.logger.info('frame {:2s}: AT-{:2s} {:10s}'.format(frame['FRAME_TYPE'], frame['AT_COMMAND'], frame['AT_PARAMETER_HEX']))
+                self.logger.info('frame {:2s}: AT-{:2s} {:10s}'.format(frame['FRAME_TYPE'], frame['AT_COMMAND'],
+                                                                       frame['AT_PARAMETER_HEX']))
 
     def mbee_init_settings(self):
         frequency = global_.settings['FREQUENCY']
         power = global_.settings['POWER']
 
-        PL = {'-32':'00', '-6':'30', '-3':'02', '0':'04', '1':'05', '3':'06', '4':'21', '5':'09', '6':'0A',\
-                '7':'0B', '8':'0D', '9':'0F', '10':'19', '11':'1A', '12':'23', '13':'1D', '14':'1F', '15':'33',\
-                '16':'25', '17':'34', '18':'27', '19':'6C', '20':'6B'}
+        PL = {'-32': '00', '-6': '30', '-3': '02', '0': '04', '1': '05', '3': '06', '4': '21', '5': '09', '6': '0A',
+              '7': '0B', '8': '0D', '9': '0F', '10': '19', '11': '1A', '12': '23', '13': '1D', '14': '1F', '15': '33',
+              '16': '25', '17': '34', '18': '27', '19': '6C', '20': '6B'}
 
         self.command_run('CF', '{:x}'.format(int(frequency)))
         self.command_run('PL', PL[str(power)])
@@ -156,7 +160,6 @@ class MbeeThread(QThread):
 
         self.logger.info('# MBee settings passed to device')
         pass
-
 
     def run_self_test(self):
         if not self.dev:
@@ -198,7 +201,7 @@ class MbeeThread(QThread):
             self.logger.warning('# No remote module')
             self.test_remote = 0
 
-    #--------------------------------------------------
+    # --------------------------------------------------
     # Callback functions.
 
     def frame_81_received(self, package):
@@ -331,7 +334,6 @@ class MbeeThread(QThread):
             self.logger.warning(exc)
             return None
 
-
     def encrypt_package(self, package):
         if not package:
             return None
@@ -387,23 +389,28 @@ def bool_to_hex(c):
     h = binascii.hexlify(b).decode('ascii')
     return h
 
+
 def int_to_hex(i):
     b = struct.pack('>i', i)
     h = binascii.hexlify(b).decode('ascii')
     return h
+
 
 def float_to_hex(f):
     b = struct.pack('>f', f)
     h = binascii.hexlify(b).decode('ascii')
     return h
 
+
 def hex_to_bool(b):
     (x,) = struct.unpack('>?', bytes.fromhex(b))
     return x
 
+
 def hex_to_int(b):
     (x,) = struct.unpack('>i', bytes.fromhex(b))
     return x
+
 
 def hex_to_float(b):
     (x,) = struct.unpack('>f', bytes.fromhex(b))

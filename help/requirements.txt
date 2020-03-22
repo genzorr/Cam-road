@@ -1,0 +1,5 @@
+hjson
+coloredlogs
+pymodbus
+
+change locale settings

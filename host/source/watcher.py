@@ -1,17 +1,13 @@
 import time
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
-import logging
 
-import global_
+from PyQt5.QtCore import QThread
+
 from global_ import get_logger
-
-import serialstar
-from lib.data_classes import *
-from lib.data_parser import *
 from lib.controls import *
+from lib.data_classes import *
 
-#----------------------------------------------------------------------------------------------#
-#   Main thread for getting/throwing data from/to MBee module and for checking all's OK
+
+# Main thread for getting/throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
     coordinate_value_sig = pyqtSignal(float)
     road_battery_sig = pyqtSignal(float)

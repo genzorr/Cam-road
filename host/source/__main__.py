@@ -1,64 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys, signal, os, time
-import logging, logging.handlers
-import hjson
+import os
 import os.path as path
+import signal
+import sys
+import time
 
-from PyQt5.QtWidgets import QApplication
+import hjson
 from PyQt5.QtCore import QMutex
-
-from watcher import *
-from mbee_ import *
-from ui.ui import MainWindow
+from PyQt5.QtWidgets import QApplication
 
 import global_
+from mbee_ import MBeeThread
+from ui.ui import MainWindow
+from watcher import WatcherThread, ControlThread
+from lib.data_classes import HTRData, HBData, RTHData
 
 os.environ['DISPLAY'] = ':0'
 
-def configure_logging(level=logging.INFO):
-    format = ' '.join([
-        '%(asctime)s',
-        '%(filename)s:%(lineno)d',
-        '%(threadName)s',
-        '%(levelname)s',
-        '%(message)s'
-    ])
-    formatter = logging.Formatter(format)
-
-    logger = logging.getLogger()
-
-    # Remove existing handlers
-    for handler in list(logger.handlers):
-        logger.removeHandler(handler)
-
-    logger.setLevel(level)
-
-    fileHandler = logging.StreamHandler(sys.stderr)
-    fileHandler.setFormatter(formatter)
-    logger.addHandler(fileHandler)
-
-#   TODO: think about advantages of properties (I should add there smth else)
-
-#   TODO: CONNECT BUTTONS TO DATA CLASSES
-#   TODO: make indication when normal / error exiting
-#   TODO: ADD LOCK TO THREADS!!!!!!!!!!!!!!!!!!!!!
-#   FIXME: CRC
-#
-#   BUGS: in buttons switches, when lock button is pushed
-
-# ssh -X pi@10.0.0.10 x2x -west -to :0
-# sudo stty -F /dev/ttySAC3 19200 cs8 -cstopb -parenb cread time 1 min 0
-# sudo ~/Downloads/modbus-cli/src/modbus -r -d /dev/ttySAC3 -b 115200 -f 3 -s 2 -a 0 -n 20
-
-# radio UP
-# echo 63 > /sys/class/gpio/export
-# echo out > /sys/class/gpio/gpio63/direction
-# echo 1 > /sys/class/gpio/gpio63/value
-# echo 63 > /sys/class/gpio/unexport
-
 THREADS = []
 
+# Killer provides a soft way to kill your application
 class Killer:
     def __init__(self):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -73,6 +35,7 @@ class Killer:
         time.sleep(1)
         sys.exit()
 
+# Gets absolute path to ../../
 def get_dir_path():
     filepath = path.abspath(__file__)
     dirname = path.dirname(filepath)
@@ -81,8 +44,7 @@ def get_dir_path():
 
 
 if __name__ == "__main__":
-    # configure_logging()
-
+    # Set up Killer to enable soft exiting by button in app
     global_.killer = Killer()
     app = QApplication(sys.argv)
 
@@ -93,17 +55,21 @@ if __name__ == "__main__":
     global_.TX_ADDR_ROAD = config["TX_ADDR_ROAD"]
     global_.settings = config
 
+    # Set up mutex
     global_.mutex = QMutex()
     global_.flag = True
 
+    # Create global data classes
     global_.hostData = HTRData()
     global_.roadData = RTHData()
     global_.specialData = HBData()
 
+    # Create main window
     global_.window = MainWindow()
     global_.window.show()
 
-    global_.mbeeThread = MbeeThread()
+    # Set up threads
+    global_.mbeeThread = MBeeThread()
     global_.mbeeThread.start()
     THREADS.append(global_.mbeeThread)
 

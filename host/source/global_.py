@@ -36,3 +36,27 @@ def get_logger(logger_name):
     logger.addHandler(get_console_handler())
     logger.propagate = False
     return logger
+
+''' Unused function to configure logging
+def configure_logging(level=logging.INFO):
+    format = ' '.join([
+        '%(asctime)s',
+        '%(filename)s:%(lineno)d',
+        '%(threadName)s',
+        '%(levelname)s',
+        '%(message)s'
+    ])
+    formatter = logging.Formatter(format)
+
+    logger = logging.getLogger()
+
+    # Remove existing handlers
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+
+    logger.setLevel(level)
+
+    fileHandler = logging.StreamHandler(sys.stderr)
+    fileHandler.setFormatter(formatter)
+    logger.addHandler(fileHandler)
+'''
