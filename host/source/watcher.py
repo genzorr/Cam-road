@@ -1,30 +1,37 @@
 import time
 
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, pyqtSignal
 
-from global_ import get_logger
-from lib.controls import *
-from lib.data_classes import *
-
+import global_
+from global_ import get_logger, styleChangeProperty, addStyleSheet
+from lib.controls import Controller
 
 # Main thread for getting/throwing data from/to MBee module and for checking all's OK
 class WatcherThread(QThread):
     coordinate_value_sig = pyqtSignal(float)
     road_battery_sig = pyqtSignal(float)
-    
-    # @pyqtSlot
+
     def rssi_value_slot(self, value):
         if value is None:
             global_.window.ui.RSSI.setStyleSheet("background-color: gray; color: black")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'gray')
         elif (value < -90):
             global_.window.ui.RSSI.setStyleSheet("background-color: black; color: white")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'white')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'black')
         elif (value < -80):
             global_.window.ui.RSSI.setStyleSheet("background-color: red; color: black")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'red')
         elif (value < -60):
             global_.window.ui.RSSI.setStyleSheet("background-color: yellow; color: black")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'yellow')
         else:
             global_.window.ui.RSSI.setStyleSheet("background-color: green; color: black")
-
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'green')
 
     def __init__(self):
         QThread.__init__(self)
@@ -32,13 +39,10 @@ class WatcherThread(QThread):
         self.logger = get_logger('Watcher')
 
         if global_.window:
-            # global_.mbeeThread.RSSI_signal.connect(global_.window.ui.RSSI.display)
             self.coordinate_value_sig.connect(global_.window.workWidget.ui.Coordinate.setValue)
             self.road_battery_sig.connect(global_.window.ui.battery_road.setValue)
-            # global_.mbeeThread.RSSI_signal.connect(self.rssi_value_slot)
 
-
-        #   Signals to slots connection
+        # Connect signals to slots.
         if global_.window.workWidget:
             global_.hostData.acceleration_signal.connect(global_.window.workWidget.ui.Acceleration.setValue)
             global_.hostData.braking_signal.connect(global_.window.workWidget.ui.Braking.setValue)
@@ -48,11 +52,7 @@ class WatcherThread(QThread):
         if global_.window.settingsWidget:
             global_.window.settingsWidget.ui.EndPointsReverse.setAutoExclusive(True)
             global_.window.settingsWidget.ui.EndPointsStop.setAutoExclusive(True)
-
             global_.window.settingsWidget.ui.EnableEndPoints.setFocusPolicy(False)
-
-            # global_.window.settingsWidget.ui.EnableEndPoints.pressed.connect(global_.specialData.enable_end_points_pressed)
-            # global_.window.settingsWidget.ui.EnableEndPoints.released.connect(global_.specialData.enable_end_points_released)
 
             global_.window.settingsWidget.ui.EnableEndPoints.toggled.connect(global_.specialData.enable_end_points_)
             global_.window.settingsWidget.ui.EndPointsStop.toggled.connect(global_.specialData.end_points_stop_)
@@ -70,7 +70,6 @@ class WatcherThread(QThread):
             global_.window.settingsWidget.ui.SwapDirection.toggled.emit(False)
             global_.window.settingsWidget.ui.StopAccelerometer.toggled.emit(True)
 
-
             global_.window.telemetryWidget.ui.sig_stop.setAutoExclusive(True)
             global_.window.telemetryWidget.ui.sig_ret1.setAutoExclusive(True)
             global_.window.telemetryWidget.ui.sig_ret2.setAutoExclusive(True)
@@ -87,24 +86,24 @@ class WatcherThread(QThread):
             t = time.time()
 
             global_.mutex.tryLock(timeout=1)
-            # global_.mbeeThread.RSSI_signal.emit(global_.mbeeThread.RSSI)
-            
+
             if (int(t) % 5 == 0):
+                # Update progress bars.
                 self.rssi_value_slot(global_.mbeeThread.RSSI)
                 v = global_.roadData.voltage
                 self.road_battery_sig.emit(v)
-                if v < 20:
-                    global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
-                    global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
-                    global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
-                    global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
-                else:
-                    global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
-                    global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
-                    global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
-                    global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                # if v < 20:
+                #     global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                #     global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                #     global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                #     global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                # else:
+                #     global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                #     global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                #     global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                #     global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
 
-
+                # Show base numbers.
                 if global_.roadData.bases_init_swap:
                     global_.window.workWidget.ui.Base1.setText('2')
                     global_.window.workWidget.ui.Base2.setText('1')
@@ -115,6 +114,7 @@ class WatcherThread(QThread):
             global_.window.base1.emit(global_.roadData.base1_set)
             global_.window.base2.emit(global_.roadData.base2_set)
 
+            # Show coordinate on progress bar.
             if (global_.roadData.base1_set and global_.roadData.base2_set):
                 length = (global_.roadData.base2 - global_.roadData.base1)
                 value = (global_.roadData.coordinate - global_.roadData.base1) / length
@@ -147,6 +147,7 @@ def _check_bit(value, bit):
 
 class ControlThread(QThread):
     changeMenu_sig = pyqtSignal(int)
+    finished = pyqtSignal(int)
 
     def __init__(self):
         QThread.__init__(self)
@@ -184,7 +185,6 @@ class ControlThread(QThread):
         for i in range(1, 3+1):
             self.controller.setEncoderValue(i, 0)
 
-
     def changeMenu(self):
         if self.menu == 3:
             self.menu = 1
@@ -193,7 +193,6 @@ class ControlThread(QThread):
         elif self.menu == 2:
             self.menu = 3
         self.changeMenu_sig.emit(self.menu)
-
 
     def run(self):
         while self.alive and self.controller.status:
@@ -214,17 +213,16 @@ class ControlThread(QThread):
             #------------------------------------------------------------------#
             global_.mutex.tryLock(timeout=1)
 
-            #  Encoders.
+            # Encoders.
             global_.hostData.acceleration = self.controller.encoders[1]
             global_.hostData.braking  = self.controller.encoders[2]
             global_.hostData.velocity = self.controller.encoders[0]
 
-            ##  Buttons.
-            # Stop.
+            # Buttons.
             stop_flag = 0
             t = time.time()
 
-            if not global_.specialData.swap_direction:
+            if not global_.specialData.swap_direction:  # Swap direction if flag is set.
                 self.left, self.right = LEFT, RIGHT
             else:
                 self.left, self.right = RIGHT, LEFT
@@ -247,18 +245,14 @@ class ControlThread(QThread):
 
             # Set base.
             if _check_bit(value, BASE):
-                if stop_flag: # Reset base points when STOP and BASE buttons pressed.
+                if stop_flag:   # Reset base points when STOP and BASE buttons pressed.
                     self.logger.info('Reset end points')
                     global_.specialData.end_points_reset = True
 
                 elif (t - self.base_t) > 1:
                     self.logger.info('Base pressed {} {}'.format(global_.roadData.base1_set, global_.roadData.base2_set))
                     self.base_t = t
-                    # if not global_.roadData.base1_set:
                     global_.hostData.set_base = 1
-                    # elif not global_.roadData.base2_set:
-                        # global_.hostData.set_base = 2
-                # print(global_.hostData.set_base, global_.roadData.base1_set, global_.roadData.base2_set)
 
             # Reset hard stop.
             if _check_bit(value, HOME):
@@ -273,26 +267,17 @@ class ControlThread(QThread):
                             global_.hostData.mode, global_.hostData.direction, global_.hostData.set_base,\
                             global_.specialData.end_points_reset, global_.specialData.motor]
 
+            # Check state lists and update flag if it's changed.
             if (t - self.state_prev_t > 3) or (self.state != self.state_prev):
                 global_.newHTR = True
                 self.state_prev = self.state
                 self.state_prev_t = t
 
-            # global_.mutex.tryLock(timeout=5)
-            # # t = time.time()
-            # global_.mbeeThread.transmit()
-            # # print(time.time() - t)
-            # global_.hostData.mode = -1
-            # global_.mutex.unlock()
-            #------------------------------------------------------------------#
-
-            # Menu
+            # Menu.
             if _check_bit(value, MENU):
                 if (t - self.menu_t) > 0.5:
                     self.menu_t = t
                     self.changeMenu()
-
-            # print('Control', t - time.time())
 
     def off(self):
         self.controller.off()

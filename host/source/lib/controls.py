@@ -3,9 +3,6 @@ from pymodbus.payload import BinaryPayloadDecoder
 from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.constants import Endian
 
-from PyQt5.QtCore import pyqtSlot
-
-
 button_reg = 3
 indicator_reg = 4
 battery_reg = 7
@@ -81,7 +78,6 @@ class Controller:
                 return (result, True)
             retry -= 1
             self.status = False
-        #logging.info(f'addr {addr}, unit {unit}')
         return (None, False)
 
 

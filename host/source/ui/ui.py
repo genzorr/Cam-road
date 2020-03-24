@@ -1,14 +1,16 @@
-import sys, global_
-from PyQt5.QtWidgets import QMainWindow, QWidget
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt, QEvent
-from PyQt5.QtGui import QColor
+import sys
+import global_
+from global_ import addStyleSheet, styleChangeProperty
 
-from .window import Ui_Watcher
-from .workwidget import Ui_Form
+from PyQt5.QtCore import pyqtSignal, Qt, QSize
+from PyQt5.QtWidgets import QMainWindow, QWidget
+
 from .settingswidget import Ui_SForm
 from .telemetrywidget import Ui_TForm
+from .window import Ui_Watcher
+from .workwidget import Ui_Form
 
-#----------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------- #
 #   Base class
 class QQWidget(QWidget):
     def __init__(self, parent=None, my_ui=None, title=None, layout=None):
@@ -24,7 +26,7 @@ class QQWidget(QWidget):
     def set_layout(self, layout):
         layout.addWidget(self)
 
-#----------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------- #
 
 class QWorkWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_Form(), title=None, layout=None):
@@ -38,7 +40,7 @@ class QWorkWidget(QQWidget):
 
         self.ui.Base1.setText('1')
         self.ui.Base2.setText('2')
-#----------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------- #
 
 class QSettingsWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_SForm(), title=None, layout=None):
@@ -62,13 +64,19 @@ class QSettingsWidget(QQWidget):
     #             self.ui.EndPointsStop.setChecked(True)
     #         else:
     #             self.ui.EndPointsStop.setChecked(False)
-#----------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------- #
 
 class QTelemetryWidget(QQWidget):
     def __init__(self, parent=None, my_ui=Ui_TForm(), title=None, layout=None):
         QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
 
         self.ui.layout.setAlignment(Qt.AlignTop)
+
+        style = ''
+        style += 'QSpinBox::up-button {subcontrol-position: top right; width: 30px; height: 30px; padding: 5px; margin: 5px;} '
+        style += 'QSpinBox::down-button {subcontrol-position: bottom right; width: 30px; height: 30px; padding: 5px; margin: 5px;} '
+        addStyleSheet(self.ui.stop_time, 'QSpinBox', style)
+        self.ui.stop_time.setMinimumSize(QSize(120, 100))
 
 #----------------------------------------------------------------------------------------------#
 
@@ -88,7 +96,7 @@ class MainWindow(QMainWindow):
         self.telemetryWidget = QTelemetryWidget(layout=self.ui.layoutidontwant)
 
         self.workWidget.show()
-        self.ui.workButton.setStyleSheet("background-color:rgb(255,140,0)")
+        styleChangeProperty(self.ui.workButton, 'background-color', 'rgb(255,140,0)')
         self.settingsWidget.hide()
         self.telemetryWidget.hide()
 
@@ -104,13 +112,12 @@ class MainWindow(QMainWindow):
         # self.settingsWidget.hide()
         # self.telemetryWidget.show()
 
-        #   Signals to use menu buttons and shutdown button.
+        # Signals to use menu buttons and shutdown button.
         # self.ui.workButton.clicked.connect(self.buttonClicked)
         # self.ui.settingsButton.clicked.connect(self.buttonClicked)
         # self.ui.telemetryButton.clicked.connect(self.buttonClicked)
         self.settingsWidget.ui.Shutdown.clicked.connect(self.buttonClicked)
 
-        # self.keyPressed.connect(self.on_key)
         self.base1.connect(global_.specialData.base1_)
         self.base2.connect(global_.specialData.base2_)
 
@@ -118,22 +125,21 @@ class MainWindow(QMainWindow):
 
     def changeMenu(self, num):
         self.workWidget.hide()
-        self.ui.workButton.setStyleSheet("background-color: white")
+        styleChangeProperty(self.ui.workButton, 'background-color', 'white')
         self.settingsWidget.hide()
-        self.ui.settingsButton.setStyleSheet("background-color: white")
+        styleChangeProperty(self.ui.settingsButton, 'background-color', 'white')
         self.telemetryWidget.hide()
-        self.ui.telemetryButton.setStyleSheet("background-color: white")
+        styleChangeProperty(self.ui.telemetryButton, 'background-color', 'white')
 
-# setStyleSheet("QPushButton {background-color: QColor (255,140,0)}")
         if num == 1:
             self.workWidget.show()
-            self.ui.workButton.setStyleSheet("background-color:rgb(255,140,0)")
+            styleChangeProperty(self.ui.workButton, 'background-color', 'rgb(255,140,0)')
         elif num == 2:
             self.settingsWidget.show()
-            self.ui.settingsButton.setStyleSheet("background-color:rgb(255,140,0)")
+            styleChangeProperty(self.ui.settingsButton, 'background-color', 'rgb(255,140,0)')
         elif num == 3:
             self.telemetryWidget.show()
-            self.ui.telemetryButton.setStyleSheet("background-color:rgb(255,140,0)")
+            styleChangeProperty(self.ui.telemetryButton, 'background-color', 'rgb(255,140,0)')
         else:
             print('# Invalid menu value')
             pass
@@ -160,47 +166,3 @@ class MainWindow(QMainWindow):
         if sender == self.settingsWidget.ui.Shutdown:
             global_.killer.kill()
             sys.exit()
-
-
-    # def keyPressEvent(self, event):
-    #     super(MainWindow, self).keyPressEvent(event)
-    #     self.keyPressed.emit(event)
-
-    # def on_key(self, event):
-    #     if event.key() == Qt.Key_BracketLeft:
-    #         self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() - 5)
-
-    #     if event.key() == Qt.Key_BracketRight:
-    #         self.workWidget.ui.Velocity.setValue(self.workWidget.ui.Velocity.value() + 5)
-
-    #     if event.key() == Qt.Key_Q:
-    #         global_.killer.kill()
-    #         sys.exit()
-
-    #     if event.key() == Qt.Key_1:
-    #         global_.hostData.mode = 1
-
-    #     if event.key() == Qt.Key_2:
-    #         global_.hostData.mode = 2
-
-    #     if event.key() == Qt.Key_A:
-    #         global_.hostData.direction = -1
-
-    #     if event.key() == Qt.Key_D:
-    #         global_.hostData.direction = 1
-
-    #     if event.key() == Qt.Key_S:
-    #         global_.hostData.mode = 0
-    #         # FIXME: CHANGE DIRECTION HERE
-    #         self.workWidget.ui.Velocity.setValue(0)
-
-    #     if event.key() == Qt.Key_W:
-    #         if global_.hostData.set_base == 1:
-    #             global_.hostData.set_base = 2
-    #         else:
-    #             global_.hostData.set_base = 1
-
-    #     if event.key() == Qt.Key_R:
-    #         global_.hostData.mode = 0
-    #         global_.hostData.direction = 0
-    #         global_.hostData.set_base = 1

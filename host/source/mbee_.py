@@ -2,7 +2,7 @@ import binascii
 import struct
 import time
 
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 
 import global_
 import serialstar
@@ -10,7 +10,7 @@ from global_ import get_logger
 from lib.data_classes import HTRData, RTHData, HBData
 
 
-# Checks some global parameters
+# Checks some global parameters.
 def update_road_to_host():
     if not global_.roadData.base1_set and not global_.roadData.base2_set:
         global_.specialData.end_points_reset = False
@@ -18,16 +18,19 @@ def update_road_to_host():
         global_.specialData.motor = False
 
 
-# MBee radio communication
+# MBee radio communication.
 class MBeeThread(QThread):
-    RSSI_signal = pyqtSignal(float)     # This signal is used to update signal value in application
+    RSSI_signal = pyqtSignal(float)     # This signal is used to update signal value in application.
+
+    def stop_time_slot(self, value):
+        self.stop_time = value
 
     def __init__(self, port='/dev/ttySAC4', baudrate=230400):
         QThread.__init__(self)
-        self.alive = True   # Shows that thread is alive
-        self.logger = get_logger('MBee')    # Thread logger
+        self.alive = True   # Shows that thread is alive.
+        self.logger = get_logger('MBee')    # Thread logger.
 
-        # These values are used to provide self-testing
+        # These values are used to provide self-testing.
         self.self_test = 0
         self.test_local = 1
         self.test_remote = 1
@@ -36,30 +39,34 @@ class MBeeThread(QThread):
         self.t_prev = 0
         self.RSSI = None
         self.received_t = 0
+        self.stop_time = 0
+        global_.window.telemetryWidget.ui.stop_time.valueChanged.connect(self.stop_time_slot)
 
         self.package_host = HTRData()
         self.package_special = HBData()
         global_.newHTR = False
         self.special_t = 0
 
-        # Initialization
+        # Initialization.
         try:
             self.dev = serialstar.SerialStar(port, baudrate, 0.2)
             self.logger.info('# MBee OK')
 
             # Callback-functions registering.
             self.dev.callback_registring("81", self.frame_81_received)
-            # self.dev.callback_registring("83", self.frame_83_received)
             self.dev.callback_registring("87", self.frame_87_received)
             self.dev.callback_registring("88", self.frame_88_received)
+            self.dev.callback_registring("8C", self.frame_8C_received)
+            '''
+            # self.dev.callback_registring("83", self.frame_83_received)
             # self.dev.callback_registring("89", self.frame_89_received)
             # self.dev.callback_registring("8A", self.frame_8A_received)
             # self.dev.callback_registring("8B", self.frame_8B_received)
-            self.dev.callback_registring("8C", self.frame_8C_received)
             # self.dev.callback_registring("8F", self.frame_8F_received)
             # self.dev.callback_registring("97", self.frame_97_received)
+            '''
 
-            # Sets needed settings for this MBee module
+            # Sets needed settings for this MBee module.
             self.mbee_init_settings()
 
         except BaseException:
@@ -69,6 +76,7 @@ class MBeeThread(QThread):
             return
 
     def run(self):
+        # Run tests and check results.
         self.run_self_test()
         if (self.test_local == 0) or (self.test_remote == 0):
             self.alive = False
@@ -76,45 +84,43 @@ class MBeeThread(QThread):
             self.logger.info('# Tests passed')
 
         while self.alive:
+            # Transmit and receive data.
             t = time.time()
-
             self.transmit()
+            self.receive()
 
-            # Receive
-            global_.mutex.tryLock(timeout=1)
-            self.dev.run()
-            global_.mutex.unlock()
-
-            # Check if connection is ok
-            if (t - self.received_t > 3):
+            # Check if connection is ok.
+            if (t - self.received_t > self.stop_time):
                 self.logger.warning('# MBee receiver disconnected')
                 self.RSSI = None
                 time.sleep(1)
 
-            # Flush dev buffers
+            # Flush dev buffers.
             self.t = time.time()
             if (self.t - self.t_prev) > 3:
                 self.t_prev = self.t
                 self.dev.ser.flush()
-                # self.dev.ser.reset_input_buffer()
-                # self.dev.ser.reset_output_buffer()
 
-            # print('MBee', t - time.time())
             time.sleep(0.01)
         self.off()
 
+    # Close serial device.
     def off(self):
         if self.dev:
             self.dev.ser.close()
             self.dev = None
 
+    # Transmit packages.
     def transmit(self):
         t = time.time()
-        newHTR, newHB = False, False
+        newHTR, newHB = False, False    # Flags that show that data is new.
 
+        # Update flags values.
         global_.mutex.tryLock(timeout=1)
         newHTR = global_.newHTR
         global_.newHTR = False
+
+        # Update packages to be transferred.
         if newHTR:
             self.package_host = global_.hostData
         if t - self.special_t > 0.5:
@@ -123,6 +129,7 @@ class MBeeThread(QThread):
             newHB = True
         global_.mutex.unlock()
 
+        # Send packages.
         if newHTR and (self.package_host is not None):
             self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(self.package_host), '11')
             global_.hostData.direction = 0
@@ -132,17 +139,26 @@ class MBeeThread(QThread):
             self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(self.package_special), '11')
             global_.specialData.soft_stop = False
 
+    # Receive packages.
+    def receive(self):
+        global_.mutex.tryLock(timeout=1)
+        self.dev.run()
+        global_.mutex.unlock()
+
+    # Run command on MBee device.
     def command_run(self, command, params):
         frame_id = '00' if params else '01'
+        # Send command and save it to memory.
         self.dev.send_immidiate_apply_and_save_local_at(frame_id=frame_id, at_command=command, at_parameter=params)
         self.dev.send_immidiate_apply_and_save_local_at(frame_id='00', at_command='AC', at_parameter='')
 
-        if not params:
+        if not params:  # If there are no params, receive package and print result.
             frame = self.dev.run()
             if frame['FRAME_TYPE'] != '81':
                 self.logger.info('frame {:2s}: AT-{:2s} {:10s}'.format(frame['FRAME_TYPE'], frame['AT_COMMAND'],
                                                                        frame['AT_PARAMETER_HEX']))
 
+    # Set MBee device init settings: frequency and power.
     def mbee_init_settings(self):
         frequency = global_.settings['FREQUENCY']
         power = global_.settings['POWER']
@@ -161,6 +177,7 @@ class MBeeThread(QThread):
         self.logger.info('# MBee settings passed to device')
         pass
 
+    # Run self-testing.
     def run_self_test(self):
         if not self.dev:
             return
@@ -213,59 +230,37 @@ class MBeeThread(QThread):
             global_.mutex.unlock()
             self.RSSI = package['RSSI']
             self.received_t = time.time()
-        # print("Received 81-frame.")
-        # print(package)
         pass
 
     def frame_83_received(self, package):
-        # if (global_.mbeeThread.self_test == 1):
-        #     global_.mbeeThread.self_test = 0
-        # print("Received 83-frame.")
-        # print(package)
         pass
 
     def frame_87_received(self, package):
         if self.self_test == 1:
             self.self_test = 0
-        # print("Received 87-frame.")
-        # print(package)
         pass
 
     def frame_88_received(self, package):
-        # print("Received 88-frame.")
-        # print(package)
         pass
 
     def frame_89_received(self, package):
-        # print("Received 89-frame.")
-        # print(package)
         pass
 
     def frame_8A_received(self, package):
-        # print("Received 8A-frame.")
-        # print(package)
         pass
 
     def frame_8B_received(self, package):
-        # print("Received 8B-frame.")
-        # print(package)
         pass
 
     def frame_8C_received(self, package):
         if self.self_test == 1:
             self.self_test = 0
-        # print("Received 8C-frame.")
-        # print(package)
         pass
 
     def frame_8F_received(self, package):
-        # print("Received 8F-frame.")
-        # print(package)
         pass
 
     def frame_97_received(self, package):
-        # print("Received 97-frame.")
-        # print(package)
         pass
 
     # --------------------------------------------------

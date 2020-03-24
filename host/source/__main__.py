@@ -20,7 +20,7 @@ os.environ['DISPLAY'] = ':0'
 
 THREADS = []
 
-# Killer provides a soft way to kill your application
+# Killer provides a soft way to kill your application.
 class Killer:
     def __init__(self):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -44,7 +44,7 @@ def get_dir_path():
 
 
 if __name__ == "__main__":
-    # Set up Killer to enable soft exiting by button in app
+    # Set up Killer to enable soft exiting by button in app.
     global_.killer = Killer()
     app = QApplication(sys.argv)
 
@@ -55,20 +55,20 @@ if __name__ == "__main__":
     global_.TX_ADDR_ROAD = config["TX_ADDR_ROAD"]
     global_.settings = config
 
-    # Set up mutex
+    # Set up mutex.
     global_.mutex = QMutex()
     global_.flag = True
 
-    # Create global data classes
+    # Create global data classes.
     global_.hostData = HTRData()
     global_.roadData = RTHData()
     global_.specialData = HBData()
 
-    # Create main window
+    # Create main window.
     global_.window = MainWindow()
     global_.window.show()
 
-    # Set up threads
+    # Set up threads.
     global_.mbeeThread = MBeeThread()
     global_.mbeeThread.start()
     THREADS.append(global_.mbeeThread)
