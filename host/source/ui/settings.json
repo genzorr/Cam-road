@@ -1,0 +1,11 @@
+{
+    "ACCEL" : 10,
+    "BRAKING" : 15,
+    "END_POINTS" : 1,
+    "END_POINTS_STOP" : 1,
+    "SWAP" : 0,
+    "STOP_ACCEL" : 1,
+    "LOCK" : 0,
+    "SIG_LOSE" : 0,
+    "STOP_TIME" : 10
+}

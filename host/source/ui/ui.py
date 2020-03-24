@@ -1,4 +1,6 @@
 import sys
+import os.path as path
+import hjson
 import global_
 from global_ import addStyleSheet, styleChangeProperty
 
@@ -166,3 +168,43 @@ class MainWindow(QMainWindow):
         if sender == self.settingsWidget.ui.Shutdown:
             global_.killer.kill()
             sys.exit()
+
+    def buttonSetValue(self, button, value):
+        if value == 1:
+            button.setChecked(True)
+        else:
+            button.toggled.emit(False)
+
+    def saveSettings(self):
+        pass
+
+    def loadSettings(self):
+        filepath = path.abspath(__file__)
+        dirname = path.dirname(filepath)
+        f = open(dirname + '/settings.json')
+        config = hjson.loads(f.read())
+
+        global_.hostData.acceleration = config['ACCEL']
+        global_.controlThread.controller.setEncoderValue(2, config['ACCEL'])
+        global_.hostData.braking = config['BRAKING']
+        global_.controlThread.controller.setEncoderValue(3, config['BRAKING'])
+
+        self.buttonSetValue(self.settingsWidget.ui.LockButtons, config['LOCK'])
+        self.buttonSetValue(self.settingsWidget.ui.EnableEndPoints, config['END_POINTS'])
+        self.buttonSetValue(self.settingsWidget.ui.EndPointsStop, config['END_POINTS_STOP'])
+        self.buttonSetValue(self.settingsWidget.ui.EndPointsReverse, 1 - config['END_POINTS_STOP'])
+        # self.buttonSetValue(self.settingsWidget.ui.SoundStop, config['LOCK'])
+        self.buttonSetValue(self.settingsWidget.ui.SwapDirection, config['SWAP'])
+        self.buttonSetValue(self.settingsWidget.ui.StopAccelerometer, config['STOP_ACCEL'])
+
+        self.buttonSetValue(self.telemetryWidget.ui.sig_stop, 0)
+        self.buttonSetValue(self.telemetryWidget.ui.sig_ret1, 0)
+        self.buttonSetValue(self.telemetryWidget.ui.sig_ret2, 0)
+        if (config['SIG_LOSE'] == 0):
+            self.buttonSetValue(self.telemetryWidget.ui.sig_stop, 1)
+        elif (config['SIG_LOSE'] == 1):
+            self.buttonSetValue(self.telemetryWidget.ui.sig_ret1, 1)
+        else:
+            self.buttonSetValue(self.telemetryWidget.ui.sig_ret2, 1)
+
+        self.telemetryWidget.ui.stop_time.setValue(config['STOP_TIME'])

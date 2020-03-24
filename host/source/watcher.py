@@ -62,13 +62,13 @@ class WatcherThread(QThread):
             global_.window.settingsWidget.ui.StopAccelerometer.toggled.connect(global_.specialData.stop_accelerometer_)
             global_.window.settingsWidget.ui.LockButtons.toggled.connect(global_.specialData.lock_buttons_)
 
-            global_.window.settingsWidget.ui.LockButtons.toggled.emit(False)
-            global_.window.settingsWidget.ui.EnableEndPoints.setChecked(True)
-            global_.window.settingsWidget.ui.EndPointsStop.setChecked(True)
-            global_.window.settingsWidget.ui.EndPointsReverse.toggled.emit(False)
-            global_.window.settingsWidget.ui.SoundStop.toggled.emit(False)
-            global_.window.settingsWidget.ui.SwapDirection.toggled.emit(False)
-            global_.window.settingsWidget.ui.StopAccelerometer.toggled.emit(True)
+            # global_.window.settingsWidget.ui.LockButtons.toggled.emit(False)
+            # global_.window.settingsWidget.ui.EnableEndPoints.setChecked(True)
+            # global_.window.settingsWidget.ui.EndPointsStop.setChecked(True)
+            # global_.window.settingsWidget.ui.EndPointsReverse.toggled.emit(False)
+            # global_.window.settingsWidget.ui.SoundStop.toggled.emit(False)
+            # global_.window.settingsWidget.ui.SwapDirection.toggled.emit(False)
+            # global_.window.settingsWidget.ui.StopAccelerometer.toggled.emit(True)
 
             global_.window.telemetryWidget.ui.sig_stop.setAutoExclusive(True)
             global_.window.telemetryWidget.ui.sig_ret1.setAutoExclusive(True)
@@ -77,9 +77,9 @@ class WatcherThread(QThread):
             global_.window.telemetryWidget.ui.sig_ret1.toggled.connect(global_.specialData.sig_ret1_)
             global_.window.telemetryWidget.ui.sig_ret2.toggled.connect(global_.specialData.sig_ret2_)
 
-            global_.window.telemetryWidget.ui.sig_stop.setChecked(True)
-            global_.window.telemetryWidget.ui.sig_ret1.toggled.emit(False)
-            global_.window.telemetryWidget.ui.sig_ret2.toggled.emit(False)
+            # global_.window.telemetryWidget.ui.sig_stop.setChecked(True)
+            # global_.window.telemetryWidget.ui.sig_ret1.toggled.emit(False)
+            # global_.window.telemetryWidget.ui.sig_ret2.toggled.emit(False)
 
     def run(self):
         while self.alive:

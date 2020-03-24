@@ -27,6 +27,7 @@ class Killer:
         signal.signal(signal.SIGTERM, self.kill)
 
     def kill(self):
+        global_.window.saveSettings()
         for thread in THREADS:
             thread.alive = False
             thread.off()
@@ -80,6 +81,8 @@ if __name__ == "__main__":
     global_.controlThread = ControlThread()
     global_.controlThread.start()
     THREADS.append(global_.controlThread)
+
+    global_.window.loadSettings()
 
     sys.exit(app.exec_())
 
