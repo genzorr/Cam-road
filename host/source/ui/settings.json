@@ -1,5 +1,5 @@
 {
-    "ACCEL" : 10,
+    "ACCEL" : 10.0,
     "BRAKING" : 15,
     "END_POINTS" : 1,
     "END_POINTS_STOP" : 1,

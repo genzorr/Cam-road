@@ -169,42 +169,73 @@ class MainWindow(QMainWindow):
             global_.killer.kill()
             sys.exit()
 
-    def buttonSetValue(self, button, value):
+    def setButtonValue(self, button, value):
         if value == 1:
             button.setChecked(True)
         else:
             button.toggled.emit(False)
 
+    def getButtonValue(self, button):
+        return 1 if button.isChecked() else 0
+
     def saveSettings(self):
-        pass
+        sig_lose_value = 0
+        if self.getButtonValue(self.telemetryWidget.ui.sig_stop) == 1:
+            sig_lose_value = 0
+        elif self.getButtonValue(self.telemetryWidget.ui.sig_ret1) == 1:
+            sig_lose_value = 1
+        else:
+            sig_lose_value = 2
+
+        config = {
+            'ACCEL': global_.hostData.acceleration,
+            'BRAKING': global_.hostData.braking,
+            'END_POINTS': self.getButtonValue(self.settingsWidget.ui.EnableEndPoints),
+            'END_POINTS_STOP': self.getButtonValue(self.settingsWidget.ui.EndPointsStop),
+            'SWAP': self.getButtonValue(self.settingsWidget.ui.SwapDirection),
+            'STOP_ACCEL': self.getButtonValue(self.settingsWidget.ui.StopAccelerometer),
+            'LOCK': self.getButtonValue(self.settingsWidget.ui.LockButtons),
+            'SIG_LOSE': sig_lose_value,
+            'STOP_TIME': self.telemetryWidget.ui.stop_time.value()
+        }
+
+        filepath = path.abspath(__file__)
+        dirname = path.dirname(filepath)
+        with open(dirname + '/settings.json', 'w') as f:
+            hjson.dump(config, f)
+            print(config)
 
     def loadSettings(self):
         filepath = path.abspath(__file__)
         dirname = path.dirname(filepath)
-        f = open(dirname + '/settings.json')
-        config = hjson.loads(f.read())
+        config = None
+        with open(dirname + '/settings.json', 'r') as f:
+            config = hjson.loads(f.read())
+
+        if not config:
+            return
 
         global_.hostData.acceleration = config['ACCEL']
         global_.controlThread.controller.setEncoderValue(2, config['ACCEL'])
         global_.hostData.braking = config['BRAKING']
         global_.controlThread.controller.setEncoderValue(3, config['BRAKING'])
 
-        self.buttonSetValue(self.settingsWidget.ui.LockButtons, config['LOCK'])
-        self.buttonSetValue(self.settingsWidget.ui.EnableEndPoints, config['END_POINTS'])
-        self.buttonSetValue(self.settingsWidget.ui.EndPointsStop, config['END_POINTS_STOP'])
-        self.buttonSetValue(self.settingsWidget.ui.EndPointsReverse, 1 - config['END_POINTS_STOP'])
+        self.setButtonValue(self.settingsWidget.ui.EnableEndPoints, config['END_POINTS'])
+        self.setButtonValue(self.settingsWidget.ui.EndPointsStop, config['END_POINTS_STOP'])
+        self.setButtonValue(self.settingsWidget.ui.EndPointsReverse, 1 - config['END_POINTS_STOP'])
         # self.buttonSetValue(self.settingsWidget.ui.SoundStop, config['LOCK'])
-        self.buttonSetValue(self.settingsWidget.ui.SwapDirection, config['SWAP'])
-        self.buttonSetValue(self.settingsWidget.ui.StopAccelerometer, config['STOP_ACCEL'])
+        self.setButtonValue(self.settingsWidget.ui.SwapDirection, config['SWAP'])
+        self.setButtonValue(self.settingsWidget.ui.StopAccelerometer, config['STOP_ACCEL'])
+        self.setButtonValue(self.settingsWidget.ui.LockButtons, config['LOCK'])
 
-        self.buttonSetValue(self.telemetryWidget.ui.sig_stop, 0)
-        self.buttonSetValue(self.telemetryWidget.ui.sig_ret1, 0)
-        self.buttonSetValue(self.telemetryWidget.ui.sig_ret2, 0)
+        self.setButtonValue(self.telemetryWidget.ui.sig_stop, 0)
+        self.setButtonValue(self.telemetryWidget.ui.sig_ret1, 0)
+        self.setButtonValue(self.telemetryWidget.ui.sig_ret2, 0)
         if (config['SIG_LOSE'] == 0):
-            self.buttonSetValue(self.telemetryWidget.ui.sig_stop, 1)
+            self.setButtonValue(self.telemetryWidget.ui.sig_stop, 1)
         elif (config['SIG_LOSE'] == 1):
-            self.buttonSetValue(self.telemetryWidget.ui.sig_ret1, 1)
+            self.setButtonValue(self.telemetryWidget.ui.sig_ret1, 1)
         else:
-            self.buttonSetValue(self.telemetryWidget.ui.sig_ret2, 1)
+            self.setButtonValue(self.telemetryWidget.ui.sig_ret2, 1)
 
         self.telemetryWidget.ui.stop_time.setValue(config['STOP_TIME'])

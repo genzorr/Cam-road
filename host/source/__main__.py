@@ -30,10 +30,10 @@ class Killer:
         global_.window.saveSettings()
         for thread in THREADS:
             thread.alive = False
+            time.sleep(0.5)
             thread.off()
 
         print('exiting..')
-        time.sleep(1)
         sys.exit()
 
 # Gets absolute path to ../../

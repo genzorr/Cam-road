@@ -76,6 +76,9 @@ class MBeeThread(QThread):
             return
 
     def run(self):
+        if not self.dev:
+            return
+
         # Run tests and check results.
         self.run_self_test()
         if (self.test_local == 0) or (self.test_remote == 0):
@@ -179,9 +182,6 @@ class MBeeThread(QThread):
 
     # Run self-testing.
     def run_self_test(self):
-        if not self.dev:
-            return
-
         # Test 1: local
         self.self_test = 1
         test_time = time.time()
@@ -202,7 +202,7 @@ class MBeeThread(QThread):
         self.self_test = 1
         test_time = time.time()
 
-        while True:
+        while self.alive:
             self.dev.send_tx_request('00', global_.TX_ADDR_HOST, '0000', '10')
             self.dev.run()
 
