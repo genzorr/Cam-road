@@ -62,24 +62,12 @@ class WatcherThread(QThread):
             global_.window.settingsWidget.ui.StopAccelerometer.toggled.connect(global_.specialData.stop_accelerometer_)
             global_.window.settingsWidget.ui.LockButtons.toggled.connect(global_.specialData.lock_buttons_)
 
-            # global_.window.settingsWidget.ui.LockButtons.toggled.emit(False)
-            # global_.window.settingsWidget.ui.EnableEndPoints.setChecked(True)
-            # global_.window.settingsWidget.ui.EndPointsStop.setChecked(True)
-            # global_.window.settingsWidget.ui.EndPointsReverse.toggled.emit(False)
-            # global_.window.settingsWidget.ui.SoundStop.toggled.emit(False)
-            # global_.window.settingsWidget.ui.SwapDirection.toggled.emit(False)
-            # global_.window.settingsWidget.ui.StopAccelerometer.toggled.emit(True)
-
             global_.window.telemetryWidget.ui.sig_stop.setAutoExclusive(True)
             global_.window.telemetryWidget.ui.sig_ret1.setAutoExclusive(True)
             global_.window.telemetryWidget.ui.sig_ret2.setAutoExclusive(True)
             global_.window.telemetryWidget.ui.sig_stop.toggled.connect(global_.specialData.sig_stop_)
             global_.window.telemetryWidget.ui.sig_ret1.toggled.connect(global_.specialData.sig_ret1_)
             global_.window.telemetryWidget.ui.sig_ret2.toggled.connect(global_.specialData.sig_ret2_)
-
-            # global_.window.telemetryWidget.ui.sig_stop.setChecked(True)
-            # global_.window.telemetryWidget.ui.sig_ret1.toggled.emit(False)
-            # global_.window.telemetryWidget.ui.sig_ret2.toggled.emit(False)
 
     def run(self):
         while self.alive:
@@ -92,16 +80,24 @@ class WatcherThread(QThread):
                 self.rssi_value_slot(global_.mbeeThread.RSSI)
                 v = global_.roadData.voltage
                 self.road_battery_sig.emit(v)
-                # if v < 20:
-                #     global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
-                #     global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
-                #     global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
-                #     global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
-                # else:
-                #     global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
-                #     global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
-                #     global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
-                #     global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+
+                # If motor is offed, display all elements in gray.
+                if global_.roadData.mode != -1:
+                    if v < 20:
+                        global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                        global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                        global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                        global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                    else:
+                        global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                        global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                        global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                        global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                else:
+                    global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+                    global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+                    global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+                    global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
 
                 # Show base numbers.
                 if global_.roadData.bases_init_swap:

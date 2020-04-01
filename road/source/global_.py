@@ -1,7 +1,3 @@
-# VELO_MAX = 60
-# ACCEL_MAX = 20
-# BRAKING_MAX = 20
-
 global lock
 global hostData
 global roadData

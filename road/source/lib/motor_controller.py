@@ -1,6 +1,6 @@
 import time
 import sys
-sys.path.append('../../../fortune-controls/Lib')
+sys.path.append('../../../bin/fortune-controls/Lib')
 
 import global_
 from global_ import get_logger
@@ -10,21 +10,22 @@ from x4motor import X4Motor
 # sudo ./modbus -r -d /dev/ttySAC3 -b 115200 -f 3 -s 2 -a 0 -n 20
 #----------------------------------------------------------------------------------------------#
 #   Settings
-config = {'id': 1,\
-        'Mode': 'Angle',\
-        'PWM_Limit' : 900,\
-        'PWM_inc_limit' : 2,\
-        'I_limit': 10.0,\
-        'V_min': 12.0,\
-        'Angle_PID_P' : 50,\
-        'Angle_PID_I' : 1,\
-        'Speed_PID_P' : 100,\
-        'Speed_PID_I' : 100,\
-        'StepsPerMM': 210,\
-        'TimeOut' : 2000,\
-        'TempShutDown' : 100,\
-        'Reverse': 0}           #   210 - 1step = 0.01m
-
+config = {
+    'id': 1,\
+    'Mode': 'Angle',\
+    'PWM_Limit' : 900,\
+    'PWM_inc_limit' : 2,\
+    'I_limit': 10.0,\
+    'V_min': 12.0,\
+    'Angle_PID_P' : 50,\
+    'Angle_PID_I' : 1,\
+    'Speed_PID_P' : 100,\
+    'Speed_PID_I' : 100,\
+    'StepsPerMM': 210,\
+    'TimeOut' : 2000,\
+    'TempShutDown' : 100,\
+    'Reverse': 0
+}   #   210 - 1step = 0.01m
 #----------------------------------------------------------------------------------------------#
 STOP = 0
 REVERSE = 1
@@ -127,6 +128,7 @@ class Controller(FSM):
 
         self.dstep = 0
         self.coordinate = 0
+        self.released_angle = 0
 
         self.mode = 0
         self.direction = 0
@@ -139,18 +141,6 @@ class Controller(FSM):
         self.signal_behavior = 0
         self.signal_lost_sig = False
         self.signal_lost_sig_set = False
-
-    # @property
-    # def signal_behavior(self):
-    #     return self._signal_behavior
-    
-    # @signal_behavior.setter
-    # def signal_behavior(self, value):
-    #     self._signal_behavior = value
-    #     # caller = eval('sys._getframe({}).f_code.co_name'.format(2))
-    #     # print(caller, value)
-    #     print('here')
-
 
     def off(self):
         if self.motor:
@@ -168,16 +158,6 @@ class Controller(FSM):
         if value == 1:
             self._speed = 0
             self._est_speed = 0
-
-    # @property
-    # def motor_state(self):
-    #     return self._motor_state
-
-    # @motor_state.setter
-    # def motor_state(self, value):
-    #     self._motor_state = value
-    #     if self.motor and not value:
-    #         self.motor.release()
 
     @property
     def accel(self):
@@ -221,19 +201,9 @@ class Controller(FSM):
     def speed(self, value):
         if value is not None:
             if self.AB_choose > 0:
-                # if value < self.est_speed:
-                #     self._speed = value
-                # else:
-                #     self._speed = self.est_speed
-                #     self.AB_choose = 0
                 self._speed = min(value, self.est_speed)
 
             elif self.AB_choose < 0:
-                # if value > self.est_speed:
-                #     self._speed = value
-                # else:
-                #     self._speed = self.est_speed
-                #     self.AB_choose = 0
                 self._speed = max(value, self.est_speed)
 
             else:
@@ -286,6 +256,7 @@ class Controller(FSM):
         self.coordinate += self.dstep
         self.motor.dstep = self.dstep
 
+
     def goto_stop(self):
         global_.motor_thread.controller.est_speed = 0
         global_.motor_thread.controller.continue_ = 0
@@ -305,18 +276,28 @@ class Controller(FSM):
     def motor_off(self):
         self.mode = -1
 
+        # Perform release.
         if not self.motor_released:
             self.motor.setTimeout(0)
             self.motor.release()
             self.motor_released = True
+            self.released_angle = self.motor.readAngle()
 
+        # Enable motor end exit to course state (when flag is set: remote control button is pushed).
         if self.motor_state:
             self.motor_released = False
-            self.motor.setTimeout(config['TimeOut'])
-
+            self.motor.setTimeout(config['TimeOut'])    # it seems that this option is unset
             self.clean_motor_error()
+
+            # Recalculate position.
+            delta = (self.motor.readAngle() - self.released_angle) / self.motor.stepspermm
+            self.logger.info('Position changed for {:3.1f}'.format(delta))
+            self.coordinate += delta
+            self.released_angle = 0
+
             self.changeState(self.course)
 
+        # Exit if signal is lost.
         if self.signal_lost_sig:
             self.motor_released = False
             self.motor.setTimeout(config['TimeOut'])
@@ -342,7 +323,6 @@ class Controller(FSM):
             self.changeState(self.stop)
 
         elif self.signal_behavior == 2 or self.signal_behavior == 3:
-            # base = self.base1 if (self.signal_behavior == 2) else self.base2
             if s2_b1 or s3_b2:
                 base = self.base1
             else:
@@ -358,7 +338,6 @@ class Controller(FSM):
                 if (self.speed == 0.0):
                     self.direction = - self.direction
             elif sign < 0:
-                print('here')
                 if self.speed != 0:
                     dist_to_base = abs(l)
                     braking_dist = self.speed * self.speed / (2 * self.braking) if self.braking != 0 else 0
@@ -396,18 +375,7 @@ class Controller(FSM):
                 self.HARD_STOP = 0
                 self.changeState(self.motor_off)
 
-
-        # if (self.speed == 0) and not self.stopped:
-        #     self.direction = 0
-        #     self.stopped = 1
-
         self.update_coordinate(speed_to=0)
-
-        # if ((self.stopped) and (self.direction != 0)):
-        #     self.HARD_STOP = 0                              # CHANGED
-        #     self.stopped = 0
-        #     self.soft_stop = 0
-        #     self.changeState(self.course)
 
         #  Exit from state.
         if self.reverse:

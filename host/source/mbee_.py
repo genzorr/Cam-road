@@ -37,9 +37,9 @@ class MBeeThread(QThread):
 
         self.t = 0
         self.t_prev = 0
-        self.RSSI = None
         self.received_t = 0
         self.stop_time = 0
+        self.RSSI = None
         global_.window.telemetryWidget.ui.stop_time.valueChanged.connect(self.stop_time_slot)
 
         self.package_host = HTRData()
@@ -49,7 +49,7 @@ class MBeeThread(QThread):
 
         # Initialization.
         try:
-            self.dev = serialstar.SerialStar(port, baudrate, 0.2)
+            self.dev = serialstar.SerialStar(port, baudrate, 0.1)
             self.logger.info('# MBee OK')
 
             # Callback-functions registering.
@@ -290,7 +290,6 @@ class MBeeThread(QThread):
                 package.mode = hex_to_int(data[0:8])
                 package.coordinate = hex_to_float(data[8:16])
                 package.voltage = hex_to_float(data[16:24])
-                # package.current = hex_to_float(data[24:32])
                 package.temperature = hex_to_float(data[24:32])
                 package.base1 = hex_to_float(data[32:40])
                 package.base2 = hex_to_float(data[40:48])
@@ -350,7 +349,6 @@ class MBeeThread(QThread):
             data += int_to_hex(package.mode)
             data += float_to_hex(package.coordinate)
             data += float_to_hex(package.voltage)
-            # data += float_to_hex(package.current)
             data += float_to_hex(package.temperature)
             data += float_to_hex(package.base1)
             data += float_to_hex(package.base2)

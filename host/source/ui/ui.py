@@ -42,6 +42,7 @@ class QWorkWidget(QQWidget):
 
         self.ui.Base1.setText('1')
         self.ui.Base2.setText('2')
+
 # ---------------------------------------------------------------------------------------------- #
 
 class QSettingsWidget(QQWidget):
@@ -49,23 +50,10 @@ class QSettingsWidget(QQWidget):
         QQWidget.__init__(self, parent, my_ui=my_ui, title=title, layout=layout)
 
         self.buttons = [self.ui.EnableEndPoints, self.ui.EndPointsStop, self.ui.EndPointsReverse,\
-                        self.ui.SoundStop, self.ui.SwapDirection, self.ui.StopAccelerometer]
+                        self.ui.SwapDirection, self.ui.StopAccelerometer]
 
         self.ui.verticalLayout.setAlignment(Qt.AlignTop)
 
-    # def setChecked(self):
-    #     sender = self.sender()
-
-    #     if sender == self.ui.EndPointsStop:
-    #         if sender.isDown():
-    #             self.ui.EndPointsReverse.setChecked(True)
-    #         else:
-    #             self.ui.EndPointsReverse.setChecked(False)
-    #     elif sender == self.ui.EndPointsReverse:
-    #         if sender.isDown():
-    #             self.ui.EndPointsStop.setChecked(True)
-    #         else:
-    #             self.ui.EndPointsStop.setChecked(False)
 # ---------------------------------------------------------------------------------------------- #
 
 class QTelemetryWidget(QQWidget):
@@ -83,7 +71,6 @@ class QTelemetryWidget(QQWidget):
 #----------------------------------------------------------------------------------------------#
 
 class MainWindow(QMainWindow):
-    # keyPressed = pyqtSignal(QEvent)
     base1 = pyqtSignal(bool)
     base2 = pyqtSignal(bool)
 
@@ -110,14 +97,7 @@ class MainWindow(QMainWindow):
         self.settingsWidget.ui.widget_5.deleteLater()
         self.settingsWidget.ui.widget_5 = None
 
-        # self.workWidget.hide()
-        # self.settingsWidget.hide()
-        # self.telemetryWidget.show()
-
         # Signals to use menu buttons and shutdown button.
-        # self.ui.workButton.clicked.connect(self.buttonClicked)
-        # self.ui.settingsButton.clicked.connect(self.buttonClicked)
-        # self.ui.telemetryButton.clicked.connect(self.buttonClicked)
         self.settingsWidget.ui.Shutdown.clicked.connect(self.buttonClicked)
 
         self.base1.connect(global_.specialData.base1_)
@@ -203,7 +183,6 @@ class MainWindow(QMainWindow):
         dirname = path.dirname(filepath)
         with open(dirname + '/settings.json', 'w') as f:
             hjson.dump(config, f)
-            print(config)
 
     def loadSettings(self):
         filepath = path.abspath(__file__)

@@ -102,9 +102,9 @@ class MBeeThread(threading.Thread):
     def __init__(self, port='/dev/ttyS2', baudrate=230400):
         super().__init__()
         self.alive = True
+        self.logger = get_logger('MBee')
         self.name = 'MBee'
         self.mbee_data = Mbee_data()
-        self.logger = get_logger('MBee')
 
         self.self_test = 0
         self.test_local = 1
@@ -114,33 +114,39 @@ class MBeeThread(threading.Thread):
         self.t_prev = 0
         self.received_t = 0
 
+        # Initialization.
         try:
             self.dev = serialstar.SerialStar(port, baudrate, 0.1)
-        except BaseException as exc:
-            self.logger.warning('# MBee init failed')
-            self.dev = None
-            self.alive = False
-            return
+            self.logger.info('# MBee OK')
 
-        self.logger.info('# MBee OK')
-
-        if self.dev:
-            #  Callback-functions registering.
+            # Callback-functions registering.
             self.dev.callback_registring("81", self.frame_81_received)
-            # self.dev.callback_registring("83", self.frame_83_received)
             self.dev.callback_registring("87", self.frame_87_received)
             self.dev.callback_registring("88", self.frame_88_received)
+            self.dev.callback_registring("8C", self.frame_8C_received)
+            '''
+            # self.dev.callback_registring("83", self.frame_83_received)
             # self.dev.callback_registring("89", self.frame_89_received)
             # self.dev.callback_registring("8A", self.frame_8A_received)
             # self.dev.callback_registring("8B", self.frame_8B_received)
-            self.dev.callback_registring("8C", self.frame_8C_received)
             # self.dev.callback_registring("8F", self.frame_8F_received)
             # self.dev.callback_registring("97", self.frame_97_received)
+            '''
 
-        if self.dev:
+            # Sets needed settings for this MBee module.
             self.mbee_init_settings()
 
+        except BaseException:
+            self.dev = None
+            self.alive = False
+            self.logger.warning('# MBee init failed')
+            return
+
     def run(self):
+        if not self.dev:
+            return
+
+        # Run tests and check results.
         self.run_self_test()
         if (self.test_local == 0) or (self.test_remote == 0):
             self.alive = False
@@ -160,37 +166,40 @@ class MBeeThread(threading.Thread):
                 global_.motor_thread.controller.signal_lost_sig = False
                 global_.motor_thread.controller.signal_lost_sig_set = False
             
-            # Receive
-            self.dev.run()
-
-            # Transmit
-            package = None
-            global_.lock.acquire(blocking=True, timeout=1)
-            update_road_to_host()
-            package = global_.roadData
-            global_.lock.release()
-
-            if package is not None:
-                package = self.encrypt_package(package)
-                self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, package, '11')
+            # Transmit and receive data.
+            self.transmit()
+            self.receive()
 
             # Flush dev buffers
             self.t = time.time()
-            #if ((self.t - self.t_prev) > 3):
-            #    self.t_prev = self.t
-            #    self.dev.ser.flush()
-            #    self.dev.ser.reset_input_buffer()
-            #    self.dev.ser.reset_output_buffer()
-
-            # print(global_.motor_thread.controller.direction)
 
         self.off()
 
+    # Close serial device.
     def off(self):
         if self.dev:
             self.dev.ser.close()
             self.dev = None
         self.logger.info('############  Mbee closed  ################')
+
+    # Receive packages.
+    def receive(self):
+        global_.lock.acquire(blocking=True, timeout=1)
+        self.dev.run()
+        global_.lock.release()
+
+    # Transmit packages.
+    def transmit(self):
+        package = None
+        global_.lock.acquire(blocking=True, timeout=1)
+        update_road_to_host()
+        package = global_.roadData
+        global_.lock.release()
+
+        # Send packages.
+        if package is not None:
+            package = self.encrypt_package(package)
+            self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, package, '11')
 
 
     def command_run(self, command, params):
@@ -220,7 +229,6 @@ class MBeeThread(threading.Thread):
 
         self.logger.info('# MBee settings passed to device')
         pass
-
 
     def run_self_test(self):
         if not self.dev:
@@ -268,79 +276,50 @@ class MBeeThread(threading.Thread):
         if isinstance(data, HTRData):
             global_.lock.acquire(blocking=True, timeout=1)
             global_.hostData = data
-            # self.logger.debug('HTR data ' + str(data.__dict__))
             update_host_to_road()
             global_.lock.release()
             self.received_t = time.time()
         if isinstance(data, HBData):
-            # self.logger.debug('HB data ' + str(data.__dict__))
             global_.lock.acquire(blocking=True, timeout=1)
             global_.specialData = data
             update_special()
             global_.lock.release()
             self.received_t = time.time()
-        # print("Received 81-frame.")
-        # print(package)
         pass
 
     def frame_83_received(self, package):
-        # print("Received 83-frame.")
-        # print(package)
         pass
 
     def frame_87_received(self, package):
         if self.self_test == 1:
             self.self_test = 0
-        # print("Received 87-frame.")
-        # print(package)
         pass
 
     def frame_88_received(self, package):
-        # print("Received 88-frame.")
-        # print(package)
         pass
 
     def frame_89_received(self, package):
-        # print("Received 89-frame.")
-        # print(package)
         pass
 
     def frame_8A_received(self, package):
-        # print("Received 8A-frame.")
-        # print(package)
         pass
 
     def frame_8B_received(self, package):
-        # print("Received 8B-frame.")
-        # print(package)
         pass
 
     def frame_8C_received(self, package):
         if self.self_test == 1:
             self.self_test = 0
-        # print("Received 8C-frame.")
-        # print(package)
         pass
 
     def frame_8F_received(self, package):
-        # data = decrypt_package(package['DATA'])
-        # if isinstance(data, HTRData):
-        #     # print(time.time())
-        #     with global_.lock:
-        #         global_.hostData = data
-        #         update_host_to_road()
-        #     # print(global_.hostData.mode)
-        # if isinstance(data, HBData):
-        #     # with global_.lock:
-        #     global_.specialData = data
-        # print("Received 8F-frame.")
         pass
 
     def frame_97_received(self, package):
-        # print("Received 97-frame.")
-        # print(package)
         pass
 
+    # --------------------------------------------------
+    # Data encryption and decryption.
 
     def decrypt_package(self, package):
         try:
@@ -425,7 +404,6 @@ class MBeeThread(threading.Thread):
             data += int_to_hex(package.mode)
             data += float_to_hex(package.coordinate)
             data += float_to_hex(package.voltage)
-            # data += float_to_hex(package.current)
             data += float_to_hex(package.temperature)
             data += float_to_hex(package.base1)
             data += float_to_hex(package.base2)
