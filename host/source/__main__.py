@@ -71,16 +71,17 @@ if __name__ == "__main__":
 
     # Set up threads.
     global_.mbeeThread = MBeeThread()
-    global_.mbeeThread.start()
     THREADS.append(global_.mbeeThread)
 
     global_.watcher = WatcherThread()
-    global_.watcher.start()
     THREADS.append(global_.watcher)
 
     global_.controlThread = ControlThread()
-    global_.controlThread.start()
     THREADS.append(global_.controlThread)
+
+    global_.mbeeThread.start()
+    global_.watcher.start()
+    global_.controlThread.start()
 
     global_.window.loadSettings()
 

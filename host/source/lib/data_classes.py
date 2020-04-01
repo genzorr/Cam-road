@@ -199,18 +199,6 @@ class HBData(QObject):
                 button.setCheckable(True)
                 button.setChecked(state)
 
-
-        # sender = self.sender()
-        # if value:
-        #     color, self.lock_buttons = self.color_green, True
-        #     # for button in global_.window.settingsWidget.buttons:
-        #     #     button.setCheckable(False)
-        # else:
-        #     color, self.lock_buttons = self.color_red, False
-        #     # for button in global_.window.settingsWidget.buttons:
-        #     #     button.setCheckable(True)
-        # self.color_button(sender, color)
-
     @pyqtSlot(bool)
     def enable_end_points_(self, value):
         if not self.lock_buttons:

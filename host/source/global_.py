@@ -41,7 +41,6 @@ def get_logger(logger_name):
 def addStyleSheet(obj, name, newStyleSheet):
     style = name + '{' + obj.styleSheet() + '} ' + newStyleSheet
     obj.setStyleSheet(style)
-    print(obj, style)
 
 def styleChangeProperty(obj, property, value):
     style = obj.styleSheet()

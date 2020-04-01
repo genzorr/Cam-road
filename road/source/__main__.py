@@ -36,13 +36,13 @@ def main():
     global_.TX_ADDR_ROAD = config["TX_ADDR_ROAD"]
     global_.settings = config
 
-    ## Variables.
+    # Create global data classes.
     global_.lock = threading.Lock()
     global_.hostData = HTRData()
     global_.roadData = RTHData()
     global_.specialData = HBData()
 
-    ## Threads.
+    # Set up threads.
     global_.motor_thread = MotorThread()
     THREADS.append(global_.motor_thread)
 
