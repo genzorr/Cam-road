@@ -2,23 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c8957dda-8430-4e27-ac9c-603ebcd4ee73" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../help/cam-road.desktop" beforeDir="false" afterPath="$PROJECT_DIR$/../help/cam-road.desktop" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../host/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../host/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/__main__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/global_.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/global_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/lib/data_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/lib/data_classes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/lib/data_parser.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../host/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/mbee_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/ui/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/ui/ui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../host/source/watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/watcher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/road.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/road.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/__main__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/global_.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/global_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/lib/data_parser.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/source/lib/motor_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/lib/motor_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/mbee_.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/watcher.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../sftp-server" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +96,8 @@
       <updated>1576756478135</updated>
       <workItem from="1585082275723" duration="483000" />
       <workItem from="1585132439096" duration="5145000" />
-      <workItem from="1585731684132" duration="20369000" />
+      <workItem from="1585731684132" duration="20564000" />
+      <workItem from="1585811334849" duration="8058000" />
     </task>
     <servers />
   </component>
@@ -113,10 +105,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="378" y="152" width="1280" height="696" key="#Deployment" timestamp="1585737361322">
+    <state x="378" y="152" width="1280" height="696" key="#Deployment" timestamp="1585812963143">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="378" y="152" width="1280" height="696" key="#Deployment/0.0.1920.1044@0.0.1920.1044" timestamp="1585737361322" />
+    <state x="378" y="152" width="1280" height="696" key="#Deployment/0.0.1920.1044@0.0.1920.1044" timestamp="1585812963143" />
     <state x="802" y="256" key="FileChooserDialogImpl" timestamp="1585737351854">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>

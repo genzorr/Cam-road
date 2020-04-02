@@ -87,19 +87,19 @@ class MBeeThread(QThread):
             self.logger.info('# Tests passed')
 
         while self.alive:
+            self.t = time.time()
             # Transmit and receive data.
-            t = time.time()
+            global_.mutex.tryLock(timeout=1)
+            self.dev.run()
+            global_.mutex.unlock()
             self.transmit()
-            self.receive()
 
             # Check if connection is ok.
-            if (t - self.received_t > self.stop_time):
-                self.logger.warning('# MBee receiver disconnected')
+            if (self.t - self.received_t > 3): #self.stop_time):
+                self.logger.warning('# MBee connection lost')
                 self.RSSI = None
-                time.sleep(1)
 
             # Flush dev buffers.
-            self.t = time.time()
             if (self.t - self.t_prev) > 3:
                 self.t_prev = self.t
                 self.dev.ser.flush()
@@ -126,7 +126,7 @@ class MBeeThread(QThread):
         # Update packages to be transferred.
         if newHTR:
             self.package_host = global_.hostData
-        if t - self.special_t > 0.5:
+        if t - self.special_t > 1:
             self.special_t = t
             self.package_special = global_.specialData
             newHB = True
@@ -141,12 +141,6 @@ class MBeeThread(QThread):
         if (newHB or newHTR) and (self.package_special is not None):
             self.dev.send_tx_request('00', global_.TX_ADDR_HOST, self.encrypt_package(self.package_special), '11')
             global_.specialData.soft_stop = False
-
-    # Receive packages.
-    def receive(self):
-        global_.mutex.tryLock(timeout=1)
-        self.dev.run()
-        global_.mutex.unlock()
 
     # Run command on MBee device.
     def command_run(self, command, params):

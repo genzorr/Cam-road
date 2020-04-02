@@ -17,7 +17,8 @@ def update_host_to_road():
 
 
     if global_.hostData.mode == 0:
-        global_.motor_thread.controller.clean_motor_error()
+        if global_.motor_thread.controller.motor:
+            global_.motor_thread.controller.clean_motor_error()
         global_.motor_thread.controller.est_speed = 0
         global_.motor_thread.controller.continue_ = 0
         global_.motor_thread.controller.reverse = 0
@@ -154,24 +155,24 @@ class MBeeThread(threading.Thread):
             self.logger.info('# Tests passed')
 
         while self.alive:
-            # Check if connection is ok
+            self.t = time.time()
+            # Transmit and receive data.
+            self.dev.run()
+            self.transmit()
+
+            # Check if connection is ok.
             if (self.t - self.received_t > 3):
                 if global_.motor_thread.controller.signal_lost_sig_set == False:
                     global_.motor_thread.controller.signal_lost_sig = True
                 else:
                     global_.motor_thread.controller.signal_lost_sig = False
-                self.logger.warning('# MBee receiver disconnected')
-                time.sleep(1)
+
+                self.logger.warning('# MBee connection lost')
             else:
                 global_.motor_thread.controller.signal_lost_sig = False
                 global_.motor_thread.controller.signal_lost_sig_set = False
-            
-            # Transmit and receive data.
-            self.transmit()
-            self.receive()
 
-            # Flush dev buffers
-            self.t = time.time()
+            time.sleep(0.01)
 
         self.off()
 
@@ -181,12 +182,6 @@ class MBeeThread(threading.Thread):
             self.dev.ser.close()
             self.dev = None
         self.logger.info('############  Mbee closed  ################')
-
-    # Receive packages.
-    def receive(self):
-        global_.lock.acquire(blocking=True, timeout=1)
-        self.dev.run()
-        global_.lock.release()
 
     # Transmit packages.
     def transmit(self):
@@ -254,7 +249,7 @@ class MBeeThread(threading.Thread):
         self.self_test = 1
         test_time = time.time()
 
-        while True:
+        while self.alive:
             self.dev.send_tx_request('00', global_.TX_ADDR_ROAD, '0000', '10')
             self.dev.run()
 

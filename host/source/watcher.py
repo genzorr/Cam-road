@@ -88,16 +88,19 @@ class WatcherThread(QThread):
                         global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
                         global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
                         global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                        global_.window.workWidget.ui.Coordinate.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
                     else:
                         global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
                         global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
                         global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
                         global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                        global_.window.workWidget.ui.Coordinate.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
                 else:
                     global_.window.ui.battery_road.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
                     global_.window.workWidget.ui.Acceleration.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
                     global_.window.workWidget.ui.Braking.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
                     global_.window.workWidget.ui.Velocity.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+                    global_.window.workWidget.ui.Coordinate.setStyleSheet('QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
 
                 # Show base numbers.
                 if global_.roadData.bases_init_swap:

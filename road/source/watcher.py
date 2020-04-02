@@ -21,7 +21,7 @@ class Writer(threading.Thread):
         self.logger = get_logger('Writer')
 
     def run(self):
-        stringData = 't:{:5.1f} | v:{:4.1f}  {:4.1f} | B1:{:5.1f}  B2:{:5.1f} | mode: {} | L:{:7.2f} | {:s} | {}'
+        stringData = 't:{:5.1f} | v:{:4.1f}  {:4.1f} | B1:{:5.1f}  B2:{:5.1f} | mode: {} | L:{:7.2f} | {:s}'
         data = None
         while self.alive:
             # Get data for printing.
@@ -35,7 +35,7 @@ class Writer(threading.Thread):
 
             self.out = stringData.format(*data)
             self.logger.info(self.out)
-            time.sleep(0.1)
+            time.sleep(0.2)
         self.off()
 
     def off(self):

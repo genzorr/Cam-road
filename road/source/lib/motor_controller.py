@@ -240,7 +240,7 @@ class Controller(FSM):
             tmp = "-"
         else:
             tmp = " "
-        return (self.t, self.speed, self.est_speed, self.base1, self.base2, self.mode, self.coordinate, tmp, self.motor.readError())
+        return (self.t, self.speed, self.est_speed, self.base1, self.base2, self.mode, self.coordinate, tmp)
 
     def update_coordinate(self, speed_to):
         dt = self.t - self.t_prev
@@ -254,7 +254,8 @@ class Controller(FSM):
         self.dstep = (self.speed + speed_new) / 2 * dt * self.direction
         self.speed = speed_new
         self.coordinate += self.dstep
-        self.motor.dstep = self.dstep
+        if self.motor:  # if motor is connected, update it's state
+            self.motor.dstep = self.dstep
 
 
     def goto_stop(self):
@@ -278,21 +279,23 @@ class Controller(FSM):
 
         # Perform release.
         if not self.motor_released:
-            self.motor.setTimeout(0)
-            self.motor.release()
             self.motor_released = True
-            self.released_angle = self.motor.readAngle()
+            if self.motor:
+                self.motor.setTimeout(0)
+                self.motor.release()
+                self.released_angle = self.motor.readAngle()
 
         # Enable motor end exit to course state (when flag is set: remote control button is pushed).
         if self.motor_state:
             self.motor_released = False
-            self.motor.setTimeout(config['TimeOut'])    # it seems that this option is unset
-            self.clean_motor_error()
+            if self.motor:
+                self.motor.setTimeout(config['TimeOut'])    # it seems that this option is unset
+                self.clean_motor_error()
 
-            # Recalculate position.
-            delta = (self.motor.readAngle() - self.released_angle) / self.motor.stepspermm
-            self.logger.info('Position changed for {:3.1f}'.format(delta))
-            self.coordinate += delta
+                # Recalculate position.
+                delta = (self.motor.readAngle() - self.released_angle) / self.motor.stepspermm
+                self.logger.info('Position changed for {:3.1f}'.format(delta))
+                self.coordinate += delta
             self.released_angle = 0
 
             self.changeState(self.course)
@@ -300,9 +303,11 @@ class Controller(FSM):
         # Exit if signal is lost.
         if self.signal_lost_sig:
             self.motor_released = False
-            self.motor.setTimeout(config['TimeOut'])
 
-            self.clean_motor_error()
+            if self.motor:
+                self.motor.setTimeout(config['TimeOut'])
+                self.clean_motor_error()
+
             self.changeState(self.signal_lost)
 
 
