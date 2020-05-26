@@ -120,8 +120,8 @@ class MBeeThread(QThread):
 
         # Update flags values.
         global_.mutex.tryLock(timeout=1)
-        newHTR = global_.newHTR
-        global_.newHTR = False
+        # newHTR = global_.newHTR
+        # global_.newHTR = False
 
         # Update packages to be transferred.
         # if newHTR:
@@ -131,6 +131,7 @@ class MBeeThread(QThread):
             self.package_host = global_.hostData
             self.package_special = global_.specialData
             newHB = True
+            newHTR = True
         global_.mutex.unlock()
 
         # Send packages.
