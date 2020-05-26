@@ -49,7 +49,7 @@ class MBeeThread(QThread):
 
         # Initialization.
         try:
-            self.dev = serialstar.SerialStar(port, baudrate, 0.1)
+            self.dev = serialstar.SerialStar(port, baudrate, 0.2)
             self.logger.info('# MBee OK')
 
             # Callback-functions registering.
@@ -89,13 +89,13 @@ class MBeeThread(QThread):
         while self.alive:
             self.t = time.time()
             # Transmit and receive data.
+            self.transmit()
             global_.mutex.tryLock(timeout=1)
             self.dev.run()
             global_.mutex.unlock()
-            self.transmit()
 
             # Check if connection is ok.
-            if (self.t - self.received_t > 3): #self.stop_time):
+            if (self.t - self.received_t > self.stop_time):
                 self.logger.warning('# MBee connection lost')
                 self.RSSI = None
 
@@ -126,7 +126,7 @@ class MBeeThread(QThread):
         # Update packages to be transferred.
         if newHTR:
             self.package_host = global_.hostData
-        if t - self.special_t > 1:
+        if t - self.special_t > 0.5:
             self.special_t = t
             self.package_special = global_.specialData
             newHB = True

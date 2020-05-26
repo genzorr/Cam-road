@@ -117,7 +117,7 @@ class MBeeThread(threading.Thread):
 
         # Initialization.
         try:
-            self.dev = serialstar.SerialStar(port, baudrate, 0.1)
+            self.dev = serialstar.SerialStar(port, baudrate, 0.2)
             self.logger.info('# MBee OK')
 
             # Callback-functions registering.
@@ -157,8 +157,8 @@ class MBeeThread(threading.Thread):
         while self.alive:
             self.t = time.time()
             # Transmit and receive data.
-            self.dev.run()
             self.transmit()
+            self.dev.run()
 
             # Check if connection is ok.
             if (self.t - self.received_t > 3):

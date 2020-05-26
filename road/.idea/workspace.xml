@@ -2,14 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c8957dda-8430-4e27-ac9c-603ebcd4ee73" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../help/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../help/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../host/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../host/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../host/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/mbee_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../host/source/watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/watcher.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/__main__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/source/lib/motor_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/lib/motor_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/mbee_.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/source/watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/watcher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sftp-server" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +34,6 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
@@ -46,7 +45,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../test/Cam-road" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -98,21 +97,23 @@
       <workItem from="1585132439096" duration="5145000" />
       <workItem from="1585731684132" duration="20564000" />
       <workItem from="1585811334849" duration="8058000" />
+      <workItem from="1590408765125" duration="4277000" />
+      <workItem from="1590483838675" duration="1697000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="2" />
   </component>
   <component name="WindowStateProjectService">
     <state x="378" y="152" width="1280" height="696" key="#Deployment" timestamp="1585812963143">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
     <state x="378" y="152" width="1280" height="696" key="#Deployment/0.0.1920.1044@0.0.1920.1044" timestamp="1585812963143" />
-    <state x="802" y="256" key="FileChooserDialogImpl" timestamp="1585737351854">
+    <state x="802" y="256" width="432" height="488" key="FileChooserDialogImpl" timestamp="1590484102093">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="802" y="256" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1585737351854" />
+    <state x="802" y="256" width="432" height="488" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1590484102093" />
     <state x="312" y="125" key="SettingsEditor" timestamp="1585751023769">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>

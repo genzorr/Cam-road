@@ -35,7 +35,7 @@ class Writer(threading.Thread):
 
             self.out = stringData.format(*data)
             self.logger.info(self.out)
-            time.sleep(0.2)
+            time.sleep(0.1)
         self.off()
 
     def off(self):
