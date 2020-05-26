@@ -124,10 +124,11 @@ class MBeeThread(QThread):
         global_.newHTR = False
 
         # Update packages to be transferred.
-        if newHTR:
-            self.package_host = global_.hostData
+        # if newHTR:
+        #     self.package_host = global_.hostData
         if t - self.special_t > 0.5:
             self.special_t = t
+            self.package_host = global_.hostData
             self.package_special = global_.specialData
             newHB = True
         global_.mutex.unlock()

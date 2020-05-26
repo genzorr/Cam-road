@@ -162,6 +162,8 @@ class MBeeThread(threading.Thread):
 
             # Check if connection is ok.
             if (self.t - self.received_t > 3):
+                self.t_prev = self.t
+                self.dev.ser.flush()
                 if global_.motor_thread.controller.signal_lost_sig_set == False:
                     global_.motor_thread.controller.signal_lost_sig = True
                 else:
