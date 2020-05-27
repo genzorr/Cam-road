@@ -73,7 +73,7 @@ class WatcherThread(QThread):
         while self.alive:
             t = time.time()
 
-            global_.mutex.tryLock(timeout=1)
+            global_.mutex.tryLock(timeout=0.2)
 
             if (int(t) % 5 == 0):
                 # Update progress bars.
@@ -210,7 +210,7 @@ class ControlThread(QThread):
             (dummy, value) = self.controller.getButtonValue(0)
 
             #------------------------------------------------------------------#
-            global_.mutex.tryLock(timeout=1)
+            global_.mutex.tryLock(timeout=0.2)
 
             # Encoders.
             global_.hostData.acceleration = self.controller.encoders[1]
@@ -227,18 +227,18 @@ class ControlThread(QThread):
                 self.left, self.right = RIGHT, LEFT
 
             if _check_bit(value, STOP):
-                if (t - self.stop_t) > 1:
+                if (t - self.stop_t) > 0.5:
                     self.stop_t = t
                     stop_flag = 1
                     global_.hostData.mode = 0
 
             elif _check_bit(value, self.left):
-                if (t - self.left_t) > 1:
+                if (t - self.left_t) > 0.5:
                     self.left_t = t
                     global_.hostData.direction = -1
 
             elif _check_bit(value, self.right):
-                if (t - self.right_t) > 1:
+                if (t - self.right_t) > 0.5:
                     self.right_t = t
                     global_.hostData.direction = 1
 
@@ -255,7 +255,7 @@ class ControlThread(QThread):
 
             # Reset hard stop.
             if _check_bit(value, HOME):
-                if (t - self.home_t > 1):
+                if (t - self.home_t > 0.5):
                     self.home_t = t
                     global_.specialData.motor = True
                     self.logger.info('Motor off')
