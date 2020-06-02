@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>CableControl_bg.jpg</file>
+    </qresource>
+</RCC>

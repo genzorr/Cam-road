@@ -1,171 +1,134 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="host" targetName="host" />
+      <config projectName="host" targetName="host_autogen" />
+    </generated>
+  </component>
+  <component name="CMakeSettings" AUTO_RELOAD="true">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+      <configuration PROFILE_NAME="Release" CONFIG_NAME="Release" />
+    </configurations>
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="5d60daf0-dedf-46eb-8aa0-fbb079f7c4e3" name="Default Changelist" comment="">
+    <list default="true" id="c80aa3a9-ef2b-4efb-ab54-f4fb3582b13e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/Watcher.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/dictionaries/michael.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Watcher.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/michael.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/mbee_.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../road/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/../road/source/mbee_.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/open_host_files.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/__main__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/cam-road.desktop" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/global_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/controls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/data_classes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/radio_off.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/radio_on.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/run.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/serialstar.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/settings.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/settingswidget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/settingswidget.ui" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/telemetrywidget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/telemetrywidget.ui" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/ui.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/ui_to_py.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/window.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/window.ui" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/workwidget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/workwidget.ui" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/watcher.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectId" id="1Om3D8IGVtV6l2Rla4vwAV6YBX5" />
+  <component name="ProjectId" id="1cloYECvPG2TVBNwXcWduaMDU9S" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="true" />
-    <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
-    <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
-    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
-    <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
-    <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../road" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.detected.package.tslint" value="true" />
-    <property name="node.js.path.for.package.eslint" value="project" />
-    <property name="node.js.path.for.package.tslint" value="project" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
-    <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
   </component>
-  <component name="RunManager">
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Watcher" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/source/__main__.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
+  <component name="RunManager" selected="CMake Application.host">
+    <configuration name="host" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="host" TARGET_NAME="host" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="host" RUN_TARGET_NAME="host">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.main" />
-      </list>
-    </recent_temporary>
-  </component>
-  <component name="SvnConfiguration">
-    <configuration />
+    <configuration name="host_autogen" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="host" TARGET_NAME="host_autogen" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.host" />
+      <item itemvalue="CMake Application.host_autogen" />
+    </list>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="5d60daf0-dedf-46eb-8aa0-fbb079f7c4e3" name="Default Changelist" comment="" />
-      <created>1563436401888</created>
+      <changelist id="c80aa3a9-ef2b-4efb-ab54-f4fb3582b13e" name="Default Changelist" comment="" />
+      <created>1591112586861</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1563436401888</updated>
-      <workItem from="1584884315578" duration="2811000" />
-      <workItem from="1584896031667" duration="1702000" />
-      <workItem from="1584897750336" duration="384000" />
-      <workItem from="1584898157722" duration="44000" />
-      <workItem from="1584898219259" duration="21000" />
-      <workItem from="1584898256064" duration="532000" />
-      <workItem from="1584898814258" duration="18000" />
-      <workItem from="1584898852848" duration="11520000" />
-      <workItem from="1584986813377" duration="17751000" />
-      <workItem from="1585037028711" duration="12915000" />
-      <workItem from="1585080188395" duration="2511000" />
-      <workItem from="1585132439704" duration="11300000" />
-      <workItem from="1585731533431" duration="9716000" />
-      <workItem from="1585811360085" duration="9359000" />
-      <workItem from="1585921751287" duration="46000" />
-      <workItem from="1590483845663" duration="4432000" />
+      <updated>1591112586861</updated>
+      <workItem from="1591112588338" duration="531000" />
     </task>
     <servers />
   </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="2" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-    <option name="RECENT_FILTERS">
-      <map>
-        <entry key="Branch">
-          <value>
-            <list />
-          </value>
-        </entry>
-        <entry key="User">
-          <value>
-            <list />
-          </value>
-        </entry>
-      </map>
-    </option>
-    <option name="oldMeFiltersMigrated" value="true" />
-  </component>
-  <component name="VcsManagerConfiguration">
-    <ignored-roots>
-      <path value="$PROJECT_DIR$" />
-      <path value="$PROJECT_DIR$/python-mbee" />
-    </ignored-roots>
-  </component>
   <component name="WindowStateProjectService">
-    <state x="556" y="186" key="#Deployment" timestamp="1585812944992">
+    <state x="419" y="180" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1591112625987">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="556" y="186" key="#Deployment/0.0.1920.1044@0.0.1920.1044" timestamp="1585812944992" />
-    <state x="698" y="269" key="FileChooserDialogImpl" timestamp="1585769268071">
+    <state x="419" y="180" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1044@0.0.1920.1044" timestamp="1591112625987" />
+    <state width="1878" height="298" key="GridCell.Tab.0.bottom" timestamp="1591113052310">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="698" y="269" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1585769268071" />
-    <state x="0" y="0" width="1920" height="1044" key="SettingsEditor" timestamp="1585731667573">
+    <state width="1878" height="298" key="GridCell.Tab.0.bottom/0.0.1920.1044@0.0.1920.1044" timestamp="1591113052310" />
+    <state width="1878" height="298" key="GridCell.Tab.0.center" timestamp="1591113052309">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="0" y="0" width="1920" height="1044" key="SettingsEditor/0.0.1920.1044@0.0.1920.1044" timestamp="1585731667573" />
-    <state x="797" y="426" key="WebDeployment.AddServerDialog.v.1" timestamp="1584884346230">
+    <state width="1878" height="298" key="GridCell.Tab.0.center/0.0.1920.1044@0.0.1920.1044" timestamp="1591113052309" />
+    <state width="1878" height="298" key="GridCell.Tab.0.left" timestamp="1591113052309">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="797" y="426" key="WebDeployment.AddServerDialog.v.1/0.0.1920.1044@0.0.1920.1044" timestamp="1584884346230" />
-    <state x="570" y="134" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1585006163703">
+    <state width="1878" height="298" key="GridCell.Tab.0.left/0.0.1920.1044@0.0.1920.1044" timestamp="1591113052309" />
+    <state width="1878" height="298" key="GridCell.Tab.0.right" timestamp="1591113052309">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="570" y="134" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1044@0.0.1920.1044" timestamp="1585006163703" />
-    <state x="823" y="432" width="272" height="188" key="publish.login" timestamp="1585769177154">
+    <state width="1878" height="298" key="GridCell.Tab.0.right/0.0.1920.1044@0.0.1920.1044" timestamp="1591113052309" />
+    <state x="495" y="157" key="SettingsEditor" timestamp="1591112645675">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="823" y="432" width="272" height="188" key="publish.login/0.0.1920.1044@0.0.1920.1044" timestamp="1585769177154" />
-    <state x="623" y="217" width="672" height="678" key="search.everywhere.popup" timestamp="1585044164116">
-      <screen x="0" y="0" width="1920" height="1044" />
-    </state>
-    <state x="623" y="217" width="672" height="678" key="search.everywhere.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1585044164116" />
+    <state x="495" y="157" key="SettingsEditor/0.0.1920.1044@0.0.1920.1044" timestamp="1591112645675" />
   </component>
 </project>

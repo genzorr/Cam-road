@@ -1,3 +1,14 @@
+# motor lib
 fortune-controls
+
+# Python .pyc
 **/__pycache__
-**/.idea
+
+# jetbrains ides settings
+#**/.idea
+
+# Clion build directories
+**/cmake-*
+
+# Qt Creator build folder
+**/build
