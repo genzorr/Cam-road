@@ -74,6 +74,8 @@ class MainWindow(QMainWindow):
     base1 = pyqtSignal(bool)
     base2 = pyqtSignal(bool)
 
+    coordinate_value_sig = pyqtSignal(float)
+
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_Watcher()
@@ -103,6 +105,8 @@ class MainWindow(QMainWindow):
         self.base1.connect(global_.specialData.base1_)
         self.base2.connect(global_.specialData.base2_)
 
+        self.coordinate_value_sig.connect(self.workWidget.ui.Coordinate.setValue)
+
         self.showFullScreen()
 
     def changeMenu(self, num):
@@ -125,7 +129,6 @@ class MainWindow(QMainWindow):
         else:
             print('# Invalid menu value')
             pass
-
 
     def buttonClicked(self):
         sender = self.sender()
@@ -218,3 +221,63 @@ class MainWindow(QMainWindow):
             self.setButtonValue(self.telemetryWidget.ui.sig_ret2, 1)
 
         self.telemetryWidget.ui.stop_time.setValue(config['STOP_TIME'])
+
+    def rssi_value_slot(self, value):
+        if value is None or value == 0.0:
+            global_.window.ui.RSSI.setStyleSheet("background-color: gray; color: black")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'gray')
+        elif value < -90:
+            global_.window.ui.RSSI.setStyleSheet("background-color: black; color: white")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'white')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'black')
+        elif value < -80:
+            global_.window.ui.RSSI.setStyleSheet("background-color: red; color: black")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'red')
+        elif value < -60:
+            global_.window.ui.RSSI.setStyleSheet("background-color: yellow; color: black")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'yellow')
+        else:
+            global_.window.ui.RSSI.setStyleSheet("background-color: green; color: black")
+            # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
+            # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'green')
+
+    def road_battery_value_slot(self, value):
+        # If motor is offed, display all elements in gray.
+        if global_.roadData.mode != -1:
+            if value < 20:
+                global_.window.ui.battery_road.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                global_.window.workWidget.ui.Acceleration.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                global_.window.workWidget.ui.Braking.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                global_.window.workWidget.ui.Velocity.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+                global_.window.workWidget.ui.Coordinate.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: red}')
+            else:
+                global_.window.ui.battery_road.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                global_.window.workWidget.ui.Acceleration.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                global_.window.workWidget.ui.Braking.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                global_.window.workWidget.ui.Velocity.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+                global_.window.workWidget.ui.Coordinate.setStyleSheet(
+                    'QProgressBar {text-align: center} QProgressBar::chunk {background-color: QColor (0,0,180)}')
+        else:
+            global_.window.ui.battery_road.setStyleSheet(
+                'QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+            global_.window.workWidget.ui.Acceleration.setStyleSheet(
+                'QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+            global_.window.workWidget.ui.Braking.setStyleSheet(
+                'QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+            global_.window.workWidget.ui.Velocity.setStyleSheet(
+                'QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+            global_.window.workWidget.ui.Coordinate.setStyleSheet(
+                'QProgressBar {text-align: center} QProgressBar::chunk {background-color: gray}')
+

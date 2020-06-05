@@ -39,7 +39,7 @@ class MBeeThread(QThread):
         self.t_prev = 0
         self.received_t = 0
         self.stop_time = 0
-        self.RSSI = None
+        self.RSSI = 0.0
         global_.window.telemetryWidget.ui.stop_time.valueChanged.connect(self.stop_time_slot)
 
         self.package_host = HTRData()

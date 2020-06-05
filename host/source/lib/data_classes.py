@@ -265,6 +265,14 @@ class HBData(QObject):
             color = self.color_red
         self.color_button(global_.window.workWidget.ui.Base1, color)
 
+        # Show base numbers.
+        if global_.roadData.bases_init_swap:
+            global_.window.workWidget.ui.Base1.setText('2')
+            global_.window.workWidget.ui.Base2.setText('1')
+        else:
+            global_.window.workWidget.ui.Base1.setText('1')
+            global_.window.workWidget.ui.Base2.setText('2')
+
     @pyqtSlot(bool)
     def base2_(self, value):
         if value:
@@ -275,4 +283,11 @@ class HBData(QObject):
         else:
             color = self.color_red
         self.color_button(global_.window.workWidget.ui.Base2, color)
-        pass
+
+        # Show base numbers.
+        if global_.roadData.bases_init_swap:
+            global_.window.workWidget.ui.Base1.setText('2')
+            global_.window.workWidget.ui.Base2.setText('1')
+        else:
+            global_.window.workWidget.ui.Base1.setText('1')
+            global_.window.workWidget.ui.Base2.setText('2')
