@@ -49,6 +49,7 @@ def indicator_init():
 
 #   Indicates by given voltage
 def indicate(v, portex):
+    global num_cells
     for i in num_cells:
         value = (v/i - V_MIN) / (V_MAX - V_MIN)
         #print("indicate " + str(i) + " : " + str(value))
@@ -58,7 +59,7 @@ def indicate(v, portex):
         
     if (value > 0.1) and (value < 1) and len(num_cells) > 1:
         num_cells = [i]
-        logger.info("Set num cells to ",i)
+        logger.info("Set num cells to %i" % (i))
         
     res = value
     value = round(value*10) + 1
