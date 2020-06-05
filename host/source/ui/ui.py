@@ -4,7 +4,7 @@ import hjson
 import global_
 from global_ import addStyleSheet, styleChangeProperty
 
-from PyQt5.QtCore import pyqtSignal, Qt, QSize
+from PyQt5.QtCore import pyqtSignal, Qt, QSize, pyqtSlot
 from PyQt5.QtWidgets import QMainWindow, QWidget
 
 from .settingswidget import Ui_SForm
@@ -222,6 +222,7 @@ class MainWindow(QMainWindow):
 
         self.telemetryWidget.ui.stop_time.setValue(config['STOP_TIME'])
 
+    @pyqtSlot(float)
     def rssi_value_slot(self, value):
         if value is None or value == 0.0:
             global_.window.ui.RSSI.setStyleSheet("background-color: gray; color: black")
@@ -244,6 +245,7 @@ class MainWindow(QMainWindow):
             # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')
             # styleChangeProperty(global_.window.ui.RSSI, 'background-color', 'green')
 
+    @pyqtSlot(float)
     def road_battery_value_slot(self, value):
         # If motor is offed, display all elements in gray.
         if global_.roadData.mode != -1:
