@@ -56,6 +56,8 @@ class WatcherThread(QThread):
 
             if int(t) % 5 == 0:
                 # Update progress bars.
+                if global_.mbeeThread.RSSI == None:
+                    global_.mbeeThread.RSSI = 0.0
                 self.rssi_value_sig.emit(global_.mbeeThread.RSSI)
                 v = global_.roadData.voltage
                 self.road_battery_sig.emit(v)

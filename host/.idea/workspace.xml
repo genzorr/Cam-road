@@ -2,10 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5d60daf0-dedf-46eb-8aa0-fbb079f7c4e3" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/mbee_.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/ui/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/ui/ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/watcher.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../road/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../road/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../road/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/../road/source/mbee_.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../road/source/lib/motor_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/../road/source/lib/motor_controller.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,6 +32,8 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
@@ -36,14 +41,14 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../road" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors" />
   </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -100,6 +105,8 @@
       <workItem from="1585811360085" duration="9359000" />
       <workItem from="1585921751287" duration="46000" />
       <workItem from="1590483845663" duration="4432000" />
+      <workItem from="1591283862961" duration="6106000" />
+      <workItem from="1591356719805" duration="3734000" />
     </task>
     <servers />
   </component>
@@ -139,26 +146,38 @@
     </ignored-roots>
   </component>
   <component name="WindowStateProjectService">
-    <state x="556" y="186" key="#Deployment" timestamp="1585812944992">
+    <state x="556" y="186" key="#Deployment" timestamp="1591361304962">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="556" y="186" key="#Deployment/0.0.1920.1044@0.0.1920.1044" timestamp="1585812944992" />
-    <state x="698" y="269" key="FileChooserDialogImpl" timestamp="1585769268071">
+    <state x="556" y="186" key="#Deployment/0.0.1920.1044@0.0.1920.1044" timestamp="1591361304962" />
+    <state x="540" y="173" key="#SSH_Configurations" timestamp="1591361302973">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="698" y="269" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1585769268071" />
-    <state x="0" y="0" width="1920" height="1044" key="SettingsEditor" timestamp="1585731667573">
+    <state x="540" y="173" key="#SSH_Configurations/0.0.1920.1044@0.0.1920.1044" timestamp="1591361302973" />
+    <state x="698" y="269" key="FileChooserDialogImpl" timestamp="1591287508284">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="0" y="0" width="1920" height="1044" key="SettingsEditor/0.0.1920.1044@0.0.1920.1044" timestamp="1585731667573" />
-    <state x="797" y="426" key="WebDeployment.AddServerDialog.v.1" timestamp="1584884346230">
+    <state x="698" y="269" key="FileChooserDialogImpl/0.0.1920.1044@0.0.1920.1044" timestamp="1591287508284" />
+    <state x="0" y="0" width="1280" height="734" key="SettingsEditor" timestamp="1591357658300">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="797" y="426" key="WebDeployment.AddServerDialog.v.1/0.0.1920.1044@0.0.1920.1044" timestamp="1584884346230" />
+    <state x="0" y="0" width="1280" height="734" key="SettingsEditor/0.0.1920.1044@0.0.1920.1044" timestamp="1591357658300" />
+    <state x="797" y="426" key="WebDeployment.AddServerDialog.v.1" timestamp="1591287425862">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="797" y="426" key="WebDeployment.AddServerDialog.v.1/0.0.1920.1044@0.0.1920.1044" timestamp="1591287425862" />
     <state x="570" y="134" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1585006163703">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
     <state x="570" y="134" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1044@0.0.1920.1044" timestamp="1585006163703" />
+    <state x="643" y="161" width="634" height="732" key="find.popup" timestamp="1591296758344">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="643" y="161" width="634" height="732" key="find.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1591296758344" />
+    <state x="863" y="258" key="ftp.server.browser" timestamp="1591287556624">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="863" y="258" key="ftp.server.browser/0.0.1920.1044@0.0.1920.1044" timestamp="1591287556624" />
     <state x="823" y="432" width="272" height="188" key="publish.login" timestamp="1585769177154">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>

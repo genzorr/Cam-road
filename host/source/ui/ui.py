@@ -224,6 +224,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(float)
     def rssi_value_slot(self, value):
+        print('here', value)
         if value is None or value == 0.0:
             global_.window.ui.RSSI.setStyleSheet("background-color: gray; color: black")
             # styleChangeProperty(global_.window.ui.RSSI, 'color', 'black')

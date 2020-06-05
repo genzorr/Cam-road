@@ -2,10 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c8957dda-8430-4e27-ac9c-603ebcd4ee73" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../host/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../host/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../host/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../host/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../host/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/mbee_.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/ui/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/ui/ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../host/source/watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/../host/source/watcher.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/source/mbee_.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/mbee_.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/source/lib/motor_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/source/lib/motor_controller.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +44,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../test/Cam-road" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -95,6 +98,8 @@
       <workItem from="1585811334849" duration="8058000" />
       <workItem from="1590408765125" duration="4277000" />
       <workItem from="1590483838675" duration="4279000" />
+      <workItem from="1591283863461" duration="2608000" />
+      <workItem from="1591359218646" duration="1922000" />
     </task>
     <servers />
   </component>
@@ -102,10 +107,14 @@
     <option name="version" value="2" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="378" y="152" width="1280" height="696" key="#Deployment" timestamp="1585812963143">
+    <state x="378" y="152" width="1280" height="696" key="#Deployment" timestamp="1591359342714">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="378" y="152" width="1280" height="696" key="#Deployment/0.0.1920.1044@0.0.1920.1044" timestamp="1585812963143" />
+    <state x="378" y="152" width="1280" height="696" key="#Deployment/0.0.1920.1044@0.0.1920.1044" timestamp="1591359342714" />
+    <state x="598" y="146" key="#SSH_Configurations" timestamp="1591359311574">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="598" y="146" key="#SSH_Configurations/0.0.1920.1044@0.0.1920.1044" timestamp="1591359311574" />
     <state x="802" y="256" width="432" height="488" key="FileChooserDialogImpl" timestamp="1590484102093">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
@@ -114,9 +123,17 @@
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
     <state x="312" y="125" key="SettingsEditor/0.0.1920.1044@0.0.1920.1044" timestamp="1585751023769" />
-    <state x="797" y="423" key="WebDeployment.AddServerDialog.v.1" timestamp="1585731689334">
+    <state x="797" y="423" key="WebDeployment.AddServerDialog.v.1" timestamp="1591359250959">
       <screen x="0" y="0" width="1920" height="1044" />
     </state>
-    <state x="797" y="423" key="WebDeployment.AddServerDialog.v.1/0.0.1920.1044@0.0.1920.1044" timestamp="1585731689334" />
+    <state x="797" y="423" key="WebDeployment.AddServerDialog.v.1/0.0.1920.1044@0.0.1920.1044" timestamp="1591359250959" />
+    <state x="643" y="283" width="634" height="488" key="find.popup" timestamp="1591361740408">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="643" y="283" width="634" height="488" key="find.popup/0.0.1920.1044@0.0.1920.1044" timestamp="1591361740408" />
+    <state x="1126" y="287" key="ftp.server.browser" timestamp="1591359339535">
+      <screen x="0" y="0" width="1920" height="1044" />
+    </state>
+    <state x="1126" y="287" key="ftp.server.browser/0.0.1920.1044@0.0.1920.1044" timestamp="1591359339535" />
   </component>
 </project>

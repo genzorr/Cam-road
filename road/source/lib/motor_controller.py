@@ -332,7 +332,6 @@ class Controller(FSM):
                 base = self.base1
             else:
                 base = self.base2
-            print(base)
 
             l = self.coordinate - base
             self.direction = -1 if (l > 0) else 1

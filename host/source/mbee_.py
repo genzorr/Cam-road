@@ -97,7 +97,7 @@ class MBeeThread(QThread):
             # Check if connection is ok.
             if (self.t - self.received_t > self.stop_time):
                 self.logger.warning('# MBee connection lost')
-                self.RSSI = None
+                self.RSSI = 0.0
 
             # Flush dev buffers.
             if (self.t - self.t_prev) > 3:
