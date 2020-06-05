@@ -1,4 +1,6 @@
 from .portex import PortExpander
+import global_
+from global_ import get_logger
 
 #-------------------------------------------------------------------------------------#
 #   Settings
@@ -31,6 +33,8 @@ BAT98 = 0
 
 BAT = [BAT0, BAT10, BAT20, BAT30, BAT40, BAT50, BAT60, BAT70, BAT80, BAT90, BAT98]
 
+num_cells = [4,6,8]
+logger = get_logger('Indicator')
 #-------------------------------------------------------------------------------------#
 #   Initializes port expander for indicator
 def indicator_init():
@@ -45,13 +49,17 @@ def indicator_init():
 
 #   Indicates by given voltage
 def indicate(v, portex):
-    for i in [4,6,8]:
+    for i in num_cells:
         value = (v/i - V_MIN) / (V_MAX - V_MIN)
         #print("indicate " + str(i) + " : " + str(value))
         if (value>0) and (value<1):
             break
         value = 0
-
+        
+    if (value > 0.1) and (value < 1) and len(num_cells) > 1:
+        num_cells = [i]
+        logger.info("Set num cells to ",i)
+        
     res = value
     value = round(value*10) + 1
     if (value >= len(BAT) - 1):
