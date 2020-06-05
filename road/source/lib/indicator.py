@@ -35,6 +35,9 @@ BAT = [BAT0, BAT10, BAT20, BAT30, BAT40, BAT50, BAT60, BAT70, BAT80, BAT90, BAT9
 
 num_cells = [4,6,8]
 logger = get_logger('Indicator')
+
+p_value = 0.0
+hysteresis = 0.1
 #-------------------------------------------------------------------------------------#
 #   Initializes port expander for indicator
 def indicator_init():
@@ -50,6 +53,7 @@ def indicator_init():
 #   Indicates by given voltage
 def indicate(v, portex):
     global num_cells
+    global p_value
     for i in num_cells:
         value = (v/i - V_MIN) / (V_MAX - V_MIN)
         #print("indicate " + str(i) + " : " + str(value))
@@ -62,6 +66,11 @@ def indicate(v, portex):
         logger.info("Set num cells to %i" % (i))
         
     res = value
+    
+    if abs(value - p_value) > hysteresis:
+        p_value = value
+    value = p_value
+    
     value = round(value*10) + 1
     if (value >= len(BAT) - 1):
         value = len(BAT) - 1
