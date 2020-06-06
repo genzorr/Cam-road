@@ -16,8 +16,8 @@ LED6    = (1 << 12)
 LED5    = (1 << 13)
 LED4    = (1 << 14)
 LED3    = (1 << 15)
-LED2    = (1 << 0)
-LED1    = (1 << 1)
+LED2    = (1 << 1)
+LED1    = (1 << 0)
 LEDALL  = LED1 | LED2 | LED3 | LED4 | LED5 | LED6 | LED7 | LED8 | LED9 | LED10
 
 BAT0  = LEDALL
