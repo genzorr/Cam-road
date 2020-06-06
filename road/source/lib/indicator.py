@@ -38,7 +38,7 @@ num_cells = [4,6,8]
 logger = get_logger('Indicator')
 
 p_value = 0.0
-hysteresis = 0.1
+hysteresis = 0.05
 #-------------------------------------------------------------------------------------#
 #   Initializes port expander for indicator
 def indicator_init():
