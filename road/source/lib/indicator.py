@@ -47,8 +47,9 @@ def indicator_init():
     b = PortExpander(2)
     port.append(a)
     port.append(b)
-    for j in BAT.reverse():
-        [i.setdir(j) for i in port]
+    [i.setdir(LEDALL) for i in port]
+    for j in BAT:
+        [i.setword(j) for i in port]
         time.sleep(0.25)
     return port
 
